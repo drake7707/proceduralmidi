@@ -460,6 +460,7 @@ namespace ProceduralMidi
             BoardSettings boardSettings;
             if (BoardMapper.TryLoad(path, out boardSettings))
             {
+                board = boardSettings.Board;
                 sldNoteDuration.Value = boardSettings.NoteDuration;
                 sldSpeed.Value = boardSettings.Speed;
                 txtNotes.Text = boardSettings.Notes;
