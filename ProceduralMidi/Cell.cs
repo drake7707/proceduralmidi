@@ -9,12 +9,12 @@ namespace ProceduralMidi
     /// Describes a cell on the board
     /// </summary>
     [Serializable]
-    public struct Cell
+    public class Cell
     {
         public Cell(CellStateEnum state)
         {
             State = state;
-            MergedStates = new HashSet<CellStateEnum>();
+            MergedStates = new List<CellStateEnum>();
         }
 
         /// <summary>
@@ -25,7 +25,7 @@ namespace ProceduralMidi
         /// <summary>
         /// The merged states of the cell
         /// </summary>
-        public HashSet<CellStateEnum> MergedStates;
+        public List<CellStateEnum> MergedStates;
     }
 
     public enum CellStateEnum

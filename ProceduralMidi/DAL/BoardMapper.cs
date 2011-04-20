@@ -176,7 +176,7 @@ namespace ProceduralMidi.DAL
                             }
 
                             cells[col, curRow].State = (CellStateEnum)cellState;
-                            cells[col, curRow].MergedStates = new HashSet<CellStateEnum>(mergedStates.Select(s => (CellStateEnum)s));
+                            cells[col, curRow].MergedStates = new List<CellStateEnum>(mergedStates.Select(s => (CellStateEnum)s));
                         }
 
                         curRow++;
