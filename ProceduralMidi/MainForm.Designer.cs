@@ -7,7 +7,7 @@
         /// </summary>
         private System.ComponentModel.IContainer components = null;
 
-     
+
         #region Windows Form Designer generated code
 
         /// <summary>
@@ -26,6 +26,8 @@
             this.lblDebug = new System.Windows.Forms.Label();
             this.tmrDrawHighlights = new System.Windows.Forms.Timer(this.components);
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.chkRec = new System.Windows.Forms.CheckBox();
+            this.lblSpeed = new System.Windows.Forms.Label();
             this.ddlMidiDevices = new System.Windows.Forms.ComboBox();
             this.sldNoteDuration = new System.Windows.Forms.TrackBar();
             this.lblNoteDuration = new System.Windows.Forms.Label();
@@ -34,7 +36,6 @@
             this.nudColumns = new System.Windows.Forms.NumericUpDown();
             this.nudRows = new System.Windows.Forms.NumericUpDown();
             this.sldSpeed = new System.Windows.Forms.TrackBar();
-            this.lblSpeed = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.sldVolume = new System.Windows.Forms.TrackBar();
             this.ddlInstruments = new System.Windows.Forms.ComboBox();
@@ -49,6 +50,9 @@
             this.mnuSave = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.mnuExit = new System.Windows.Forms.ToolStripMenuItem();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.cellPalette = new ProceduralMidi.Palette();
+            this.btnRandomize = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.picBoard)).BeginInit();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.sldNoteDuration)).BeginInit();
@@ -57,6 +61,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.sldSpeed)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.sldVolume)).BeginInit();
             this.menuStrip1.SuspendLayout();
+            this.groupBox2.SuspendLayout();
             this.SuspendLayout();
             // 
             // tmrIterate
@@ -82,13 +87,14 @@
                         | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
             this.picBoard.BackColor = System.Drawing.Color.Black;
-            this.picBoard.Location = new System.Drawing.Point(2, 27);
+            this.picBoard.Location = new System.Drawing.Point(71, 27);
             this.picBoard.Name = "picBoard";
-            this.picBoard.Size = new System.Drawing.Size(472, 437);
+            this.picBoard.Size = new System.Drawing.Size(525, 484);
             this.picBoard.TabIndex = 2;
             this.picBoard.TabStop = false;
             this.picBoard.Paint += new System.Windows.Forms.PaintEventHandler(this.picBoard_Paint);
             this.picBoard.MouseDown += new System.Windows.Forms.MouseEventHandler(this.picBoard_MouseDown);
+            this.picBoard.MouseMove += new System.Windows.Forms.MouseEventHandler(this.picBoard_MouseMove);
             // 
             // btnNext
             // 
@@ -112,7 +118,7 @@
             // 
             // lblDebug
             // 
-            this.lblDebug.Location = new System.Drawing.Point(9, 367);
+            this.lblDebug.Location = new System.Drawing.Point(15, 411);
             this.lblDebug.Name = "lblDebug";
             this.lblDebug.Size = new System.Drawing.Size(161, 67);
             this.lblDebug.TabIndex = 5;
@@ -127,6 +133,8 @@
             // 
             this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
                         | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox1.Controls.Add(this.btnRandomize);
+            this.groupBox1.Controls.Add(this.chkRec);
             this.groupBox1.Controls.Add(this.lblDebug);
             this.groupBox1.Controls.Add(this.lblSpeed);
             this.groupBox1.Controls.Add(this.ddlMidiDevices);
@@ -144,17 +152,38 @@
             this.groupBox1.Controls.Add(this.btnNext);
             this.groupBox1.Controls.Add(this.chkRun);
             this.groupBox1.Controls.Add(this.btnClean);
-            this.groupBox1.Location = new System.Drawing.Point(480, 27);
+            this.groupBox1.Location = new System.Drawing.Point(602, 27);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(180, 437);
+            this.groupBox1.Size = new System.Drawing.Size(180, 484);
             this.groupBox1.TabIndex = 6;
             this.groupBox1.TabStop = false;
+            // 
+            // chkRec
+            // 
+            this.chkRec.Appearance = System.Windows.Forms.Appearance.Button;
+            this.chkRec.Location = new System.Drawing.Point(6, 77);
+            this.chkRec.Name = "chkRec";
+            this.chkRec.Size = new System.Drawing.Size(71, 23);
+            this.chkRec.TabIndex = 19;
+            this.chkRec.Text = "Rec";
+            this.chkRec.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.chkRec.UseVisualStyleBackColor = true;
+            this.chkRec.CheckedChanged += new System.EventHandler(this.chkRec_CheckedChanged);
+            // 
+            // lblSpeed
+            // 
+            this.lblSpeed.AutoSize = true;
+            this.lblSpeed.Location = new System.Drawing.Point(15, 245);
+            this.lblSpeed.Name = "lblSpeed";
+            this.lblSpeed.Size = new System.Drawing.Size(134, 13);
+            this.lblSpeed.TabIndex = 10;
+            this.lblSpeed.Text = "Speed (in ms, current=250)";
             // 
             // ddlMidiDevices
             // 
             this.ddlMidiDevices.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.ddlMidiDevices.FormattingEnabled = true;
-            this.ddlMidiDevices.Location = new System.Drawing.Point(12, 126);
+            this.ddlMidiDevices.Location = new System.Drawing.Point(18, 170);
             this.ddlMidiDevices.Name = "ddlMidiDevices";
             this.ddlMidiDevices.Size = new System.Drawing.Size(155, 21);
             this.ddlMidiDevices.TabIndex = 18;
@@ -162,7 +191,7 @@
             // 
             // sldNoteDuration
             // 
-            this.sldNoteDuration.Location = new System.Drawing.Point(15, 319);
+            this.sldNoteDuration.Location = new System.Drawing.Point(21, 363);
             this.sldNoteDuration.Maximum = 3000;
             this.sldNoteDuration.Minimum = 25;
             this.sldNoteDuration.Name = "sldNoteDuration";
@@ -175,7 +204,7 @@
             // lblNoteDuration
             // 
             this.lblNoteDuration.AutoSize = true;
-            this.lblNoteDuration.Location = new System.Drawing.Point(9, 303);
+            this.lblNoteDuration.Location = new System.Drawing.Point(15, 347);
             this.lblNoteDuration.Name = "lblNoteDuration";
             this.lblNoteDuration.Size = new System.Drawing.Size(167, 13);
             this.lblNoteDuration.TabIndex = 16;
@@ -184,7 +213,7 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(89, 252);
+            this.label4.Location = new System.Drawing.Point(95, 296);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(47, 13);
             this.label4.TabIndex = 15;
@@ -193,7 +222,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(12, 252);
+            this.label3.Location = new System.Drawing.Point(18, 296);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(34, 13);
             this.label3.TabIndex = 14;
@@ -201,7 +230,7 @@
             // 
             // nudColumns
             // 
-            this.nudColumns.Location = new System.Drawing.Point(92, 271);
+            this.nudColumns.Location = new System.Drawing.Point(98, 315);
             this.nudColumns.Minimum = new decimal(new int[] {
             2,
             0,
@@ -219,7 +248,7 @@
             // 
             // nudRows
             // 
-            this.nudRows.Location = new System.Drawing.Point(12, 271);
+            this.nudRows.Location = new System.Drawing.Point(18, 315);
             this.nudRows.Minimum = new decimal(new int[] {
             2,
             0,
@@ -237,7 +266,7 @@
             // 
             // sldSpeed
             // 
-            this.sldSpeed.Location = new System.Drawing.Point(12, 220);
+            this.sldSpeed.Location = new System.Drawing.Point(18, 264);
             this.sldSpeed.Maximum = 1000;
             this.sldSpeed.Minimum = 25;
             this.sldSpeed.Name = "sldSpeed";
@@ -247,19 +276,10 @@
             this.sldSpeed.Value = 250;
             this.sldSpeed.ValueChanged += new System.EventHandler(this.sldSpeed_ValueChanged);
             // 
-            // lblSpeed
-            // 
-            this.lblSpeed.AutoSize = true;
-            this.lblSpeed.Location = new System.Drawing.Point(9, 201);
-            this.lblSpeed.Name = "lblSpeed";
-            this.lblSpeed.Size = new System.Drawing.Size(134, 13);
-            this.lblSpeed.TabIndex = 10;
-            this.lblSpeed.Text = "Speed (in ms, current=250)";
-            // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(9, 150);
+            this.label2.Location = new System.Drawing.Point(15, 194);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(42, 13);
             this.label2.TabIndex = 9;
@@ -267,7 +287,7 @@
             // 
             // sldVolume
             // 
-            this.sldVolume.Location = new System.Drawing.Point(12, 169);
+            this.sldVolume.Location = new System.Drawing.Point(18, 213);
             this.sldVolume.Maximum = 127;
             this.sldVolume.Name = "sldVolume";
             this.sldVolume.Size = new System.Drawing.Size(155, 45);
@@ -279,7 +299,7 @@
             // 
             this.ddlInstruments.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.ddlInstruments.FormattingEnabled = true;
-            this.ddlInstruments.Location = new System.Drawing.Point(12, 106);
+            this.ddlInstruments.Location = new System.Drawing.Point(18, 150);
             this.ddlInstruments.Name = "ddlInstruments";
             this.ddlInstruments.Size = new System.Drawing.Size(155, 21);
             this.ddlInstruments.TabIndex = 7;
@@ -287,7 +307,7 @@
             // 
             // label1
             // 
-            this.label1.Location = new System.Drawing.Point(9, 74);
+            this.label1.Location = new System.Drawing.Point(15, 118);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(158, 42);
             this.label1.TabIndex = 6;
@@ -297,9 +317,9 @@
             // 
             this.txtNotes.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtNotes.Location = new System.Drawing.Point(2, 483);
+            this.txtNotes.Location = new System.Drawing.Point(2, 530);
             this.txtNotes.Name = "txtNotes";
-            this.txtNotes.Size = new System.Drawing.Size(658, 20);
+            this.txtNotes.Size = new System.Drawing.Size(780, 20);
             this.txtNotes.TabIndex = 7;
             this.txtNotes.Text = "D3, A3, A#3, C4, D4, E4, F4, A5, C5";
             this.txtNotes.TextChanged += new System.EventHandler(this.txtNotes_TextChanged);
@@ -309,7 +329,7 @@
             this.label5.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(9, 467);
+            this.label5.Location = new System.Drawing.Point(9, 514);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(466, 13);
             this.label5.TabIndex = 15;
@@ -322,7 +342,7 @@
             this.fileToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(665, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(787, 24);
             this.menuStrip1.TabIndex = 16;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -384,18 +404,54 @@
             this.mnuExit.Text = "E&xit";
             this.mnuExit.Click += new System.EventHandler(this.mnuExit_Click);
             // 
-            // Form1
+            // groupBox2
+            // 
+            this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)));
+            this.groupBox2.Controls.Add(this.cellPalette);
+            this.groupBox2.Location = new System.Drawing.Point(2, 28);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(63, 479);
+            this.groupBox2.TabIndex = 17;
+            this.groupBox2.TabStop = false;
+            this.groupBox2.Text = "Palette";
+            // 
+            // cellPalette
+            // 
+            this.cellPalette.CellStates = null;
+            this.cellPalette.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.cellPalette.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
+            this.cellPalette.FormattingEnabled = true;
+            this.cellPalette.ItemHeight = 34;
+            this.cellPalette.Location = new System.Drawing.Point(3, 16);
+            this.cellPalette.Name = "cellPalette";
+            this.cellPalette.Size = new System.Drawing.Size(57, 460);
+            this.cellPalette.States = null;
+            this.cellPalette.TabIndex = 0;
+            // 
+            // btnRandomize
+            // 
+            this.btnRandomize.Location = new System.Drawing.Point(103, 48);
+            this.btnRandomize.Name = "btnRandomize";
+            this.btnRandomize.Size = new System.Drawing.Size(73, 23);
+            this.btnRandomize.TabIndex = 20;
+            this.btnRandomize.Text = "Randomize";
+            this.btnRandomize.UseVisualStyleBackColor = true;
+            this.btnRandomize.Click += new System.EventHandler(this.btnRandomize_Click);
+            // 
+            // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(665, 511);
+            this.ClientSize = new System.Drawing.Size(787, 558);
+            this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.txtNotes);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.picBoard);
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
-            this.Name = "Form1";
+            this.Name = "MainForm";
             this.Text = "Procedural Midi";
             ((System.ComponentModel.ISupportInitialize)(this.picBoard)).EndInit();
             this.groupBox1.ResumeLayout(false);
@@ -407,6 +463,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.sldVolume)).EndInit();
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
+            this.groupBox2.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -445,6 +502,10 @@
         private System.Windows.Forms.ToolStripMenuItem mnuExit;
         private System.Windows.Forms.ToolStripMenuItem mnuReload;
         private System.Windows.Forms.ComboBox ddlMidiDevices;
+        private System.Windows.Forms.CheckBox chkRec;
+        private System.Windows.Forms.GroupBox groupBox2;
+        private Palette cellPalette;
+        private System.Windows.Forms.Button btnRandomize;
     }
 }
 

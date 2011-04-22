@@ -17,10 +17,6 @@ namespace ProceduralMidi
 
         private NoteController noteController = new NoteController();
 
-        /// <summary>
-        /// The characters to draw for the different cell states
-        /// </summary>
-        private string[] cellStateText = { "▲", "►", "▼", "◄" };
 
         public MainForm()
         {
@@ -28,6 +24,9 @@ namespace ProceduralMidi
 
             // create a new board with the default columns/rows
             board = new OtomataBoard(Cols, Rows);
+            cellPalette.States = board.PossibleStatesForPalette;
+            if (cellPalette.Items.Count > 0)
+                cellPalette.SelectedIndex = 0;
 
             // fill dropdowns
             FillMidiDevices();
@@ -89,6 +88,9 @@ namespace ProceduralMidi
             tmrIterate.Enabled = chkRun.Checked;
         }
 
+
+
+
         /// <summary>
         /// Draws the board
         /// </summary>
@@ -113,39 +115,20 @@ namespace ProceduralMidi
                     g.DrawLine(p, new PointF(0, i * cellSize.Height), new PointF(bounds.Right, i * cellSize.Height));
             }
 
-            // create required brushes, etc
-            SolidBrush singleStateBrush = new SolidBrush(Color.DarkGray);
-            SolidBrush mergedStateBrush = new SolidBrush(Color.White);
-            SolidBrush txtbrush = new SolidBrush(Color.White);
-            Font f = new Font("Times New Roman", 10f, FontStyle.Regular);
+            int rows = Rows;
+            int cols = Cols;
+
+            g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SingleBitPerPixel;
 
             // for each row on the board
-            for (int row = 0; row < Rows; row++)
+            for (int row = 0; row < rows; row++)
             {
                 // for each col on the board
-                for (int col = 0; col < Cols; col++)
+                for (int col = 0; col < cols; col++)
                 {
-                    var cellState = board.Cells[col, row].State;
-                    if (cellState != CellStateEnum.Dead)
-                    {
-                        // if the cell isn't dead, draw it 
-
-                        // to draw the background of the cell use mergedbrush if cell state is merged, otherwise singlestatebrush
-                        Brush b = (cellState == CellStateEnum.Merged ? mergedStateBrush : singleStateBrush);
-                        g.FillRectangle(b, new RectangleF(col * cellSize.Width, row * cellSize.Height, cellSize.Width, cellSize.Height));
-
-                        // draw the arrows of a cell if it is any of these cell states
-                        if (cellState == CellStateEnum.Up || cellState == CellStateEnum.Down ||
-                           cellState == CellStateEnum.Left || cellState == CellStateEnum.Right)
-                        {
-                            // get character for cellstate
-                            string str = cellStateText[(int)cellState];
-                            SizeF sizeStr = g.MeasureString(str, f);
-                            // draw character in center of cell
-                            g.DrawString(str, f, txtbrush, new PointF(col * cellSize.Width + cellSize.Width / 2 - sizeStr.Width / 2,
-                                                                         row * cellSize.Height + cellSize.Height / 2 - sizeStr.Height / 2));
-                        }
-                    }
+                    // if the cell isn't dead, draw it 
+                    RectangleF cellBounds = new RectangleF(col * cellSize.Width, row * cellSize.Height, cellSize.Width, cellSize.Height);
+                    g.DrawCell(board.Cells[col, row], cellBounds);
                 }
             }
 
@@ -163,22 +146,16 @@ namespace ProceduralMidi
                     g.FillRectangle(br, r);
             }
 
-            // clean up
-            singleStateBrush.Dispose();
-            mergedStateBrush.Dispose();
-            txtbrush.Dispose();
-            f.Dispose();
+
+
         }
-
-
-
 
         /// <summary>
         /// Define cell state of certain cell or show debug info of selected cell
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void picBoard_MouseDown(object sender, MouseEventArgs e)
+        private void picBoard_MouseMove(object sender, MouseEventArgs e)
         {
             Rectangle bounds = new Rectangle(0, 0, picBoard.Width - 1, picBoard.Height - 1);
 
@@ -189,15 +166,14 @@ namespace ProceduralMidi
             int col = (int)(e.X / cellSize.Width);
             int row = (int)(e.Y / cellSize.Height);
 
+            // don't go out of bounds
+            if (col < 0 || col >= Cols || row < 0 || row >= Rows)
+                return;
+
             // left click
             if (e.Button == System.Windows.Forms.MouseButtons.Left)
             {
-                // switch to next state
-                board.Cells[col, row].State = (CellStateEnum)((int)(board.Cells[col, row].State + 1) % ((int)CellStateEnum.Dead + 1));
-
-                // but skip merged state
-                if (board.Cells[col, row].State == CellStateEnum.Merged)
-                    board.Cells[col, row].State = (CellStateEnum)((int)(board.Cells[col, row].State + 1) % ((int)CellStateEnum.Dead + 1));
+                board.Cells[col, row].State = cellPalette.SelectedState;
 
                 // refresh board
                 picBoard.Invalidate();
@@ -209,9 +185,15 @@ namespace ProceduralMidi
                 lblDebug.Text = "Pos: " + col + "," + row + Environment.NewLine +
                                 "State: " + board.Cells[col, row].State + Environment.NewLine +
                                 "Merged states: " + string.Join(",", board.Cells[col, row].MergedStates.Select(s => s.ToString()).ToArray());
-
             }
         }
+
+        private void picBoard_MouseDown(object sender, MouseEventArgs e)
+        {
+            picBoard_MouseMove(sender, e);
+        }
+
+
 
         /// <summary>
         /// A list of highlights that are alive
@@ -227,7 +209,7 @@ namespace ProceduralMidi
             {
                 IsRow = isRow;
                 Index = index;
-                Alpha = 1;
+                Alpha = 0.5f;
             }
 
             /// <summary>
@@ -277,28 +259,25 @@ namespace ProceduralMidi
         /// </summary>
         private void PlayNotesForActiveCells()
         {
-            bool[,] activeCells = board.ActiveCells;
+            OtomataBoard.ActiveState[,] activeCells = board.ActiveCells;
 
             for (int row = 0; row < board.Rows; row++)
             {
                 for (int col = 0; col < board.Cols; col++)
                 {
-                    if (activeCells[col, row])
+                    if (activeCells[col, row] == AbstractBoard.ActiveState.ColumnActivated)
                     {
-                        if (col == 0 || col == board.Cols - 1)
-                        {
-                            // add highlight for the row
-                            highlights.Add(new Highlight(true, row));
-                            // play corresponding note for the row
-                            noteController.PlayNote(row, NoteDuration, Volume);
-                        }
-                        else if (row == 0 || row == board.Rows - 1)
-                        {
-                            // add highlight for the col
-                            highlights.Add(new Highlight(false, col));
-                            // play corresponding note for the col
-                            noteController.PlayNote(col, NoteDuration, Volume);
-                        }
+                        // add highlight for the col
+                        highlights.Add(new Highlight(false, col));
+                        // play corresponding note for the col
+                        noteController.PlayNote(col, NoteDuration, Volume);                      
+                    }
+                    else if (activeCells[col, row] == AbstractBoard.ActiveState.RowActivated)
+                    {
+                        // add highlight for the row
+                        highlights.Add(new Highlight(true, row));
+                        // play corresponding note for the row
+                        noteController.PlayNote(row, NoteDuration, Volume);
                     }
                 }
             }
@@ -365,8 +344,11 @@ namespace ProceduralMidi
         /// <param name="e"></param>
         private void nudRows_ValueChanged(object sender, EventArgs e)
         {
-            board.ChangeSize(Rows, Cols);
-            picBoard.Invalidate();
+            if (!ignoreNudRowColValueChange)
+            {
+                board.ChangeSize(Rows, Cols);
+                picBoard.Invalidate();
+            }
         }
 
         /// <summary>
@@ -376,8 +358,11 @@ namespace ProceduralMidi
         /// <param name="e"></param>
         private void nudColumns_ValueChanged(object sender, EventArgs e)
         {
-            board.ChangeSize(Rows, Cols);
-            picBoard.Invalidate();
+            if (!ignoreNudRowColValueChange)
+            {
+                board.ChangeSize(Rows, Cols);
+                picBoard.Invalidate();
+            }
         }
 
         /// <summary>
@@ -457,6 +442,7 @@ namespace ProceduralMidi
         /// <param name="path"></param>
         private void LoadBoard(string path)
         {
+            ignoreNudRowColValueChange = true;
             BoardSettings boardSettings;
             if (BoardMapper.TryLoad(path, out boardSettings))
             {
@@ -472,7 +458,10 @@ namespace ProceduralMidi
 
                 lastPathOpened = path;
             }
+            ignoreNudRowColValueChange = false;
         }
+
+        private bool ignoreNudRowColValueChange;
 
 
         /// <summary>
@@ -570,6 +559,70 @@ namespace ProceduralMidi
                 noteController.Dispose();
 
             base.Dispose(disposing);
+        }
+
+        private void chkRec_CheckedChanged(object sender, EventArgs e)
+        {
+            if (chkRec.Checked)
+            {
+                noteController.Recorder = new Recorder();
+                tmrIterate.Enabled = true;
+            }
+            else
+            {
+                tmrIterate.Enabled = false;
+
+                try
+                {
+                    using (SaveFileDialog sfd = new SaveFileDialog())
+                    {
+                        sfd.Filter = "*.mid|*.mid";
+                        if (sfd.ShowDialog(this) == System.Windows.Forms.DialogResult.OK)
+                        {
+                            MidiWriter.Write(sfd.FileName, ddlInstruments.SelectedIndex, noteController.Recorder.Notes);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Could not save file, error: " + ex.GetType().FullName + " - " + ex.Message, "Could not save file");
+                }
+
+                noteController.Recorder = null;
+            }
+        }
+
+        protected override void OnMouseWheel(MouseEventArgs e)
+        {
+            if (cellPalette.Items.Count > 0 && picBoard.Focused || cellPalette.Focused)
+            {
+                if (e.Delta > 0)
+                    cellPalette.SelectedIndex = (cellPalette.SelectedIndex + 1) % cellPalette.Items.Count;
+                else if (e.Delta < 0)
+                    cellPalette.SelectedIndex = ((cellPalette.SelectedIndex - 1) < 0 ? cellPalette.Items.Count - 1 : cellPalette.SelectedIndex - 1);
+            }
+            base.OnMouseWheel(e);
+        }
+
+        private void btnRandomize_Click(object sender, EventArgs e)
+        {
+            Random rnd = new Random();
+
+            List<CellStateEnum> possibleStates = board.PossibleStatesForPalette.Where(s => s != CellStateEnum.Dead).ToList();
+
+            for (int row = 0; row < board.Rows; row++)
+            {
+                for (int col = 0; col < board.Cols; col++)
+                {
+                    if (rnd.NextDouble() > 0.8f)
+                    {
+                        board.Cells[col, row] = new Cell(possibleStates[rnd.Next(possibleStates.Count)]);
+                    }
+                    else
+                        board.Cells[col, row] = new Cell(CellStateEnum.Dead);
+                }
+            }
+            picBoard.Invalidate();
         }
     }
 }

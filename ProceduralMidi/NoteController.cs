@@ -63,6 +63,9 @@ namespace ProceduralMidi
             NotesPerCell = new string[] { "D3", "A3", "A#3", "C4", "D4", "E4", "F4", "A5", "C5" };
         }
 
+        public Recorder Recorder { get; set; }
+
+
         /// <summary>
         /// Checks all currently pressed notes and if their duration is exceeded
         /// unpress the note
@@ -93,7 +96,12 @@ namespace ProceduralMidi
         {
             short midiIndex =GetNoteIndexFromCellIndex(cellIdx);
             Midi.NoteDown(midiIndex, MIDI_CHANNEL, volume);
-            notesDown.Add(new Note(DateTime.Now, midiIndex, durationMS));
+
+            Note n = new Note(DateTime.Now, midiIndex, durationMS);
+            notesDown.Add(n);
+
+            if(Recorder != null)
+                Recorder.Notes.Add(n);
         }
 
         /// <summary>
@@ -106,34 +114,6 @@ namespace ProceduralMidi
             // determine note of cell index, wrap the notes per cell if there are not enough notes specified
             string note = NotesPerCell[cellIdx % NotesPerCell.Length].Replace("BB", "A#");
             return (short)(notesByMidiIndex.IndexOf(note));
-        }
-
-        /// <summary>
-        /// Describes a note that is played
-        /// </summary>
-        private class Note
-        {
-            public Note(DateTime timeDown, short midiIdx, int durationMs)
-            {
-                this.TimeDown = timeDown;
-                this.MidiIndex = midiIdx;
-                this.DurationMS = durationMs;
-            }
-
-            /// <summary>
-            /// The time when the note was pressed
-            /// </summary>
-            public DateTime TimeDown { get; set; }
-
-            /// <summary>
-            /// The midi index of the note
-            /// </summary>
-            public short MidiIndex { get; set; }
-
-            /// <summary>
-            /// The duration the note has to be pressed
-            /// </summary>
-            public int DurationMS { get; set; }
         }
 
         /// <summary>
