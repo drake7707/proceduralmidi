@@ -97,6 +97,21 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\control-play-icon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\control-record-icon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\control-step-icon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\control-clean-icon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\control-shuffle-icon.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

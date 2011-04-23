@@ -13,5 +13,7 @@ namespace ProceduralMidi
         }
 
         public List<Note> Notes { get; set; }
+
+        public DateTime Start { get; set; }
     }
 }
