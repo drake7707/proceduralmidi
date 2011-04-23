@@ -59,5 +59,54 @@ namespace ProceduralMidi.Properties {
                 resourceCulture = value;
             }
         }
+        
+        internal static System.Drawing.Bitmap control_clean_icon {
+            get {
+                object obj = ResourceManager.GetObject("control_clean_icon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap control_open_icon {
+            get {
+                object obj = ResourceManager.GetObject("control_open_icon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap control_play_icon {
+            get {
+                object obj = ResourceManager.GetObject("control_play_icon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap control_record_icon {
+            get {
+                object obj = ResourceManager.GetObject("control_record_icon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap control_save_icon {
+            get {
+                object obj = ResourceManager.GetObject("control_save_icon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap control_shuffle_icon {
+            get {
+                object obj = ResourceManager.GetObject("control_shuffle_icon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap control_step_icon {
+            get {
+                object obj = ResourceManager.GetObject("control_step_icon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
     }
 }

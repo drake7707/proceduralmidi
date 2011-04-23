@@ -29,7 +29,7 @@ namespace ProceduralMidi
         private static extern int midiOutShortMsg(int handle, int message);
 
         [DllImport("winmm.dll")]
-        static public extern UInt32 midiOutGetNumDevs();
+        private static extern UInt32 midiOutGetNumDevs();
 
         public struct MIDIOUTCAPS
         {
@@ -94,6 +94,12 @@ namespace ProceduralMidi
             }
         }
 
+        /// <summary>
+        /// Send a note down to the current midi device
+        /// </summary>
+        /// <param name="idx"></param>
+        /// <param name="channel"></param>
+        /// <param name="velocity"></param>
         public static void NoteDown(short idx, short channel, short velocity)
         {
             if (velocity == 0) // don't play 0 volume notes
@@ -104,6 +110,12 @@ namespace ProceduralMidi
             midiOutShortMsg(handle, midiMsg);
         }
 
+        /// <summary>
+        /// Send a note up to the current midi device
+        /// </summary>
+        /// <param name="idx"></param>
+        /// <param name="channel"></param>
+        /// <param name="velocity"></param>
         public static void NoteUp(short idx, short channel, short velocity)
         {
             if (velocity == 0) // don't play 0 volume notes

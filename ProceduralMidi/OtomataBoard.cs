@@ -34,68 +34,31 @@ namespace ProceduralMidi
 
                     // move cell 1 to left
                     if (currentCell.State == CellStateEnum.Left)
-                    {
-                        if (col - 1 >= 0)
-                            SetState(ref newCellsState[col - 1, row], CellStateEnum.Left);
-                        else // out bounds, let it bounce to the other side
-                            SetState(ref newCellsState[col + 1, row], CellStateEnum.Right);
-                    }
+                        CheckLeft(newCellsState, row, col);
                     // move cell 1 to right
                     else if (currentCell.State == CellStateEnum.Right)
-                    {
-                        if (col + 1 < Cols)
-                            SetState(ref newCellsState[col + 1, row], CellStateEnum.Right);
-                        else // out bounds, let it bounce to the other side
-                            SetState(ref newCellsState[col - 1, row], CellStateEnum.Left);
-                    }
+                        CheckRight(newCellsState, row, col);
                     // move cell 1 to top
                     else if (currentCell.State == CellStateEnum.Up)
-                    {
-                        if (row - 1 >= 0)
-                            SetState(ref newCellsState[col, row - 1], CellStateEnum.Up);
-                        else // out bounds, let it bounce to the other side
-                            SetState(ref newCellsState[col, row + 1], CellStateEnum.Down);
-                    }
+                        CheckUp(newCellsState, row, col);
                     // move cell 1 to bottom
                     else if (currentCell.State == CellStateEnum.Down)
-                    {
-                        if (row + 1 < Rows)
-                            SetState(ref newCellsState[col, row + 1], CellStateEnum.Down);
-                        else // out bounds, let it bounce to the other side
-                            SetState(ref newCellsState[col, row - 1], CellStateEnum.Up);
-                    }
+                        CheckDown(newCellsState, row, col);
+                    // walls stay walls (immutable)
+                    else if (currentCell.State == CellStateEnum.Wall || currentCell.State == CellStateEnum.SoundWall)
+                        newCellsState[col, row].State = currentCell.State;
                     else if (currentCell.State == CellStateEnum.Merged)
                     {
                         foreach (var mergedState in currentCell.MergedStates)
                         {
                             if (mergedState == CellStateEnum.Left)
-                            {
-                                if (col - 1 >= 0)
-                                    SetState(ref newCellsState[col - 1, row], CellStateEnum.Left);
-                                else // out bounds, let it bounce to the other side
-                                    SetState(ref newCellsState[col + 1, row], CellStateEnum.Right);
-                            }
+                                CheckLeft(newCellsState, row, col);
                             else if (mergedState == CellStateEnum.Right)
-                            {
-                                if (col + 1 < Cols)
-                                    SetState(ref newCellsState[col + 1, row], CellStateEnum.Right);
-                                else // out bounds, let it bounce to the other side
-                                    SetState(ref newCellsState[col - 1, row], CellStateEnum.Left);
-                            }
+                                CheckRight(newCellsState, row, col);
                             else if (mergedState == CellStateEnum.Up)
-                            {
-                                if (row - 1 >= 0)
-                                    SetState(ref newCellsState[col, row - 1], CellStateEnum.Up);
-                                else // out bounds, let it bounce to the other side
-                                    SetState(ref newCellsState[col, row + 1], CellStateEnum.Down);
-                            }
+                                CheckUp(newCellsState, row, col);
                             else if (mergedState == CellStateEnum.Down)
-                            {
-                                if (row + 1 < Rows)
-                                    SetState(ref newCellsState[col, row + 1], CellStateEnum.Down);
-                                else // out bounds, let it bounce to the other side
-                                    SetState(ref newCellsState[col, row - 1], CellStateEnum.Up);
-                            }
+                                CheckDown(newCellsState, row, col);
                         }
                     }
                 }
@@ -112,6 +75,86 @@ namespace ProceduralMidi
             }
 
             Cells = newCellsState;
+        }
+
+        /// <summary>
+        /// Checks the position down of the given position to set the new cell state
+        /// </summary>
+        /// <param name="newCellsState"></param>
+        /// <param name="row"></param>
+        /// <param name="col"></param>
+        private void CheckDown(Cell[,] newCellsState, int row, int col)
+        {
+            if (row + 1 < Rows && Cells[col, row + 1].State != CellStateEnum.Wall && Cells[col, row + 1].State != CellStateEnum.SoundWall)
+                SetState(newCellsState[col, row + 1], CellStateEnum.Down);
+            else // out bounds, let it bounce to the other side
+            {
+                // if there is room to bounce back
+                if (row - 1 >= 0 && Cells[col, row - 1].State != CellStateEnum.Wall && Cells[col, row - 1].State != CellStateEnum.SoundWall)
+                    SetState(newCellsState[col, row - 1], CellStateEnum.Up);
+                else // otherwise stay put and change cell
+                    SetState(newCellsState[col, row], CellStateEnum.Up);
+            }
+        }
+
+        /// <summary>
+        /// Checks the position up of the given position to set the new cell state
+        /// </summary>
+        /// <param name="newCellsState"></param>
+        /// <param name="row"></param>
+        /// <param name="col"></param>
+        private void CheckUp(Cell[,] newCellsState, int row, int col)
+        {
+            if (row - 1 >= 0 && Cells[col, row - 1].State != CellStateEnum.Wall && Cells[col, row - 1].State != CellStateEnum.SoundWall)
+                SetState(newCellsState[col, row - 1], CellStateEnum.Up);
+            else // out bounds, let it bounce to the other side
+            {
+                // if there is room to bounce back
+                if (row + 1 < Rows && Cells[col, row + 1].State != CellStateEnum.Wall && Cells[col, row + 1].State != CellStateEnum.SoundWall)
+                    SetState(newCellsState[col, row + 1], CellStateEnum.Down);
+                else
+                    SetState(newCellsState[col, row], CellStateEnum.Down);
+            }
+        }
+
+        /// <summary>
+        /// Checks the position right of the given position to set the new cell state
+        /// </summary>
+        /// <param name="newCellsState"></param>
+        /// <param name="row"></param>
+        /// <param name="col"></param>
+        private void CheckRight(Cell[,] newCellsState, int row, int col)
+        {
+            if (col + 1 < Cols && Cells[col + 1, row].State != CellStateEnum.Wall && Cells[col + 1, row].State != CellStateEnum.SoundWall)
+                SetState(newCellsState[col + 1, row], CellStateEnum.Right);
+            else // out bounds, let it bounce to the other side
+            {
+                // if there is room to bounce back
+                if (col - 1 >= 0 && Cells[col - 1, row].State != CellStateEnum.Wall && Cells[col - 1, row].State != CellStateEnum.SoundWall)
+                    SetState(newCellsState[col - 1, row], CellStateEnum.Left);
+                else
+                    SetState(newCellsState[col, row], CellStateEnum.Left);
+            }
+        }
+
+        /// <summary>
+        /// Checks the position left of the given position to set the new cell state
+        /// </summary>
+        /// <param name="newCellsState"></param>
+        /// <param name="row"></param>
+        /// <param name="col"></param>
+        private void CheckLeft(Cell[,] newCellsState, int row, int col)
+        {
+            if (col - 1 >= 0 && Cells[col - 1, row].State != CellStateEnum.Wall && Cells[col - 1, row].State != CellStateEnum.SoundWall)
+                SetState(newCellsState[col - 1, row], CellStateEnum.Left);
+            else // out bounds, let it bounce to the other side
+            {
+                // if there is room to bounce back
+                if (col + 1 < Cols && Cells[col + 1, row].State != CellStateEnum.Wall && Cells[col + 1, row].State != CellStateEnum.SoundWall)
+                    SetState(newCellsState[col + 1, row], CellStateEnum.Right);
+                else
+                    SetState(newCellsState[col, row], CellStateEnum.Right);
+            }
         }
 
         #region  OLD rule code
@@ -200,7 +243,7 @@ namespace ProceduralMidi
         /// </summary>
         /// <param name="c"></param>
         /// <param name="state"></param>
-        private void SetState(ref Cell c, CellStateEnum state)
+        private void SetState(Cell c, CellStateEnum state)
         {
             if (c.State != CellStateEnum.Dead)
             {
@@ -239,37 +282,91 @@ namespace ProceduralMidi
         /// Determine the cell active in the current state
         /// 
         /// In this implementation: check on the borders if there are any cells that have
-        /// a state that matches the border (e.g left border, left state)
+        /// a state that matches the border (e.g left border, left state), or if a cell will bounce
+        /// against a sound wall
         /// </summary>
-        public override bool[,] ActiveCells
+        public override ActiveState[,] ActiveCells
         {
             get
             {
-                bool[,] activeCells = new bool[Cols, Rows];
+                ActiveState[,] activeCells = new ActiveState[Cols, Rows];
 
                 for (int row = 0; row < Rows; row++)
                 {
                     // check the left border if any cell states are left or merged cells that came from left but are rotated
                     if (Cells[0, row].State == CellStateEnum.Left || CellIsMergedAndContainsState(Cells[0, row], RotateClockWise(CellStateEnum.Left)))
-                        activeCells[0, row] = true;
+                        activeCells[0, row] = ActiveState.RowActivated;
 
                     // check the right border if any cell states are right or merged cells that came from right but are rotated
                     if (Cells[Cols - 1, row].State == CellStateEnum.Right || CellIsMergedAndContainsState(Cells[Cols - 1, row], RotateClockWise(CellStateEnum.Right)))
-                        activeCells[Cols - 1, row] = true;
+                        activeCells[Cols - 1, row] = ActiveState.RowActivated;
                 }
 
                 for (int col = 0; col < Cols; col++)
                 {
                     // check the top border if any cell states are up or merged cells that came from up but are rotated
                     if (Cells[col, 0].State == CellStateEnum.Up || CellIsMergedAndContainsState(Cells[col, 0], RotateClockWise(CellStateEnum.Up)))
-                        activeCells[col, 0] = true;
+                        activeCells[col, 0] = ActiveState.ColumnActivated;
 
                     // check the bottom border if any cell states are down or merged cells that came from down but are rotated
                     if (Cells[col, Rows - 1].State == CellStateEnum.Down || CellIsMergedAndContainsState(Cells[col, Rows - 1], RotateClockWise(CellStateEnum.Down)))
-                        activeCells[col, Rows - 1] = true;
+                        activeCells[col, Rows - 1] = ActiveState.ColumnActivated;
+                }
+
+                for (int row = 0; row < Rows; row++)
+                {
+                    for (int col = 0; col < Cols; col++)
+                    {
+                        // check left
+                        if (Cells[col, row].State == CellStateEnum.Left || CellIsMergedAndContainsState(Cells[col, row], RotateClockWise(CellStateEnum.Left)))
+                        {
+                            if (col - 1 < 0 || Cells[col - 1, row].State == CellStateEnum.SoundWall)
+                                activeCells[col, row] = ActiveState.RowActivated;
+                        }
+
+                        // check right
+                        if (Cells[col, row].State == CellStateEnum.Right || CellIsMergedAndContainsState(Cells[col, row], RotateClockWise(CellStateEnum.Right)))
+                        {
+                            if (col + 1 >= Cols || Cells[col + 1, row].State == CellStateEnum.SoundWall)
+                                activeCells[col, row] = ActiveState.RowActivated;
+                        }
+
+                        // check up
+                        if (Cells[col, row].State == CellStateEnum.Up || CellIsMergedAndContainsState(Cells[col, row], RotateClockWise(CellStateEnum.Up)))
+                        {
+                            if (row - 1 < 0 || Cells[col, row - 1].State == CellStateEnum.SoundWall)
+                                activeCells[col, row] = ActiveState.ColumnActivated;
+                        }
+
+                        // check down
+                        if (Cells[col, row].State == CellStateEnum.Down || CellIsMergedAndContainsState(Cells[col, row], RotateClockWise(CellStateEnum.Down)))
+                        {
+                            if (row + 1 >= Rows || Cells[col, row + 1].State == CellStateEnum.SoundWall)
+                                activeCells[col, row] = ActiveState.ColumnActivated;
+                        }
+                    }
                 }
 
                 return activeCells;
+            }
+        }
+
+        /// <summary>
+        /// Otomata boards can only draw dead, the 4 directions and walls
+        /// </summary>
+        public override CellStateEnum[] PossibleStatesForPalette
+        {
+            get
+            {
+                return new CellStateEnum[] { 
+                    CellStateEnum.Dead, 
+                    CellStateEnum.Up, 
+                    CellStateEnum.Right, 
+                    CellStateEnum.Down, 
+                    CellStateEnum.Left, 
+                    CellStateEnum.Wall,
+                    CellStateEnum.SoundWall
+                };
             }
         }
     }

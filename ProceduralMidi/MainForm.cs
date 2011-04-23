@@ -17,10 +17,17 @@ namespace ProceduralMidi
 
         private NoteController noteController = new NoteController();
 
-
         public MainForm()
         {
             InitializeComponent();
+
+            // default values
+            sldVolume.Value = 64;
+            sldSpeed.Value = 250;
+            sldNoteDuration.Value = 500;
+            sldSpeed_ValueChanged(sldSpeed, EventArgs.Empty);
+            sldNoteDuration_ValueChanged(sldNoteDuration, EventArgs.Empty);
+
 
             // create a new board with the default columns/rows
             board = new OtomataBoard(Cols, Rows);
@@ -78,18 +85,6 @@ namespace ProceduralMidi
             Midi.ChangeMidiDevice(ddlMidiDevices.SelectedIndex);
         }
 
-        /// <summary>
-        /// Enable the timer for the iterations if run is checked
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void chkRun_CheckedChanged(object sender, EventArgs e)
-        {
-            tmrIterate.Enabled = chkRun.Checked;
-        }
-
-
-
 
         /// <summary>
         /// Draws the board
@@ -106,19 +101,32 @@ namespace ProceduralMidi
             SizeF cellSize = new SizeF(((float)bounds.Width / (float)Cols), ((float)bounds.Height / (float)Rows));
 
             // draw grid
-            using (Pen p = new Pen(Color.Gray))
+            if (mnuShowGrid.Checked)
             {
-                for (int i = 0; i <= Cols; i++)
-                    g.DrawLine(p, new PointF(i * cellSize.Width, 0), new PointF(i * cellSize.Width, bounds.Bottom));
+                using (Pen p = new Pen(Color.Gray))
+                {
+                    for (int i = 0; i <= Cols; i++)
+                        g.DrawLine(p, new PointF(i * cellSize.Width, 0), new PointF(i * cellSize.Width, bounds.Bottom));
 
-                for (int i = 0; i <= Rows; i++)
-                    g.DrawLine(p, new PointF(0, i * cellSize.Height), new PointF(bounds.Right, i * cellSize.Height));
+                    for (int i = 0; i <= Rows; i++)
+                        g.DrawLine(p, new PointF(0, i * cellSize.Height), new PointF(bounds.Right, i * cellSize.Height));
+                }
             }
 
             int rows = Rows;
             int cols = Cols;
 
-            g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SingleBitPerPixel;
+            bool drawFancy = mnuFancy.Checked;
+            if (drawFancy)
+            {
+                g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+                g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
+            }
+            else
+            {
+                g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighSpeed;
+                g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SingleBitPerPixel;
+            }
 
             // for each row on the board
             for (int row = 0; row < rows; row++)
@@ -127,8 +135,11 @@ namespace ProceduralMidi
                 for (int col = 0; col < cols; col++)
                 {
                     // if the cell isn't dead, draw it 
-                    RectangleF cellBounds = new RectangleF(col * cellSize.Width, row * cellSize.Height, cellSize.Width, cellSize.Height);
-                    g.DrawCell(board.Cells[col, row], cellBounds);
+                    RectangleF cellBounds = new RectangleF(col * cellSize.Width + 2, row * cellSize.Height + 2, cellSize.Width - 4, cellSize.Height - 4);
+                    if (drawFancy)
+                        g.DrawCellFancy(board.Cells[col, row], cellBounds);
+                    else
+                        g.DrawCellFast(board.Cells[col, row], cellBounds);
                 }
             }
 
@@ -188,11 +199,15 @@ namespace ProceduralMidi
             }
         }
 
+        /// <summary>
+        /// Define cell state of certain cell or show debug info of selected cell
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void picBoard_MouseDown(object sender, MouseEventArgs e)
         {
             picBoard_MouseMove(sender, e);
         }
-
 
 
         /// <summary>
@@ -209,7 +224,7 @@ namespace ProceduralMidi
             {
                 IsRow = isRow;
                 Index = index;
-                Alpha = 0.5f;
+                Alpha = 0.7f;
             }
 
             /// <summary>
@@ -226,17 +241,6 @@ namespace ProceduralMidi
             /// The transparency of the highlight, once it reaches 0 it's dead and removed from the board
             /// </summary>
             public float Alpha { get; set; }
-        }
-
-
-        /// <summary>
-        /// Move to next state
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void btnNext_Click(object sender, EventArgs e)
-        {
-            MoveToNextState();
         }
 
         /// <summary>
@@ -270,7 +274,7 @@ namespace ProceduralMidi
                         // add highlight for the col
                         highlights.Add(new Highlight(false, col));
                         // play corresponding note for the col
-                        noteController.PlayNote(col, NoteDuration, Volume);                      
+                        noteController.PlayNote(col, NoteDuration, Volume);
                     }
                     else if (activeCells[col, row] == AbstractBoard.ActiveState.RowActivated)
                     {
@@ -291,6 +295,9 @@ namespace ProceduralMidi
         private void tmrIterate_Tick(object sender, EventArgs e)
         {
             MoveToNextState();
+
+            if (btnRecord.Checked)
+                lblStatus.Text = "Recording.. (" + noteController.Recorder.Notes.Count + " notes in " + new DateTime((DateTime.Now - noteController.Recorder.Start).Ticks).ToString("HH:mm:ss") + ")";
         }
 
         /// <summary>
@@ -312,14 +319,21 @@ namespace ProceduralMidi
         /// <param name="e"></param>
         private void tmrDrawHighlights_Tick(object sender, EventArgs e)
         {
+            bool drawFancy = mnuFancy.Checked;
+
             // if there are any highlights queued, draw them
             if (highlights.Count > 0)
             {
                 foreach (var hl in highlights.ToList())
                 {
-                    hl.Alpha -= 0.1f;
+                    if (drawFancy)
+                        hl.Alpha -= 0.1f;
+                    else
+                        hl.Alpha -= 0.5f;
+
                     if (hl.Alpha <= 0) // remove from  list if fadeout is complete
                         highlights.Remove(hl);
+
                 }
 
                 picBoard.Invalidate();
@@ -327,14 +341,14 @@ namespace ProceduralMidi
         }
 
         /// <summary>
-        /// 
+        /// Changes the speed & updates the label
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void sldSpeed_ValueChanged(object sender, EventArgs e)
         {
             tmrIterate.Interval = sldSpeed.Value;
-            lblSpeed.Text = "Speed (in ms, current=" + sldSpeed.Value + ")";
+            lblSpeed.Text = "Speed (in bpm, current=" + ((int)(60000f / (float)sldSpeed.Value)) + ")";
         }
 
         /// <summary>
@@ -461,6 +475,9 @@ namespace ProceduralMidi
             ignoreNudRowColValueChange = false;
         }
 
+        /// <summary>
+        /// Ignore the row/col value change events
+        /// </summary>
         private bool ignoreNudRowColValueChange;
 
 
@@ -537,9 +554,13 @@ namespace ProceduralMidi
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
             if (keyData == Keys.F5)
-                chkRun.Checked = !chkRun.Checked;
+            {
+                btnRun.Checked = !btnRun.Checked;
+            }
             else if (keyData == Keys.F6)
-                btnNext_Click(btnNext, EventArgs.Empty);
+                btnStep_Click(btnStep, EventArgs.Empty);
+            else if (keyData == Keys.F7)
+                btnRecord.Checked = !btnRecord.Checked;
 
             return base.ProcessCmdKey(ref msg, keyData);
         }
@@ -561,17 +582,80 @@ namespace ProceduralMidi
             base.Dispose(disposing);
         }
 
-        private void chkRec_CheckedChanged(object sender, EventArgs e)
+        /// <summary>
+        /// Randomizes the board
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btnRandomize_Click(object sender, EventArgs e)
         {
-            if (chkRec.Checked)
+            Random rnd = new Random();
+
+            List<CellStateEnum> possibleStates = board.PossibleStatesForPalette.Where(s => s != CellStateEnum.Dead).ToList();
+
+            for (int row = 0; row < board.Rows; row++)
+            {
+                for (int col = 0; col < board.Cols; col++)
+                {
+                    if (rnd.NextDouble() > 0.8f) // only 20% of cells are not dead
+                        board.Cells[col, row] = new Cell(possibleStates[rnd.Next(possibleStates.Count)]);
+                    else
+                        board.Cells[col, row] = new Cell(CellStateEnum.Dead);
+                }
+            }
+            picBoard.Invalidate();
+        }
+
+        /// <summary>
+        /// Toggles the graphic setting
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void mnuFancy_Click(object sender, EventArgs e)
+        {
+            // toggle fancy setting
+            mnuFancy.Checked = !mnuFancy.Checked;
+            picBoard.Invalidate();
+        }
+
+        /// <summary>
+        /// Toggles the grid
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void mnuShowGrid_Click(object sender, EventArgs e)
+        {
+            mnuShowGrid.Checked = !mnuShowGrid.Checked;
+            picBoard.Invalidate();
+        }
+
+        /// <summary>
+        /// Enable the timer for the iterations if run is checked
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btnRun_CheckedChanged(object sender, EventArgs e)
+        {
+            tmrIterate.Enabled = btnRun.Checked;
+        }
+
+        /// <summary>
+        /// Add recorder to note controller and save to midi when recording is stopped
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btnRecord_CheckedChanged(object sender, EventArgs e)
+        {
+            if (btnRecord.Checked)
             {
                 noteController.Recorder = new Recorder();
+                noteController.Recorder.Start = DateTime.Now;
                 tmrIterate.Enabled = true;
             }
             else
             {
                 tmrIterate.Enabled = false;
-
+                lblStatus.Text = "Recording stopped";
                 try
                 {
                     using (SaveFileDialog sfd = new SaveFileDialog())
@@ -580,6 +664,8 @@ namespace ProceduralMidi
                         if (sfd.ShowDialog(this) == System.Windows.Forms.DialogResult.OK)
                         {
                             MidiWriter.Write(sfd.FileName, ddlInstruments.SelectedIndex, noteController.Recorder.Notes);
+
+                            lblStatus.Text = "Midi saved to " + sfd.FileName;
                         }
                     }
                 }
@@ -592,37 +678,45 @@ namespace ProceduralMidi
             }
         }
 
-        protected override void OnMouseWheel(MouseEventArgs e)
+        /// <summary>
+        /// Move to next state
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btnStep_Click(object sender, EventArgs e)
         {
-            if (cellPalette.Items.Count > 0 && picBoard.Focused || cellPalette.Focused)
-            {
-                if (e.Delta > 0)
-                    cellPalette.SelectedIndex = (cellPalette.SelectedIndex + 1) % cellPalette.Items.Count;
-                else if (e.Delta < 0)
-                    cellPalette.SelectedIndex = ((cellPalette.SelectedIndex - 1) < 0 ? cellPalette.Items.Count - 1 : cellPalette.SelectedIndex - 1);
-            }
-            base.OnMouseWheel(e);
+            MoveToNextState();
         }
 
-        private void btnRandomize_Click(object sender, EventArgs e)
+        /// <summary>
+        /// Open a saved state
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btnOpen_Click(object sender, EventArgs e)
         {
-            Random rnd = new Random();
+            mnuOpen_Click(mnuOpen, EventArgs.Empty);
+        }
 
-            List<CellStateEnum> possibleStates = board.PossibleStatesForPalette.Where(s => s != CellStateEnum.Dead).ToList();
+        /// <summary>
+        /// Saves the current state & settings to a text file
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btnSave_Click(object sender, EventArgs e)
+        {
+            mnuSave_Click(mnuSave, EventArgs.Empty);
+        }
 
-            for (int row = 0; row < board.Rows; row++)
-            {
-                for (int col = 0; col < board.Cols; col++)
-                {
-                    if (rnd.NextDouble() > 0.8f)
-                    {
-                        board.Cells[col, row] = new Cell(possibleStates[rnd.Next(possibleStates.Count)]);
-                    }
-                    else
-                        board.Cells[col, row] = new Cell(CellStateEnum.Dead);
-                }
-            }
+        /// <summary>
+        /// Repaint board when size changes
+        /// </summary>
+        /// <param name="e"></param>
+        protected override void OnSizeChanged(EventArgs e)
+        {
             picBoard.Invalidate();
+            base.OnSizeChanged(e);
         }
+
     }
 }

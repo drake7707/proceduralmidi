@@ -105,6 +105,22 @@ namespace ProceduralMidi
         /// <summary>
         /// Returns all the active cells of the current state
         /// </summary>
-        public abstract bool[,] ActiveCells { get; }
+        public abstract ActiveState[,] ActiveCells { get; }
+
+        /// <summary>
+        /// Returns all possible states that the user can choose from the palette
+        /// </summary>
+        public abstract CellStateEnum[] PossibleStatesForPalette { get; }
+
+        /// <summary>
+        /// Describes the active state of a cell
+        /// </summary>
+        public enum ActiveState
+        {
+            NotActive,
+            RowActivated,
+            ColumnActivated,
+            BothActivated
+        }
     }
 }

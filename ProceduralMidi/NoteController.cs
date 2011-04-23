@@ -63,6 +63,9 @@ namespace ProceduralMidi
             NotesPerCell = new string[] { "D3", "A3", "A#3", "C4", "D4", "E4", "F4", "A5", "C5" };
         }
 
+        /// <summary>
+        /// A recorder to record the notes to. If one is present (!= null) all played notes will be saved to the recorder.
+        /// </summary>
         public Recorder Recorder { get; set; }
 
 
