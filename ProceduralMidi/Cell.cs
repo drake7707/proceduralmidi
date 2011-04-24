@@ -35,6 +35,10 @@ namespace ProceduralMidi
         Down,
         Left,
         Merged,
-        Dead
+        Dead,
+        Wall,
+        SoundWall,
+        RotateClockWise,
+        RotateCounterClockWise
     }
 }

@@ -34,31 +34,34 @@ namespace ProceduralMidi
 
                     // move cell 1 to left
                     if (currentCell.State == CellStateEnum.Left)
-                        CheckLeft(newCellsState, row, col);
+                        CheckLeft(newCellsState, currentCell.State, row, col);
                     // move cell 1 to right
                     else if (currentCell.State == CellStateEnum.Right)
-                        CheckRight(newCellsState, row, col);
+                        CheckRight(newCellsState, currentCell.State, row, col);
                     // move cell 1 to top
                     else if (currentCell.State == CellStateEnum.Up)
-                        CheckUp(newCellsState, row, col);
+                        CheckUp(newCellsState, currentCell.State, row, col);
                     // move cell 1 to bottom
                     else if (currentCell.State == CellStateEnum.Down)
-                        CheckDown(newCellsState, row, col);
-                    // walls stay walls (immutable)
-                    else if (currentCell.State == CellStateEnum.Wall || currentCell.State == CellStateEnum.SoundWall)
+                        CheckDown(newCellsState, currentCell.State, row, col);
+
+                    // walls stay walls, rotation blocks stay the same too (immutable)
+                    else if (currentCell.State == CellStateEnum.Wall || currentCell.State == CellStateEnum.SoundWall ||
+                             currentCell.State == CellStateEnum.RotateClockWise || currentCell.State == CellStateEnum.RotateCounterClockWise)
                         newCellsState[col, row].State = currentCell.State;
+
                     else if (currentCell.State == CellStateEnum.Merged)
                     {
                         foreach (var mergedState in currentCell.MergedStates)
                         {
                             if (mergedState == CellStateEnum.Left)
-                                CheckLeft(newCellsState, row, col);
+                                CheckLeft(newCellsState, mergedState, row, col);
                             else if (mergedState == CellStateEnum.Right)
-                                CheckRight(newCellsState, row, col);
+                                CheckRight(newCellsState, mergedState, row, col);
                             else if (mergedState == CellStateEnum.Up)
-                                CheckUp(newCellsState, row, col);
+                                CheckUp(newCellsState, mergedState, row, col);
                             else if (mergedState == CellStateEnum.Down)
-                                CheckDown(newCellsState, row, col);
+                                CheckDown(newCellsState, mergedState, row, col);
                         }
                     }
                 }
@@ -83,18 +86,51 @@ namespace ProceduralMidi
         /// <param name="newCellsState"></param>
         /// <param name="row"></param>
         /// <param name="col"></param>
-        private void CheckDown(Cell[,] newCellsState, int row, int col)
+        private void CheckDown(Cell[,] newCellsState, CellStateEnum currentCellState, int row, int col)
         {
-            if (row + 1 < Rows && Cells[col, row + 1].State != CellStateEnum.Wall && Cells[col, row + 1].State != CellStateEnum.SoundWall)
-                SetState(newCellsState[col, row + 1], CellStateEnum.Down);
-            else // out bounds, let it bounce to the other side
-            {
+            if (row + 1 >= Rows || IsWall(col, row + 1))
+            { // reached edge or wall, bounce
+
                 // if there is room to bounce back
-                if (row - 1 >= 0 && Cells[col, row - 1].State != CellStateEnum.Wall && Cells[col, row - 1].State != CellStateEnum.SoundWall)
+                if (row - 1 >= 0 && !IsBlocked(col, row - 1))
                     SetState(newCellsState[col, row - 1], CellStateEnum.Up);
-                else // otherwise stay put and change cell
+                else
                     SetState(newCellsState[col, row], CellStateEnum.Up);
             }
+            else
+            {
+                if (Cells[col, row + 1].State == CellStateEnum.RotateClockWise)
+                {
+                    if (col - 1 >= 0 && !IsBlocked(col - 1, row))
+                        SetState(newCellsState[col - 1, row], RotateClockWise(currentCellState));
+                    else
+                        SetState(newCellsState[col, row], RotateClockWise(currentCellState));
+                }
+                else if (Cells[col, row + 1].State == CellStateEnum.RotateCounterClockWise)
+                {
+                    if (col + 1 < Cols && !IsBlocked(col + 1, row))
+                        SetState(newCellsState[col + 1, row], RotateCounterClockWise(currentCellState));
+                    else
+                        SetState(newCellsState[col, row], RotateCounterClockWise(currentCellState));
+                }
+                else
+                {
+                    // free to go to the up side
+                    SetState(newCellsState[col, row + 1], CellStateEnum.Down);
+                }
+            }
+
+
+            //if (row + 1 < Rows && Cells[col, row + 1].State != CellStateEnum.Wall && Cells[col, row + 1].State != CellStateEnum.SoundWall)
+            //    SetState(newCellsState[col, row + 1], CellStateEnum.Down);
+            //else // out bounds, let it bounce to the other side
+            //{
+            //    // if there is room to bounce back
+            //    if (row - 1 >= 0 && Cells[col, row - 1].State != CellStateEnum.Wall && Cells[col, row - 1].State != CellStateEnum.SoundWall)
+            //        SetState(newCellsState[col, row - 1], CellStateEnum.Up);
+            //    else // otherwise stay put and change cell
+            //        SetState(newCellsState[col, row], CellStateEnum.Up);
+            //}
         }
 
         /// <summary>
@@ -103,18 +139,50 @@ namespace ProceduralMidi
         /// <param name="newCellsState"></param>
         /// <param name="row"></param>
         /// <param name="col"></param>
-        private void CheckUp(Cell[,] newCellsState, int row, int col)
+        private void CheckUp(Cell[,] newCellsState, CellStateEnum currentCellState, int row, int col)
         {
-            if (row - 1 >= 0 && Cells[col, row - 1].State != CellStateEnum.Wall && Cells[col, row - 1].State != CellStateEnum.SoundWall)
-                SetState(newCellsState[col, row - 1], CellStateEnum.Up);
-            else // out bounds, let it bounce to the other side
-            {
+            if (row - 1 < 0 || IsWall(col, row - 1))
+            { // reached edge or wall, bounce
+
                 // if there is room to bounce back
-                if (row + 1 < Rows && Cells[col, row + 1].State != CellStateEnum.Wall && Cells[col, row + 1].State != CellStateEnum.SoundWall)
+                if (row + 1 < Rows && !IsBlocked(col, row + 1))
                     SetState(newCellsState[col, row + 1], CellStateEnum.Down);
                 else
                     SetState(newCellsState[col, row], CellStateEnum.Down);
             }
+            else
+            {
+                if (Cells[col, row - 1].State == CellStateEnum.RotateClockWise)
+                {
+                    if (col + 1 < Cols && !IsBlocked(col + 1, row))
+                        SetState(newCellsState[col + 1, row], RotateClockWise(currentCellState));
+                    else
+                        SetState(newCellsState[col, row], RotateClockWise(currentCellState));
+                }
+                else if (Cells[col, row - 1].State == CellStateEnum.RotateCounterClockWise)
+                {
+                    if (col - 1 >= 0 && !IsBlocked(col - 1, row))
+                        SetState(newCellsState[col - 1, row], RotateCounterClockWise(currentCellState));
+                    else
+                        SetState(newCellsState[col, row], RotateCounterClockWise(currentCellState));
+                }
+                else
+                {
+                    // free to go to the up side
+                    SetState(newCellsState[col, row - 1], CellStateEnum.Up);
+                }
+            }
+
+            //if (row - 1 >= 0 && Cells[col, row - 1].State != CellStateEnum.Wall && Cells[col, row - 1].State != CellStateEnum.SoundWall)
+            //    SetState(newCellsState[col, row - 1], CellStateEnum.Up);
+            //else // out bounds, let it bounce to the other side
+            //{
+            //    // if there is room to bounce back
+            //    if (row + 1 < Rows && Cells[col, row + 1].State != CellStateEnum.Wall && Cells[col, row + 1].State != CellStateEnum.SoundWall)
+            //        SetState(newCellsState[col, row + 1], CellStateEnum.Down);
+            //    else
+            //        SetState(newCellsState[col, row], CellStateEnum.Down);
+            //}
         }
 
         /// <summary>
@@ -123,18 +191,50 @@ namespace ProceduralMidi
         /// <param name="newCellsState"></param>
         /// <param name="row"></param>
         /// <param name="col"></param>
-        private void CheckRight(Cell[,] newCellsState, int row, int col)
+        private void CheckRight(Cell[,] newCellsState, CellStateEnum currentCellState, int row, int col)
         {
-            if (col + 1 < Cols && Cells[col + 1, row].State != CellStateEnum.Wall && Cells[col + 1, row].State != CellStateEnum.SoundWall)
-                SetState(newCellsState[col + 1, row], CellStateEnum.Right);
-            else // out bounds, let it bounce to the other side
-            {
+            if (col + 1 >= Cols || IsWall(col + 1, row))
+            { // reached edge or wall, bounce
+
                 // if there is room to bounce back
-                if (col - 1 >= 0 && Cells[col - 1, row].State != CellStateEnum.Wall && Cells[col - 1, row].State != CellStateEnum.SoundWall)
+                if (col - 1 >= 0 && !IsBlocked(col - 1, row))
                     SetState(newCellsState[col - 1, row], CellStateEnum.Left);
                 else
                     SetState(newCellsState[col, row], CellStateEnum.Left);
             }
+            else
+            {
+                if (Cells[col + 1, row].State == CellStateEnum.RotateClockWise)
+                {
+                    if (row + 1 < Rows && !IsBlocked(col, row + 1))
+                        SetState(newCellsState[col, row + 1], RotateClockWise(currentCellState));
+                    else
+                        SetState(newCellsState[col, row], RotateClockWise(currentCellState));
+                }
+                else if (Cells[col + 1, row].State == CellStateEnum.RotateCounterClockWise)
+                {
+                    if (row - 1 >= 0 && !IsBlocked(col, row - 1))
+                        SetState(newCellsState[col, row - 1], RotateCounterClockWise(currentCellState));
+                    else
+                        SetState(newCellsState[col, row], RotateCounterClockWise(currentCellState));
+                }
+                else
+                {
+                    // free to go to the right side
+                    SetState(newCellsState[col + 1, row], CellStateEnum.Right);
+                }
+            }
+
+            //if (col + 1 < Cols && Cells[col + 1, row].State != CellStateEnum.Wall && Cells[col + 1, row].State != CellStateEnum.SoundWall)
+            //    SetState(newCellsState[col + 1, row], CellStateEnum.Right);
+            //else // out bounds, let it bounce to the other side
+            //{
+            //    // if there is room to bounce back
+            //    if (col - 1 >= 0 && Cells[col - 1, row].State != CellStateEnum.Wall && Cells[col - 1, row].State != CellStateEnum.SoundWall)
+            //        SetState(newCellsState[col - 1, row], CellStateEnum.Left);
+            //    else
+            //        SetState(newCellsState[col, row], CellStateEnum.Left);
+            //}
         }
 
         /// <summary>
@@ -143,18 +243,56 @@ namespace ProceduralMidi
         /// <param name="newCellsState"></param>
         /// <param name="row"></param>
         /// <param name="col"></param>
-        private void CheckLeft(Cell[,] newCellsState, int row, int col)
+        private void CheckLeft(Cell[,] newCellsState, CellStateEnum currentCellState, int row, int col)
         {
-            if (col - 1 >= 0 && Cells[col - 1, row].State != CellStateEnum.Wall && Cells[col - 1, row].State != CellStateEnum.SoundWall)
-                SetState(newCellsState[col - 1, row], CellStateEnum.Left);
-            else // out bounds, let it bounce to the other side
-            {
+            if (col - 1 < 0 || IsWall(col - 1, row))
+            { // reached edge or wall, bounce
+
                 // if there is room to bounce back
-                if (col + 1 < Cols && Cells[col + 1, row].State != CellStateEnum.Wall && Cells[col + 1, row].State != CellStateEnum.SoundWall)
+                if (col + 1 < Cols && !IsBlocked(col + 1, row))
                     SetState(newCellsState[col + 1, row], CellStateEnum.Right);
                 else
                     SetState(newCellsState[col, row], CellStateEnum.Right);
             }
+            else
+            {
+                if (Cells[col - 1, row].State == CellStateEnum.RotateClockWise)
+                {
+                    if (row - 1 >= 0 && !IsBlocked(col, row - 1))
+                        SetState(newCellsState[col, row - 1], RotateClockWise(currentCellState));
+                    else
+                        SetState(newCellsState[col, row], RotateClockWise(currentCellState));
+                }
+                else if (Cells[col - 1, row].State == CellStateEnum.RotateCounterClockWise)
+                {
+                    if (row + 1 < Rows && !IsBlocked(col, row + 1))
+                        SetState(newCellsState[col, row + 1], RotateCounterClockWise(currentCellState));
+                    else
+                        SetState(newCellsState[col, row], RotateCounterClockWise(currentCellState));
+                }
+                else
+                {
+                    // free to go to the left side
+                    SetState(newCellsState[col - 1, row], CellStateEnum.Left);
+                }
+            }
+
+
+            //if (col - 1 >= 0 && 
+            //    Cells[col - 1, row].State != CellStateEnum.Wall && Cells[col - 1, row].State != CellStateEnum.SoundWall && 
+            //    Cells[col - 1, row].State != CellStateEnum.RotateClockWise && Cells[col - 1, row].State != CellStateEnum.RotateCounterClockWise)
+            //    // free to go to the left side
+            //    SetState(newCellsState[col - 1, row], CellStateEnum.Left);
+            //else
+            //{
+            //    // let it bounce to the other side
+
+            //    // if there is room to bounce back
+            //    if (col + 1 < Cols && Cells[col + 1, row].State != CellStateEnum.Wall && Cells[col + 1, row].State != CellStateEnum.SoundWall)
+            //        SetState(newCellsState[col + 1, row], CellStateEnum.Right);
+            //    else
+            //        SetState(newCellsState[col, row], CellStateEnum.Right);
+            //}
         }
 
         #region  OLD rule code
@@ -226,6 +364,18 @@ namespace ProceduralMidi
         #endregion
 
 
+        private bool IsBlocked(int col, int row)
+        {
+            return Cells[col, row].State == CellStateEnum.Wall || Cells[col, row].State == CellStateEnum.SoundWall ||
+                   Cells[col, row].State == CellStateEnum.RotateClockWise || Cells[col, row].State == CellStateEnum.RotateCounterClockWise;
+        }
+
+        private bool IsWall(int col, int row)
+        {
+            return Cells[col, row].State == CellStateEnum.Wall || Cells[col, row].State == CellStateEnum.SoundWall;
+        }
+
+
         /// <summary>
         /// Determine if the cell is merged and its merged states contain the specified state
         /// </summary>
@@ -273,10 +423,28 @@ namespace ProceduralMidi
                 return CellStateEnum.Left;
             else if (s == CellStateEnum.Left)
                 return CellStateEnum.Up;
+
+            return s;
+        }
+
+        /// <summary>
+        /// Rotate cell state counter clockwise
+        /// </summary>
+        /// <param name="s"></param>
+        /// <returns></returns>
+        private CellStateEnum RotateCounterClockWise(CellStateEnum s)
+        {
+            if (s == CellStateEnum.Up)
+                return CellStateEnum.Left;
+            else if (s == CellStateEnum.Left)
+                return CellStateEnum.Down;
+            else if (s == CellStateEnum.Down)
+                return CellStateEnum.Right;
+            else if (s == CellStateEnum.Right)
+                return CellStateEnum.Up;
             else
                 return s;
         }
-
 
         /// <summary>
         /// Determine the cell active in the current state
@@ -365,7 +533,9 @@ namespace ProceduralMidi
                     CellStateEnum.Down, 
                     CellStateEnum.Left, 
                     CellStateEnum.Wall,
-                    CellStateEnum.SoundWall
+                    CellStateEnum.SoundWall,
+                    CellStateEnum.RotateClockWise ,
+                    CellStateEnum.RotateCounterClockWise
                 };
             }
         }

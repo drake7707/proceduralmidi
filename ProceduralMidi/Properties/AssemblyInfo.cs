@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("ProceduralMidi")]
-[assembly: AssemblyDescription("Procedural Midi using Cellular automata")]
+[assembly: AssemblyTitle("Procedural Midi")]
+[assembly: AssemblyDescription("Procedural Midi using cellular automata. Based on the rules from Otomata by earslap.")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("http://drake7707.blogspot.com")]
-[assembly: AssemblyProduct("ProceduralMidi")]
-[assembly: AssemblyCopyright("Copyright © Drake7707  2011")]
+[assembly: AssemblyCompany("http://proceduralmidi.codeplex.com or http://drake7707.blogspot.com")]
+[assembly: AssemblyProduct("Procedural Midi")]
+[assembly: AssemblyCopyright("Copyright © drake7707 2011")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

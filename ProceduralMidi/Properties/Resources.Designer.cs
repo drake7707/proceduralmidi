@@ -60,6 +60,13 @@ namespace ProceduralMidi.Properties {
             }
         }
         
+        internal static System.Drawing.Bitmap clockwise {
+            get {
+                object obj = ResourceManager.GetObject("clockwise", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
         internal static System.Drawing.Bitmap control_clean_icon {
             get {
                 object obj = ResourceManager.GetObject("control_clean_icon", resourceCulture);
@@ -105,6 +112,27 @@ namespace ProceduralMidi.Properties {
         internal static System.Drawing.Bitmap control_step_icon {
             get {
                 object obj = ResourceManager.GetObject("control_step_icon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap counterclockwise {
+            get {
+                object obj = ResourceManager.GetObject("counterclockwise", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap volume {
+            get {
+                object obj = ResourceManager.GetObject("volume", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap wall {
+            get {
+                object obj = ResourceManager.GetObject("wall", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
