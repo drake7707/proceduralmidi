@@ -718,5 +718,11 @@ namespace ProceduralMidi
             base.OnSizeChanged(e);
         }
 
+        private void mnuAbout_Click(object sender, EventArgs e)
+        {
+            using (AboutBox box = new AboutBox())
+                box.ShowDialog(this);
+        }
+
     }
 }
