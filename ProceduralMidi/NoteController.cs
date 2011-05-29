@@ -12,6 +12,36 @@ namespace ProceduralMidi
     public class NoteController : IDisposable
     {
         /// <summary>
+        /// The sample manager that will be used to play the note, if UseSamples = true
+        /// </summary>
+        private SampleManager sampleManager;
+        /// <summary>
+        /// The sample manager that will be used to play the note, if UseSamples = true
+        /// </summary>
+        public SampleManager SampleManager
+        {
+            get { return sampleManager; }
+        }
+
+        /// <summary>
+        /// Creates a new Note controller
+        /// </summary>
+        public NoteController(System.Windows.Forms.Control owner, bool enableSamples)
+        {
+            OutputSound = true;
+
+            if(enableSamples) 
+                sampleManager = new SampleManager(owner);
+            
+            tmrDoNotesUp = new System.Windows.Forms.Timer();
+            tmrDoNotesUp.Interval = 25;
+            tmrDoNotesUp.Tick += new EventHandler(tmr_Tick);
+            tmrDoNotesUp.Start();
+
+            NotesPerCell = new string[] { "D3", "A3", "A#3", "C4", "D4", "E4", "F4", "A5", "C5" };
+        }
+
+        /// <summary>
         /// The MIDI channel to output on
         /// </summary>
         public const int MIDI_CHANNEL = 15;
@@ -29,7 +59,7 @@ namespace ProceduralMidi
         /// <summary>
         /// All possible notes by MIDI index
         /// </summary>
-        private List<string> notesByMidiIndex = new List<string>
+        private static List<string> notesByMidiIndex = new List<string>
         { 
             "A-1", "A#-1", "B-1", "C-1", "C#-1", "D-1", "D#-1", "E-1", "F-1", "F#-1", "G-1", "G#-1",
             "A0", "A#0", "B0", "C0", "C#0", "D0", "D#0", "E0", "F0", "F#0", "G0", "G#0",
@@ -46,22 +76,22 @@ namespace ProceduralMidi
         };
 
         /// <summary>
+        /// Returns the MIDI frequency of the given midi index
+        /// </summary>
+        /// <param name="midiIdx"></param>
+        /// <returns></returns>
+        private static int GetFrequencyByMidiIndex(int midiIdx)
+        {
+            if (midiIdx == -1)
+                return -1;
+            int a = 440; // a is 440 hz...
+            return (int)((a / 32f) * (Math.Pow(2,((midiIdx+12 - 9) / 12f))));
+        }
+
+        /// <summary>
         /// A list of which notes to play for each cell index
         /// </summary>
         public string[] NotesPerCell { get; set; }
-
-        /// <summary>
-        /// Creates a new Note controller
-        /// </summary>
-        public NoteController()
-        {
-            tmrDoNotesUp = new System.Windows.Forms.Timer();
-            tmrDoNotesUp.Interval = 25;
-            tmrDoNotesUp.Tick += new EventHandler(tmr_Tick);
-            tmrDoNotesUp.Start();
-
-            NotesPerCell = new string[] { "D3", "A3", "A#3", "C4", "D4", "E4", "F4", "A5", "C5" };
-        }
 
         /// <summary>
         /// A recorder to record the notes to. If one is present (!= null) all played notes will be saved to the recorder.
@@ -81,8 +111,12 @@ namespace ProceduralMidi
             {
                 if ((DateTime.Now - note.TimeDown).TotalMilliseconds > note.DurationMS)
                 {
-                    // note duration exceeded, up the note
-                    Midi.NoteUp(note.MidiIndex, MIDI_CHANNEL, 127);
+
+                    if (OutputSound)
+                    {
+                        // note duration exceeded, up the note
+                        MidiManager.NoteUp(note.MidiIndex, MIDI_CHANNEL, 127);
+                    }
                     // and remove it from the list to check
                     notesDown.Remove(note);
                 }
@@ -97,13 +131,20 @@ namespace ProceduralMidi
         /// <param name="volume"></param>
         public void PlayNote(int cellIdx, int durationMS, short volume)
         {
-            short midiIndex =GetNoteIndexFromCellIndex(cellIdx);
-            Midi.NoteDown(midiIndex, MIDI_CHANNEL, volume);
+            short midiIndex = GetNoteIndexFromCellIndex(cellIdx);
 
+            if (OutputSound)
+            {
+                if (UseSamples && sampleManager != null)
+                    sampleManager.PlaySample(GetFrequencyByMidiIndex(midiIndex), volume, durationMS);
+                else
+                    MidiManager.NoteDown(midiIndex, MIDI_CHANNEL, volume);
+
+            }
             Note n = new Note(DateTime.Now, midiIndex, durationMS);
             notesDown.Add(n);
 
-            if(Recorder != null)
+            if (Recorder != null)
                 Recorder.Notes.Add(n);
         }
 
@@ -118,6 +159,39 @@ namespace ProceduralMidi
             string note = NotesPerCell[cellIdx % NotesPerCell.Length].Replace("BB", "A#");
             return (short)(notesByMidiIndex.IndexOf(note));
         }
+
+        /// <summary>
+        /// Returns the midi index from the note
+        /// </summary>
+        /// <param name="note"></param>
+        /// <returns></returns>
+        public static int GetMidiIndexFromNote(string note)
+        {
+            return notesByMidiIndex.IndexOf(note);
+        }
+
+        /// <summary>
+        /// Returns the note representation of the given midi index
+        /// </summary>
+        /// <param name="midiIndex"></param>
+        /// <returns></returns>
+        public static string GetNoteFromMidiIndex(int midiIndex)
+        {
+            if (midiIndex >= 0 && midiIndex < notesByMidiIndex.Count)
+                return notesByMidiIndex[midiIndex];
+            else
+                return "";
+        }
+
+        /// <summary>
+        /// Determines if the midi notes are sent to the midi controller
+        /// </summary>
+        public bool OutputSound { get; set; }
+
+        /// <summary>
+        /// Use the sample manager to play the note, if false, use the Midi Controller
+        /// </summary>
+        public bool UseSamples { get; set; }
 
         /// <summary>
         /// Clean up the running timers

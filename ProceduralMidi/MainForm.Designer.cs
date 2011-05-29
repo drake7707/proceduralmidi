@@ -22,6 +22,9 @@
             this.lblDebug = new System.Windows.Forms.Label();
             this.tmrDrawHighlights = new System.Windows.Forms.Timer(this.components);
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.ddlSamples = new System.Windows.Forms.ComboBox();
+            this.rdbSample = new System.Windows.Forms.RadioButton();
+            this.rdbMidi = new System.Windows.Forms.RadioButton();
             this.lblSpeed = new System.Windows.Forms.Label();
             this.ddlMidiDevices = new System.Windows.Forms.ComboBox();
             this.sldNoteDuration = new System.Windows.Forms.TrackBar();
@@ -34,7 +37,6 @@
             this.label2 = new System.Windows.Forms.Label();
             this.sldVolume = new System.Windows.Forms.TrackBar();
             this.ddlInstruments = new System.Windows.Forms.ComboBox();
-            this.label1 = new System.Windows.Forms.Label();
             this.txtNotes = new System.Windows.Forms.TextBox();
             this.label5 = new System.Windows.Forms.Label();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
@@ -48,8 +50,9 @@
             this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuFancy = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuShowGrid = new System.Windows.Forms.ToolStripMenuItem();
+            this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuAbout = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.cellPalette = new ProceduralMidi.Palette();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.btnOpen = new System.Windows.Forms.ToolStripButton();
             this.btnSave = new System.Windows.Forms.ToolStripButton();
@@ -60,11 +63,13 @@
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.btnClean = new System.Windows.Forms.ToolStripButton();
             this.btnRandomize = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             this.picBoard = new System.Windows.Forms.PictureBox();
             this.status = new System.Windows.Forms.StatusStrip();
             this.lblStatus = new System.Windows.Forms.ToolStripStatusLabel();
-            this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.mnuAbout = new System.Windows.Forms.ToolStripMenuItem();
+            this.cellPalette = new ProceduralMidi.Palette();
+            this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuReloadSamples = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.sldNoteDuration)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudColumns)).BeginInit();
@@ -85,9 +90,10 @@
             // 
             // lblDebug
             // 
-            this.lblDebug.Location = new System.Drawing.Point(15, 305);
+            this.lblDebug.Font = new System.Drawing.Font("Tahoma", 6F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblDebug.Location = new System.Drawing.Point(9, 333);
             this.lblDebug.Name = "lblDebug";
-            this.lblDebug.Size = new System.Drawing.Size(161, 67);
+            this.lblDebug.Size = new System.Drawing.Size(161, 49);
             this.lblDebug.TabIndex = 5;
             // 
             // tmrDrawHighlights
@@ -100,6 +106,9 @@
             // 
             this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
                         | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox1.Controls.Add(this.ddlSamples);
+            this.groupBox1.Controls.Add(this.rdbSample);
+            this.groupBox1.Controls.Add(this.rdbMidi);
             this.groupBox1.Controls.Add(this.lblDebug);
             this.groupBox1.Controls.Add(this.lblSpeed);
             this.groupBox1.Controls.Add(this.ddlMidiDevices);
@@ -113,17 +122,50 @@
             this.groupBox1.Controls.Add(this.label2);
             this.groupBox1.Controls.Add(this.sldVolume);
             this.groupBox1.Controls.Add(this.ddlInstruments);
-            this.groupBox1.Controls.Add(this.label1);
             this.groupBox1.Location = new System.Drawing.Point(476, 52);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(180, 390);
             this.groupBox1.TabIndex = 6;
             this.groupBox1.TabStop = false;
             // 
+            // ddlSamples
+            // 
+            this.ddlSamples.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.ddlSamples.FormattingEnabled = true;
+            this.ddlSamples.Location = new System.Drawing.Point(19, 104);
+            this.ddlSamples.Name = "ddlSamples";
+            this.ddlSamples.Size = new System.Drawing.Size(155, 21);
+            this.ddlSamples.TabIndex = 21;
+            this.ddlSamples.SelectedIndexChanged += new System.EventHandler(this.ddlSamples_SelectedIndexChanged);
+            // 
+            // rdbSample
+            // 
+            this.rdbSample.AutoSize = true;
+            this.rdbSample.Location = new System.Drawing.Point(9, 86);
+            this.rdbSample.Name = "rdbSample";
+            this.rdbSample.Size = new System.Drawing.Size(60, 17);
+            this.rdbSample.TabIndex = 20;
+            this.rdbSample.Text = "Sample";
+            this.rdbSample.UseVisualStyleBackColor = true;
+            this.rdbSample.CheckedChanged += new System.EventHandler(this.rdbSample_CheckedChanged);
+            // 
+            // rdbMidi
+            // 
+            this.rdbMidi.AutoSize = true;
+            this.rdbMidi.Checked = true;
+            this.rdbMidi.Location = new System.Drawing.Point(9, 16);
+            this.rdbMidi.Name = "rdbMidi";
+            this.rdbMidi.Size = new System.Drawing.Size(44, 17);
+            this.rdbMidi.TabIndex = 19;
+            this.rdbMidi.TabStop = true;
+            this.rdbMidi.Text = "Midi";
+            this.rdbMidi.UseVisualStyleBackColor = true;
+            this.rdbMidi.CheckedChanged += new System.EventHandler(this.rdbMidi_CheckedChanged);
+            // 
             // lblSpeed
             // 
             this.lblSpeed.AutoSize = true;
-            this.lblSpeed.Location = new System.Drawing.Point(9, 149);
+            this.lblSpeed.Location = new System.Drawing.Point(6, 179);
             this.lblSpeed.Name = "lblSpeed";
             this.lblSpeed.Size = new System.Drawing.Size(134, 13);
             this.lblSpeed.TabIndex = 10;
@@ -133,7 +175,7 @@
             // 
             this.ddlMidiDevices.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.ddlMidiDevices.FormattingEnabled = true;
-            this.ddlMidiDevices.Location = new System.Drawing.Point(18, 74);
+            this.ddlMidiDevices.Location = new System.Drawing.Point(18, 59);
             this.ddlMidiDevices.Name = "ddlMidiDevices";
             this.ddlMidiDevices.Size = new System.Drawing.Size(155, 21);
             this.ddlMidiDevices.TabIndex = 18;
@@ -141,7 +183,7 @@
             // 
             // sldNoteDuration
             // 
-            this.sldNoteDuration.Location = new System.Drawing.Point(21, 267);
+            this.sldNoteDuration.Location = new System.Drawing.Point(18, 297);
             this.sldNoteDuration.Maximum = 3000;
             this.sldNoteDuration.Minimum = 25;
             this.sldNoteDuration.Name = "sldNoteDuration";
@@ -154,7 +196,7 @@
             // lblNoteDuration
             // 
             this.lblNoteDuration.AutoSize = true;
-            this.lblNoteDuration.Location = new System.Drawing.Point(9, 251);
+            this.lblNoteDuration.Location = new System.Drawing.Point(6, 281);
             this.lblNoteDuration.Name = "lblNoteDuration";
             this.lblNoteDuration.Size = new System.Drawing.Size(167, 13);
             this.lblNoteDuration.TabIndex = 16;
@@ -163,7 +205,7 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(95, 200);
+            this.label4.Location = new System.Drawing.Point(92, 230);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(47, 13);
             this.label4.TabIndex = 15;
@@ -172,7 +214,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(18, 200);
+            this.label3.Location = new System.Drawing.Point(15, 230);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(34, 13);
             this.label3.TabIndex = 14;
@@ -180,7 +222,7 @@
             // 
             // nudColumns
             // 
-            this.nudColumns.Location = new System.Drawing.Point(98, 219);
+            this.nudColumns.Location = new System.Drawing.Point(95, 249);
             this.nudColumns.Minimum = new decimal(new int[] {
             2,
             0,
@@ -198,7 +240,7 @@
             // 
             // nudRows
             // 
-            this.nudRows.Location = new System.Drawing.Point(18, 219);
+            this.nudRows.Location = new System.Drawing.Point(15, 249);
             this.nudRows.Minimum = new decimal(new int[] {
             2,
             0,
@@ -216,7 +258,7 @@
             // 
             // sldSpeed
             // 
-            this.sldSpeed.Location = new System.Drawing.Point(18, 168);
+            this.sldSpeed.Location = new System.Drawing.Point(15, 198);
             this.sldSpeed.Maximum = 1000;
             this.sldSpeed.Minimum = 25;
             this.sldSpeed.Name = "sldSpeed";
@@ -229,7 +271,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(9, 98);
+            this.label2.Location = new System.Drawing.Point(6, 130);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(42, 13);
             this.label2.TabIndex = 9;
@@ -237,7 +279,7 @@
             // 
             // sldVolume
             // 
-            this.sldVolume.Location = new System.Drawing.Point(18, 117);
+            this.sldVolume.Location = new System.Drawing.Point(15, 147);
             this.sldVolume.Maximum = 127;
             this.sldVolume.Name = "sldVolume";
             this.sldVolume.Size = new System.Drawing.Size(155, 45);
@@ -249,19 +291,11 @@
             // 
             this.ddlInstruments.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.ddlInstruments.FormattingEnabled = true;
-            this.ddlInstruments.Location = new System.Drawing.Point(18, 54);
+            this.ddlInstruments.Location = new System.Drawing.Point(18, 39);
             this.ddlInstruments.Name = "ddlInstruments";
             this.ddlInstruments.Size = new System.Drawing.Size(155, 21);
             this.ddlInstruments.TabIndex = 7;
             this.ddlInstruments.SelectedIndexChanged += new System.EventHandler(this.ddlInstrument_SelectedIndexChanged);
-            // 
-            // label1
-            // 
-            this.label1.Location = new System.Drawing.Point(9, 16);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(158, 42);
-            this.label1.TabIndex = 6;
-            this.label1.Text = "Click left to change cell state, right to see debug info of cell";
             // 
             // txtNotes
             // 
@@ -291,6 +325,7 @@
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fileToolStripMenuItem,
             this.viewToolStripMenuItem,
+            this.optionsToolStripMenuItem,
             this.helpToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
@@ -383,6 +418,21 @@
             this.mnuShowGrid.Text = "Show &grid";
             this.mnuShowGrid.Click += new System.EventHandler(this.mnuShowGrid_Click);
             // 
+            // helpToolStripMenuItem
+            // 
+            this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.mnuAbout});
+            this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
+            this.helpToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
+            this.helpToolStripMenuItem.Text = "&Help";
+            // 
+            // mnuAbout
+            // 
+            this.mnuAbout.Name = "mnuAbout";
+            this.mnuAbout.Size = new System.Drawing.Size(152, 22);
+            this.mnuAbout.Text = "&About...";
+            this.mnuAbout.Click += new System.EventHandler(this.mnuAbout_Click);
+            // 
             // groupBox2
             // 
             this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
@@ -395,19 +445,6 @@
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Palette";
             // 
-            // cellPalette
-            // 
-            this.cellPalette.CellStates = null;
-            this.cellPalette.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.cellPalette.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
-            this.cellPalette.FormattingEnabled = true;
-            this.cellPalette.ItemHeight = 34;
-            this.cellPalette.Location = new System.Drawing.Point(3, 16);
-            this.cellPalette.Name = "cellPalette";
-            this.cellPalette.Size = new System.Drawing.Size(57, 371);
-            this.cellPalette.States = null;
-            this.cellPalette.TabIndex = 0;
-            // 
             // toolStrip1
             // 
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -419,7 +456,8 @@
             this.btnStep,
             this.toolStripSeparator1,
             this.btnClean,
-            this.btnRandomize});
+            this.btnRandomize,
+            this.toolStripSeparator4});
             this.toolStrip1.Location = new System.Drawing.Point(0, 24);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(661, 25);
@@ -512,6 +550,11 @@
             this.btnRandomize.Text = "Randomize";
             this.btnRandomize.Click += new System.EventHandler(this.btnRandomize_Click);
             // 
+            // toolStripSeparator4
+            // 
+            this.toolStripSeparator4.Name = "toolStripSeparator4";
+            this.toolStripSeparator4.Size = new System.Drawing.Size(6, 25);
+            // 
             // picBoard
             // 
             this.picBoard.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
@@ -542,20 +585,33 @@
             this.lblStatus.Name = "lblStatus";
             this.lblStatus.Size = new System.Drawing.Size(0, 17);
             // 
-            // helpToolStripMenuItem
+            // cellPalette
             // 
-            this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.mnuAbout});
-            this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
-            this.helpToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
-            this.helpToolStripMenuItem.Text = "&Help";
+            this.cellPalette.CellStates = null;
+            this.cellPalette.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.cellPalette.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
+            this.cellPalette.FormattingEnabled = true;
+            this.cellPalette.ItemHeight = 34;
+            this.cellPalette.Location = new System.Drawing.Point(3, 16);
+            this.cellPalette.Name = "cellPalette";
+            this.cellPalette.Size = new System.Drawing.Size(57, 371);
+            this.cellPalette.States = null;
+            this.cellPalette.TabIndex = 0;
             // 
-            // mnuAbout
+            // optionsToolStripMenuItem
             // 
-            this.mnuAbout.Name = "mnuAbout";
-            this.mnuAbout.Size = new System.Drawing.Size(152, 22);
-            this.mnuAbout.Text = "&About...";
-            this.mnuAbout.Click += new System.EventHandler(this.mnuAbout_Click);
+            this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.mnuReloadSamples});
+            this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
+            this.optionsToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
+            this.optionsToolStripMenuItem.Text = "&Options";
+            // 
+            // mnuReloadSamples
+            // 
+            this.mnuReloadSamples.Name = "mnuReloadSamples";
+            this.mnuReloadSamples.Size = new System.Drawing.Size(156, 22);
+            this.mnuReloadSamples.Text = "Reload &samples";
+            this.mnuReloadSamples.Click += new System.EventHandler(this.mnuReloadSamples_Click);
             // 
             // MainForm
             // 
@@ -600,7 +656,6 @@
         private System.Windows.Forms.Label lblDebug;
         private System.Windows.Forms.Timer tmrDrawHighlights;
         private System.Windows.Forms.GroupBox groupBox1;
-        private System.Windows.Forms.Label label1;
         private System.Windows.Forms.ComboBox ddlInstruments;
         private System.Windows.Forms.TrackBar sldVolume;
         private System.Windows.Forms.TrackBar sldSpeed;
@@ -642,6 +697,12 @@
         private System.Windows.Forms.ToolStripStatusLabel lblStatus;
         private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem mnuAbout;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
+        private System.Windows.Forms.ComboBox ddlSamples;
+        private System.Windows.Forms.RadioButton rdbSample;
+        private System.Windows.Forms.RadioButton rdbMidi;
+        private System.Windows.Forms.ToolStripMenuItem optionsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem mnuReloadSamples;
     }
 }
 

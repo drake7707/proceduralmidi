@@ -16,5 +16,9 @@ namespace ProceduralMidi.DAL
         public int NoteDuration { get; set; }
         public int Speed { get; set; }
         public int Instrument { get; set; }
+
+        public bool UseSamples { get; set; }
+        public string Sample { get; set; }
+
     }
 }
