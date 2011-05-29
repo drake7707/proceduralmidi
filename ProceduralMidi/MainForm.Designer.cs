@@ -41,35 +41,38 @@
             this.label5 = new System.Windows.Forms.Label();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.mnuOpen = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuReload = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator = new System.Windows.Forms.ToolStripSeparator();
-            this.mnuSave = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.mnuExit = new System.Windows.Forms.ToolStripMenuItem();
             this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuFancy = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuShowGrid = new System.Windows.Forms.ToolStripMenuItem();
+            this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuReloadSamples = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuAbout = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
+            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
+            this.status = new System.Windows.Forms.StatusStrip();
+            this.lblStatus = new System.Windows.Forms.ToolStripStatusLabel();
+            this.mnuImportAutomataUrl = new System.Windows.Forms.ToolStripMenuItem();
             this.btnOpen = new System.Windows.Forms.ToolStripButton();
             this.btnSave = new System.Windows.Forms.ToolStripButton();
-            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.btnRun = new System.Windows.Forms.ToolStripButton();
             this.btnRecord = new System.Windows.Forms.ToolStripButton();
             this.btnStep = new System.Windows.Forms.ToolStripButton();
-            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.btnClean = new System.Windows.Forms.ToolStripButton();
             this.btnRandomize = new System.Windows.Forms.ToolStripButton();
-            this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             this.picBoard = new System.Windows.Forms.PictureBox();
-            this.status = new System.Windows.Forms.StatusStrip();
-            this.lblStatus = new System.Windows.Forms.ToolStripStatusLabel();
+            this.mnuOpen = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuSave = new System.Windows.Forms.ToolStripMenuItem();
             this.cellPalette = new ProceduralMidi.Palette();
-            this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.mnuReloadSamples = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
+            this.mnuExportOtomataUrl = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.sldNoteDuration)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudColumns)).BeginInit();
@@ -79,8 +82,8 @@
             this.menuStrip1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.toolStrip1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.picBoard)).BeginInit();
             this.status.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.picBoard)).BeginInit();
             this.SuspendLayout();
             // 
             // tmrIterate
@@ -305,7 +308,7 @@
             this.txtNotes.Name = "txtNotes";
             this.txtNotes.Size = new System.Drawing.Size(654, 20);
             this.txtNotes.TabIndex = 7;
-            this.txtNotes.Text = "D3, A3, A#3, C4, D4, E4, F4, A5, C5";
+            this.txtNotes.Text = "D3, A3, A#3, C4, D4, E4, F4, A5, C5";
             this.txtNotes.TextChanged += new System.EventHandler(this.txtNotes_TextChanged);
             // 
             // label5
@@ -338,6 +341,9 @@
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.mnuOpen,
             this.mnuReload,
+            this.toolStripSeparator5,
+            this.mnuImportAutomataUrl,
+            this.mnuExportOtomataUrl,
             this.toolStripSeparator,
             this.mnuSave,
             this.toolStripSeparator2,
@@ -346,48 +352,28 @@
             this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
             this.fileToolStripMenuItem.Text = "&File";
             // 
-            // mnuOpen
-            // 
-            this.mnuOpen.Image = ((System.Drawing.Image)(resources.GetObject("mnuOpen.Image")));
-            this.mnuOpen.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.mnuOpen.Name = "mnuOpen";
-            this.mnuOpen.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
-            this.mnuOpen.Size = new System.Drawing.Size(152, 22);
-            this.mnuOpen.Text = "&Open";
-            this.mnuOpen.Click += new System.EventHandler(this.mnuOpen_Click);
-            // 
             // mnuReload
             // 
             this.mnuReload.Name = "mnuReload";
             this.mnuReload.ShortcutKeys = System.Windows.Forms.Keys.F2;
-            this.mnuReload.Size = new System.Drawing.Size(152, 22);
+            this.mnuReload.Size = new System.Drawing.Size(175, 22);
             this.mnuReload.Text = "Reload";
             this.mnuReload.Click += new System.EventHandler(this.mnuReload_Click);
             // 
             // toolStripSeparator
             // 
             this.toolStripSeparator.Name = "toolStripSeparator";
-            this.toolStripSeparator.Size = new System.Drawing.Size(149, 6);
-            // 
-            // mnuSave
-            // 
-            this.mnuSave.Image = ((System.Drawing.Image)(resources.GetObject("mnuSave.Image")));
-            this.mnuSave.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.mnuSave.Name = "mnuSave";
-            this.mnuSave.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-            this.mnuSave.Size = new System.Drawing.Size(152, 22);
-            this.mnuSave.Text = "&Save";
-            this.mnuSave.Click += new System.EventHandler(this.mnuSave_Click);
+            this.toolStripSeparator.Size = new System.Drawing.Size(172, 6);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(149, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(172, 6);
             // 
             // mnuExit
             // 
             this.mnuExit.Name = "mnuExit";
-            this.mnuExit.Size = new System.Drawing.Size(152, 22);
+            this.mnuExit.Size = new System.Drawing.Size(175, 22);
             this.mnuExit.Text = "E&xit";
             this.mnuExit.Click += new System.EventHandler(this.mnuExit_Click);
             // 
@@ -418,6 +404,21 @@
             this.mnuShowGrid.Text = "Show &grid";
             this.mnuShowGrid.Click += new System.EventHandler(this.mnuShowGrid_Click);
             // 
+            // optionsToolStripMenuItem
+            // 
+            this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.mnuReloadSamples});
+            this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
+            this.optionsToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
+            this.optionsToolStripMenuItem.Text = "&Options";
+            // 
+            // mnuReloadSamples
+            // 
+            this.mnuReloadSamples.Name = "mnuReloadSamples";
+            this.mnuReloadSamples.Size = new System.Drawing.Size(156, 22);
+            this.mnuReloadSamples.Text = "Reload &samples";
+            this.mnuReloadSamples.Click += new System.EventHandler(this.mnuReloadSamples_Click);
+            // 
             // helpToolStripMenuItem
             // 
             this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -429,7 +430,7 @@
             // mnuAbout
             // 
             this.mnuAbout.Name = "mnuAbout";
-            this.mnuAbout.Size = new System.Drawing.Size(152, 22);
+            this.mnuAbout.Size = new System.Drawing.Size(116, 22);
             this.mnuAbout.Text = "&About...";
             this.mnuAbout.Click += new System.EventHandler(this.mnuAbout_Click);
             // 
@@ -463,6 +464,43 @@
             this.toolStrip1.Size = new System.Drawing.Size(661, 25);
             this.toolStrip1.TabIndex = 18;
             // 
+            // toolStripSeparator3
+            // 
+            this.toolStripSeparator3.Name = "toolStripSeparator3";
+            this.toolStripSeparator3.Size = new System.Drawing.Size(6, 25);
+            // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 25);
+            // 
+            // toolStripSeparator4
+            // 
+            this.toolStripSeparator4.Name = "toolStripSeparator4";
+            this.toolStripSeparator4.Size = new System.Drawing.Size(6, 25);
+            // 
+            // status
+            // 
+            this.status.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.lblStatus});
+            this.status.Location = new System.Drawing.Point(0, 486);
+            this.status.Name = "status";
+            this.status.Size = new System.Drawing.Size(661, 22);
+            this.status.TabIndex = 19;
+            this.status.Text = "statusStrip1";
+            // 
+            // lblStatus
+            // 
+            this.lblStatus.Name = "lblStatus";
+            this.lblStatus.Size = new System.Drawing.Size(0, 17);
+            // 
+            // mnuImportAutomataUrl
+            // 
+            this.mnuImportAutomataUrl.Name = "mnuImportAutomataUrl";
+            this.mnuImportAutomataUrl.Size = new System.Drawing.Size(175, 22);
+            this.mnuImportAutomataUrl.Text = "&Import otomata url";
+            this.mnuImportAutomataUrl.Click += new System.EventHandler(this.mnuImportAutomataUrl_Click);
+            // 
             // btnOpen
             // 
             this.btnOpen.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
@@ -483,11 +521,6 @@
             this.btnSave.Text = "Save";
             this.btnSave.ToolTipText = "Save (CTRL+S)";
             this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
-            // 
-            // toolStripSeparator3
-            // 
-            this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(6, 25);
             // 
             // btnRun
             // 
@@ -524,11 +557,6 @@
             this.btnStep.ToolTipText = "Next state (F6)";
             this.btnStep.Click += new System.EventHandler(this.btnStep_Click);
             // 
-            // toolStripSeparator1
-            // 
-            this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 25);
-            // 
             // btnClean
             // 
             this.btnClean.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
@@ -550,11 +578,6 @@
             this.btnRandomize.Text = "Randomize";
             this.btnRandomize.Click += new System.EventHandler(this.btnRandomize_Click);
             // 
-            // toolStripSeparator4
-            // 
-            this.toolStripSeparator4.Name = "toolStripSeparator4";
-            this.toolStripSeparator4.Size = new System.Drawing.Size(6, 25);
-            // 
             // picBoard
             // 
             this.picBoard.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
@@ -570,20 +593,25 @@
             this.picBoard.MouseDown += new System.Windows.Forms.MouseEventHandler(this.picBoard_MouseDown);
             this.picBoard.MouseMove += new System.Windows.Forms.MouseEventHandler(this.picBoard_MouseMove);
             // 
-            // status
+            // mnuOpen
             // 
-            this.status.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.lblStatus});
-            this.status.Location = new System.Drawing.Point(0, 486);
-            this.status.Name = "status";
-            this.status.Size = new System.Drawing.Size(661, 22);
-            this.status.TabIndex = 19;
-            this.status.Text = "statusStrip1";
+            this.mnuOpen.Image = ((System.Drawing.Image)(resources.GetObject("mnuOpen.Image")));
+            this.mnuOpen.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.mnuOpen.Name = "mnuOpen";
+            this.mnuOpen.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
+            this.mnuOpen.Size = new System.Drawing.Size(175, 22);
+            this.mnuOpen.Text = "&Open";
+            this.mnuOpen.Click += new System.EventHandler(this.mnuOpen_Click);
             // 
-            // lblStatus
+            // mnuSave
             // 
-            this.lblStatus.Name = "lblStatus";
-            this.lblStatus.Size = new System.Drawing.Size(0, 17);
+            this.mnuSave.Image = ((System.Drawing.Image)(resources.GetObject("mnuSave.Image")));
+            this.mnuSave.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.mnuSave.Name = "mnuSave";
+            this.mnuSave.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
+            this.mnuSave.Size = new System.Drawing.Size(175, 22);
+            this.mnuSave.Text = "&Save";
+            this.mnuSave.Click += new System.EventHandler(this.mnuSave_Click);
             // 
             // cellPalette
             // 
@@ -598,20 +626,17 @@
             this.cellPalette.States = null;
             this.cellPalette.TabIndex = 0;
             // 
-            // optionsToolStripMenuItem
+            // toolStripSeparator5
             // 
-            this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.mnuReloadSamples});
-            this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
-            this.optionsToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
-            this.optionsToolStripMenuItem.Text = "&Options";
+            this.toolStripSeparator5.Name = "toolStripSeparator5";
+            this.toolStripSeparator5.Size = new System.Drawing.Size(172, 6);
             // 
-            // mnuReloadSamples
+            // mnuExportOtomataUrl
             // 
-            this.mnuReloadSamples.Name = "mnuReloadSamples";
-            this.mnuReloadSamples.Size = new System.Drawing.Size(156, 22);
-            this.mnuReloadSamples.Text = "Reload &samples";
-            this.mnuReloadSamples.Click += new System.EventHandler(this.mnuReloadSamples_Click);
+            this.mnuExportOtomataUrl.Name = "mnuExportOtomataUrl";
+            this.mnuExportOtomataUrl.Size = new System.Drawing.Size(175, 22);
+            this.mnuExportOtomataUrl.Text = "&Export otomata url";
+            this.mnuExportOtomataUrl.Click += new System.EventHandler(this.mnuExportOtomataUrl_Click);
             // 
             // MainForm
             // 
@@ -641,9 +666,9 @@
             this.groupBox2.ResumeLayout(false);
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.picBoard)).EndInit();
             this.status.ResumeLayout(false);
             this.status.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.picBoard)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -703,6 +728,9 @@
         private System.Windows.Forms.RadioButton rdbMidi;
         private System.Windows.Forms.ToolStripMenuItem optionsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem mnuReloadSamples;
+        private System.Windows.Forms.ToolStripMenuItem mnuImportAutomataUrl;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
+        private System.Windows.Forms.ToolStripMenuItem mnuExportOtomataUrl;
     }
 }
 

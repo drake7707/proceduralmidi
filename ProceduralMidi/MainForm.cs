@@ -336,7 +336,7 @@ namespace ProceduralMidi
                 btnRun.Checked = false;
                 btnRun_CheckedChanged(btnRun, EventArgs.Empty);
 
-                MessageBox.Show("Unable to play sound for current state, error: " + ex.GetType().FullName + " - " + ex.Message, "Error",  MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Unable to play sound for current state, error: " + ex.GetType().FullName + " - " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -845,8 +845,67 @@ namespace ProceduralMidi
 
             FillSamples();
 
-            if(!string.IsNullOrEmpty(currentSample))
-                ddlSamples.SelectedIndex =  ddlSamples.FindString(currentSample);
+            if (!string.IsNullOrEmpty(currentSample))
+                ddlSamples.SelectedIndex = ddlSamples.FindString(currentSample);
+        }
+
+        private void mnuImportAutomataUrl_Click(object sender, EventArgs e)
+        {
+            using (ImportOtomataUrl dlg = new ImportOtomataUrl())
+            {
+                if (dlg.ShowDialog(this) == System.Windows.Forms.DialogResult.OK)
+                {
+                    ignoreNudRowColValueChange = true;
+                    UpdateFromBoardSettings(dlg.BoardSettings);
+                    lastPathOpened = "";
+                    ignoreNudRowColValueChange = false;
+                }
+            }
+        }
+
+        private void mnuExportOtomataUrl_Click(object sender, EventArgs e)
+        {
+            string rowAndState = "qwertyuiopasdfghjklzxcvbnm0123456789";
+
+            StringBuilder str = new StringBuilder();
+            str.Append("http://earslap.com/projectslab/otomata/?q=");
+
+            for (int row = 0; row < Math.Min(9, board.Rows); row++)
+            {
+                for (int col = 0; col < Math.Min(9,board.Cols); col++)
+                {
+                    if (board.Cells[col, row].State == CellStateEnum.Up ||
+                       board.Cells[col, row].State == CellStateEnum.Right ||
+                       board.Cells[col, row].State == CellStateEnum.Down ||
+                       board.Cells[col, row].State == CellStateEnum.Left)
+                    {
+                        string colStr = col.ToString();
+                        string rowStr = rowAndState[(row * 4 + (int)board.Cells[col, row].State)].ToString();
+                        str.Append(colStr + rowStr);
+                    }
+                    else if (board.Cells[col, row].State == CellStateEnum.Merged)
+                    {
+                        string colStr = col.ToString();
+                        foreach (CellStateEnum state in board.Cells[col,row].MergedStates)
+                        {
+                            string rowStr = rowAndState[(row * 4 + (int)state)].ToString();
+                            str.Append(colStr + rowStr);
+                        }
+                    }
+                }
+            }
+
+            try
+            {
+                Clipboard.Clear();
+                Clipboard.SetText(str.ToString());
+
+                MessageBox.Show("The url is copied onto the clipboard");
+            }
+            catch (Exception ex )
+            {
+                MessageBox.Show("Could not copy the url to the clipboard, error: " + ex.Message);
+            }
         }
 
         /* A test that didn't work so well
