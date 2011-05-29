@@ -198,6 +198,35 @@ namespace ProceduralMidi
                 // calculate the sample rate from the MIDI frequency
                 int dxFreq = (int)((freq / 440f) * buffer.Format.SamplesPerSecond);
 
+
+                //EffectDescription[] effects = new EffectDescription[]
+                //{
+                //    new EffectDescription() { GuidEffectClass = DSoundHelper.StandardEchoGuid },
+                //      //   new EffectDescription() { GuidEffectClass = DSoundHelper.StandardEchoGuid }
+                //};
+                //buffer.SetEffects(effects);
+
+                //EchoEffect echo = buffer.GetEffects(0) as EchoEffect;
+                //if (echo != null)
+                //{
+                //    EffectsEcho ee = echo.AllParameters;
+                //    ee.Feedback = 0.1f;
+                //    ee.LeftDelay = 500;
+                //    ee.RightDelay = 500;
+                //    ee.WetDryMix = 50;
+                //    echo.AllParameters = ee;
+                //}
+
+                //echo = buffer.GetEffects(1) as EchoEffect;
+                //if (echo != null)
+                //{
+                //    EffectsEcho ee = echo.AllParameters;
+                //    ee.Feedback = 0.2f;
+                //    ee.LeftDelay = 1000;
+                //    ee.RightDelay = 1000;
+                //    ee.WetDryMix = 0;
+                //    echo.AllParameters = ee;
+                //}
                 buffer.Volume = dxVolume;
                 buffer.Frequency = dxFreq;
             }
