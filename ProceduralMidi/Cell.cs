@@ -26,8 +26,6 @@ namespace ProceduralMidi
         /// The merged states of the cell
         /// </summary>
         public List<CellStateEnum> MergedStates;
-
-        public System.Drawing.Color Color { get; set; }
     }
 
     public enum CellStateEnum
