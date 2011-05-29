@@ -10,7 +10,7 @@ namespace ProceduralMidi
     /// <summary>
     /// Provides a way to communicate with the installed MIDI controllers
     /// </summary>
-    public static class Midi
+    public static class MidiManager
     {
         private static int handle = 0;
 
@@ -80,13 +80,13 @@ namespace ProceduralMidi
             {
                 List<string> midiDevices = new List<string>();
 
-                UInt32 numberOfDevices = Midi.midiOutGetNumDevs();
+                UInt32 numberOfDevices = MidiManager.midiOutGetNumDevs();
                 if (numberOfDevices > 0)
                 {
                     for (Int32 i = 0; i < numberOfDevices; i++)
                     {
-                        Midi.MIDIOUTCAPS caps = new Midi.MIDIOUTCAPS();
-                        Midi.midiOutGetDevCaps(i, ref caps, (UInt32)Marshal.SizeOf(caps));
+                        MidiManager.MIDIOUTCAPS caps = new MidiManager.MIDIOUTCAPS();
+                        MidiManager.midiOutGetDevCaps(i, ref caps, (UInt32)Marshal.SizeOf(caps));
                         midiDevices.Add(caps.szPname);
                     }
                 }

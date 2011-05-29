@@ -13,13 +13,35 @@ namespace ProceduralMidi
 {
     public partial class MainForm : Form
     {
+        /// <summary>
+        /// The current board that will be drawn & manipulated
+        /// </summary>
         private OtomataBoard board;
 
-        private NoteController noteController = new NoteController();
+        /// <summary>
+        /// The note controller to play & record notes
+        /// </summary>
+        private NoteController noteController;
 
+        /// <summary>
+        /// Creates a new Otomata board form
+        /// </summary>
         public MainForm()
         {
             InitializeComponent();
+
+            // try creating the notecontroller with sample support
+            try
+            {
+                noteController = new NoteController(this, true);
+            }
+            catch (Exception ex)
+            {
+                // it failed (directx not installed, ..), disable samples
+                noteController = new NoteController(this, false);
+                rdbSample.Enabled = false;
+                ddlSamples.Enabled = false;
+            }
 
             // default values
             sldVolume.Value = 64;
@@ -38,12 +60,16 @@ namespace ProceduralMidi
             // fill dropdowns
             FillMidiDevices();
             FillInstruments();
+            FillSamples();
 
             if (ddlMidiDevices.Items.Count > 0)
                 ddlMidiDevices.SelectedIndex = 0;
 
             if (ddlInstruments.Items.Count > 0)
                 ddlInstruments.SelectedIndex = 0;
+
+            if (ddlSamples.Items.Count > 0)
+                ddlSamples.SelectedIndex = 0;
         }
 
         /// <summary>
@@ -52,7 +78,7 @@ namespace ProceduralMidi
         private void FillInstruments()
         {
             ddlInstruments.Items.Clear();
-            ddlInstruments.Items.AddRange(Midi.Instruments.ToArray());
+            ddlInstruments.Items.AddRange(MidiManager.Instruments.ToArray());
         }
 
         /// <summary>
@@ -61,7 +87,24 @@ namespace ProceduralMidi
         private void FillMidiDevices()
         {
             ddlMidiDevices.Items.Clear();
-            ddlMidiDevices.Items.AddRange(Midi.MidiDevices.ToArray());
+            ddlMidiDevices.Items.AddRange(MidiManager.MidiDevices.ToArray());
+        }
+
+        /// <summary>
+        /// Fill the samples dropdown
+        /// </summary>
+        private void FillSamples()
+        {
+            try
+            {
+                ddlSamples.Items.Clear();
+                ddlSamples.Items.AddRange(SampleManager.Samples.ToArray());
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Could not load the available samples. Is the samples subdirectory available? Error: " + ex.Message);
+            }
         }
 
         /// <summary>
@@ -72,7 +115,7 @@ namespace ProceduralMidi
         private void ddlInstrument_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (ddlInstruments.SelectedIndex >= 0)
-                Midi.ChangeInstrument(ddlInstruments.SelectedIndex, NoteController.MIDI_CHANNEL);
+                MidiManager.ChangeInstrument(ddlInstruments.SelectedIndex, NoteController.MIDI_CHANNEL);
         }
 
         /// <summary>
@@ -82,7 +125,7 @@ namespace ProceduralMidi
         /// <param name="e"></param>
         private void ddlMidiDevices_SelectedIndexChanged(object sender, EventArgs e)
         {
-            Midi.ChangeMidiDevice(ddlMidiDevices.SelectedIndex);
+            MidiManager.ChangeMidiDevice(ddlMidiDevices.SelectedIndex);
         }
 
 
@@ -263,27 +306,37 @@ namespace ProceduralMidi
         /// </summary>
         private void PlayNotesForActiveCells()
         {
-            OtomataBoard.ActiveState[,] activeCells = board.ActiveCells;
-
-            for (int row = 0; row < board.Rows; row++)
+            try
             {
-                for (int col = 0; col < board.Cols; col++)
+                OtomataBoard.ActiveState[,] activeCells = board.ActiveCells;
+
+                for (int row = 0; row < board.Rows; row++)
                 {
-                    if (activeCells[col, row] == AbstractBoard.ActiveState.ColumnActivated)
+                    for (int col = 0; col < board.Cols; col++)
                     {
-                        // add highlight for the col
-                        highlights.Add(new Highlight(false, col));
-                        // play corresponding note for the col
-                        noteController.PlayNote(col, NoteDuration, Volume);
-                    }
-                    else if (activeCells[col, row] == AbstractBoard.ActiveState.RowActivated)
-                    {
-                        // add highlight for the row
-                        highlights.Add(new Highlight(true, row));
-                        // play corresponding note for the row
-                        noteController.PlayNote(row, NoteDuration, Volume);
+                        if (activeCells[col, row] == AbstractBoard.ActiveState.ColumnActivated)
+                        {
+                            // add highlight for the col
+                            highlights.Add(new Highlight(false, col));
+                            // play corresponding note for the col
+                            noteController.PlayNote(col, NoteDuration, Volume);
+                        }
+                        else if (activeCells[col, row] == AbstractBoard.ActiveState.RowActivated)
+                        {
+                            // add highlight for the row
+                            highlights.Add(new Highlight(true, row));
+                            // play corresponding note for the row
+                            noteController.PlayNote(row, NoteDuration, Volume);
+                        }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                btnRun.Checked = false;
+                btnRun_CheckedChanged(btnRun, EventArgs.Empty);
+
+                MessageBox.Show("Unable to play sound for current state, error: " + ex.GetType().FullName + " - " + ex.Message, "Error",  MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -460,19 +513,30 @@ namespace ProceduralMidi
             BoardSettings boardSettings;
             if (BoardMapper.TryLoad(path, out boardSettings))
             {
-                board = boardSettings.Board;
-                sldNoteDuration.Value = boardSettings.NoteDuration;
-                sldSpeed.Value = boardSettings.Speed;
-                txtNotes.Text = boardSettings.Notes;
-                ddlInstruments.SelectedIndex = boardSettings.Instrument;
-                nudRows.Value = boardSettings.Board.Rows;
-                nudColumns.Value = boardSettings.Board.Cols;
-
-                picBoard.Invalidate();
-
+                UpdateFromBoardSettings(boardSettings);
                 lastPathOpened = path;
             }
             ignoreNudRowColValueChange = false;
+        }
+
+        /// <summary>
+        /// Set controls to the values specified in the board settings
+        /// </summary>
+        /// <param name="boardSettings"></param>
+        private void UpdateFromBoardSettings(BoardSettings boardSettings)
+        {
+            board = boardSettings.Board;
+            sldNoteDuration.Value = boardSettings.NoteDuration;
+            sldSpeed.Value = boardSettings.Speed;
+            txtNotes.Text = boardSettings.Notes;
+            ddlInstruments.SelectedIndex = boardSettings.Instrument;
+            nudRows.Value = boardSettings.Board.Rows;
+            nudColumns.Value = boardSettings.Board.Cols;
+            rdbSample.Checked = boardSettings.UseSamples;
+            rdbMidi.Checked = !boardSettings.UseSamples;
+            ddlSamples.SelectedIndex = ddlSamples.FindString(boardSettings.Sample);
+
+            picBoard.Invalidate();
         }
 
         /// <summary>
@@ -522,7 +586,9 @@ namespace ProceduralMidi
                             Instrument = ddlInstruments.SelectedIndex,
                             NoteDuration = NoteDuration,
                             Notes = txtNotes.Text,
-                            Speed = sldSpeed.Value
+                            Speed = sldSpeed.Value,
+                            UseSamples = rdbSample.Checked,
+                            Sample = (ddlSamples.SelectedIndex >= 0 ? ddlSamples.Items[ddlSamples.SelectedIndex].ToString() : "")
                         });
                     }
                 }
@@ -589,21 +655,26 @@ namespace ProceduralMidi
         /// <param name="e"></param>
         private void btnRandomize_Click(object sender, EventArgs e)
         {
-            Random rnd = new Random();
+            RandomizeBoard(board);
+            picBoard.Invalidate();
+        }
 
+        private Random rnd = new Random();
+
+        private void RandomizeBoard(OtomataBoard board)
+        {
             List<CellStateEnum> possibleStates = board.PossibleStatesForPalette.Where(s => s != CellStateEnum.Dead).ToList();
 
             for (int row = 0; row < board.Rows; row++)
             {
                 for (int col = 0; col < board.Cols; col++)
                 {
-                    if (rnd.NextDouble() > 0.8f) // only 20% of cells are not dead
+                    if (rnd.NextDouble() >= 0.8f) // only 20% of cells are not dead
                         board.Cells[col, row] = new Cell(possibleStates[rnd.Next(possibleStates.Count)]);
                     else
                         board.Cells[col, row] = new Cell(CellStateEnum.Dead);
                 }
             }
-            picBoard.Invalidate();
         }
 
         /// <summary>
@@ -664,7 +735,6 @@ namespace ProceduralMidi
                         if (sfd.ShowDialog(this) == System.Windows.Forms.DialogResult.OK)
                         {
                             MidiWriter.Write(sfd.FileName, ddlInstruments.SelectedIndex, noteController.Recorder.Notes);
-
                             lblStatus.Text = "Midi saved to " + sfd.FileName;
                         }
                     }
@@ -718,11 +788,253 @@ namespace ProceduralMidi
             base.OnSizeChanged(e);
         }
 
+        /// <summary>
+        /// Show about box
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void mnuAbout_Click(object sender, EventArgs e)
         {
             using (AboutBox box = new AboutBox())
                 box.ShowDialog(this);
         }
 
+        /// <summary>
+        /// Use the sample manager to play notes
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void rdbSample_CheckedChanged(object sender, EventArgs e)
+        {
+            noteController.UseSamples = rdbSample.Checked;
+        }
+
+        /// <summary>
+        /// Use the midi controller to play notes
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void rdbMidi_CheckedChanged(object sender, EventArgs e)
+        {
+            noteController.UseSamples = rdbSample.Checked;
+        }
+
+        /// <summary>
+        /// Change the sample on the sample manager
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ddlSamples_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (ddlSamples.SelectedIndex >= 0 && noteController.SampleManager != null)
+                noteController.SampleManager.ChangeSample(ddlSamples.Items[ddlSamples.SelectedIndex].ToString());
+        }
+
+        /// <summary>
+        /// Reloads all the samples from the sample directory
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void mnuReloadSamples_Click(object sender, EventArgs e)
+        {
+            string currentSample;
+            if (ddlSamples.SelectedIndex >= 0)
+                currentSample = ddlSamples.Items[ddlSamples.SelectedIndex].ToString();
+            else
+                currentSample = "";
+
+            FillSamples();
+
+            if(!string.IsNullOrEmpty(currentSample))
+                ddlSamples.SelectedIndex =  ddlSamples.FindString(currentSample);
+        }
+
+        /* A test that didn't work so well
+        private void btnImportMidi_Click(object sender, EventArgs e)
+        {
+            // test
+            List<IEnumerable<string>> notesByBeat = new List<IEnumerable<string>>();
+            notesByBeat.Add(new string[] { });
+            notesByBeat.Add(new string[] { });
+            notesByBeat.Add(new string[] { });
+            notesByBeat.Add(new string[] { "C3" });
+            notesByBeat.Add(new string[] { "C4" });
+            notesByBeat.Add(new string[] { "A3" });
+            notesByBeat.Add(new string[] { });
+
+
+            long minDiff = long.MaxValue;
+            OtomataBoard bestMatchingBoard = null;
+
+            foreach (var notes in GetPermutationsOf(new HashSet<string>(notesByBeat.SelectMany(n => n)).ToList()))
+            {
+                string[] notesPerCell = notes.ToArray();
+
+                for (int rowSize = notes.Count; rowSize < 100; rowSize += notes.Count)
+                {
+                    //for (int colSize = notes.Count; colSize < 100; colSize += notes.Count)
+                    //{
+
+                    OtomataBoard board = new OtomataBoard(rowSize, rowSize);
+
+                    for (int tries = 0; tries < 100000; tries++)
+                    {
+                        RandomizeBoard(board);
+
+                        var notesOfBoard = GetNotesOfBoard(notesByBeat.Count, notesPerCell, board);
+
+                        long diff = DifferenceInNotesByBeat(notesByBeat, notesOfBoard);
+
+                        this.board = board;
+                        this.txtNotes.Text = string.Join(",", notes.ToArray());
+                        ignoreNudRowColValueChange = true;
+                        nudColumns.Value = rowSize;
+                        nudRows.Value = rowSize;
+                        ignoreNudRowColValueChange = false;
+                        minDiff = diff;
+                        picBoard.Invalidate();
+                        Application.DoEvents();
+
+                        if (diff == 0)
+                        {
+                            // found exact matching board!
+                            bestMatchingBoard = board;
+                            this.board = board;
+                            this.txtNotes.Text = string.Join(",", notes.ToArray());
+                            ignoreNudRowColValueChange = true;
+                            nudColumns.Value = rowSize;
+                            nudRows.Value = rowSize;
+                            ignoreNudRowColValueChange = false;
+                            minDiff = diff;
+                            picBoard.Invalidate();
+                            Application.DoEvents();
+                            return;
+                        }
+                        else
+                        {
+                            if (minDiff > diff)
+                            {
+                                bestMatchingBoard = board;
+                                this.board = board;
+                                this.txtNotes.Text = string.Join(",", notes.ToArray());
+                                ignoreNudRowColValueChange = true;
+                                nudColumns.Value = rowSize;
+                                nudRows.Value = rowSize;
+                                ignoreNudRowColValueChange = false;
+                                minDiff = diff;
+                                picBoard.Invalidate();
+                                Application.DoEvents();
+                            }
+                        }
+                        //}
+                    }
+                }
+            }
+
+            //BoardSettings settings = new BoardSettings()
+            //{
+            //    Instrument = 0,
+            //    NoteDuration = 500,
+            //    Notes = note
+            //};
+
+        }
+
+        private long DifferenceInNotesByBeat(List<IEnumerable<string>> notesByBeat1, List<IEnumerable<string>> notesByBeat2)
+        {
+            long diff = 0;
+            for (int i = 0; i < Math.Min(notesByBeat1.Count, notesByBeat2.Count); i++)
+            {
+                diff += DifferenceInNotes(notesByBeat1[i], notesByBeat2[2]);
+            }
+            return diff;
+        }
+
+        private long DifferenceInNotes(IEnumerable<string> n1, IEnumerable<string> n2)
+        {
+            List<string> notes1;
+            List<string> notes2;
+            if (n1.Count() < n2.Count())
+            {
+                notes1 = n1.ToList();
+                notes2 = n2.ToList();
+            }
+            else
+            {
+                notes1 = n2.ToList();
+                notes2 = n1.ToList();
+            }
+
+            long diff = 0;
+            if (notes1.Count < notes2.Count)
+            {
+                int i = 0;
+                while (i < notes1.Count)
+                {
+                    diff += Math.Abs((NoteController.GetMidiIndexFromNote(notes1[i]) - NoteController.GetMidiIndexFromNote(notes2[i])));
+                    i++;
+                }
+                diff += (notes2.Count - i) * 1000;
+            }
+
+            return diff;
+        }
+
+        private List<IEnumerable<string>> GetNotesOfBoard(int iterations, string[] notePerCell, AbstractBoard board)
+        {
+            List<IEnumerable<string>> notesByBeat = new List<IEnumerable<string>>();
+
+            OtomataBoard.ActiveState[,] activeCells = board.ActiveCells;
+
+            for (int i = 0; i < iterations; i++)
+            {
+                List<string> notesOfIteration = new List<string>();
+
+                for (int row = 0; row < board.Rows; row++)
+                {
+                    for (int col = 0; col < board.Cols; col++)
+                    {
+                        if (activeCells[col, row] == AbstractBoard.ActiveState.ColumnActivated)
+                        {
+                            string note = notePerCell[col % notePerCell.Length].Replace("BB", "A#");
+                            notesOfIteration.Add(note);
+                        }
+                        else if (activeCells[col, row] == AbstractBoard.ActiveState.RowActivated)
+                        {
+                            string note = notePerCell[row % notePerCell.Length].Replace("BB", "A#");
+                            notesOfIteration.Add(note);
+                        }
+                    }
+                }
+                notesByBeat.Add(notesOfIteration);
+            }
+
+            return notesByBeat;
+        }
+
+        private IEnumerable<List<string>> GetPermutationsOf(List<string> notes)
+        {
+            if (notes.Count() == 1)
+            {
+                List<List<string>> lst = new List<List<string>>();
+                lst.Add(notes);
+                return lst;
+            }
+            else
+            {
+                List<List<string>> lst = new List<List<string>>();
+                foreach (string note in notes)
+                {
+                    IEnumerable<List<string>> subperms = GetPermutationsOf(notes.Except(new string[] { note }).ToList());
+                    foreach (var sub in subperms)
+                    {
+                        sub.Insert(0, note);
+                        lst.Add(sub);
+                    }
+                }
+                return lst;
+            }
+        }
+        */
     }
 }

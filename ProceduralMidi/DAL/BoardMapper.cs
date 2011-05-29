@@ -27,6 +27,9 @@ namespace ProceduralMidi.DAL
             str.AppendLine("instrument=" + boardsettings.Instrument);
             str.AppendLine("speed=" + boardsettings.Speed);
             str.AppendLine("notes=" + boardsettings.Notes);
+            str.AppendLine("usesamples=" +(boardsettings.UseSamples ? "1" : "0"));
+            str.AppendLine("sample=" + boardsettings.Sample);
+
             str.AppendLine("[cells]");
 
             for (int row = 0; row < boardsettings.Board.Rows; row++)
@@ -71,6 +74,9 @@ namespace ProceduralMidi.DAL
             int noteduration = 0;
             string notes = "";
             int instrument = 0;
+            int usesamples = 0;
+            string sample = "";
+
             int speed = 0;
             Cell[,] cells = null;
 
@@ -113,6 +119,18 @@ namespace ProceduralMidi.DAL
                             MessageBox.Show("Invalid instrument", "Invalid file");
                             return false;
                         }
+                    }
+                    else if (propName.ToLower() == "usesamples")
+                    {
+                        if (!int.TryParse(propValue, out usesamples))
+                        {
+                            MessageBox.Show("Invalid property value for 'Use samples'", "Invalid file");
+                            return false;
+                        }
+                    }
+                    else if (propName.ToLower() == "sample")
+                    {
+                        sample = propValue;
                     }
                     else if (propName.ToLower() == "speed")
                     {
@@ -191,7 +209,9 @@ namespace ProceduralMidi.DAL
                 NoteDuration = noteduration,
                 Speed = speed,
                 Notes = notes,
-                Instrument = instrument
+                Instrument = instrument,
+                UseSamples = (usesamples != 0 ? true : false),
+                Sample = sample
             };
             return true;
         }
