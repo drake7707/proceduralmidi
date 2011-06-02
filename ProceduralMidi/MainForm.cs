@@ -76,13 +76,13 @@ namespace ProceduralMidi
                 ddlSamples.SelectedIndex = 0;
         }
 
-        private BoardSettings[] states = new BoardSettings[10];
+        /// <summary>
+        /// Create all the state menu items
+        /// </summary>
         private void CreateStates()
         {
             for (int i = 0; i < 10; i++)
             {
-                states[i] = null;
-
                 var mnuItm = new ToolStripMenuItem("Empty state", null, (sender, e) =>
                     {
                         LoadState(mnuStates.DropDownItems.IndexOf((ToolStripItem)sender));
@@ -93,12 +93,20 @@ namespace ProceduralMidi
             }
         }
 
+        /// <summary>
+        /// Save the state of the board in the given slot
+        /// </summary>
+        /// <param name="i"></param>
         private void SaveState(int i)
         {
             mnuStates.DropDownItems[i].Text = "State " + DateTime.Now.ToString("HH:mm:ss");
             mnuStates.DropDownItems[i].Tag = BoardMapper.GetStringFromBoardSettings(GetCurrentBoardSettings());
         }
 
+        /// <summary>
+        /// Load the state of the board from the given slot, nothing will be loaded if the slot is empty
+        /// </summary>
+        /// <param name="i"></param>
         private void LoadState(int i)
         {
             var boardsettingsString = (string)mnuStates.DropDownItems[i].Tag;
@@ -676,14 +684,17 @@ namespace ProceduralMidi
                 btnRecord.Checked = !btnRecord.Checked;
             else
             {
-                for (int i = 0; i < 9; i++)
+                if (!txtNotes.Focused) // shift+nr will give problems on azerty keyboards (like mine)
                 {
-                    if (keyData == (Keys.Control | (Keys)(Keys.D0 + i)) ||
-                       keyData == (Keys.Control | (Keys)(Keys.NumPad0 + i)))
-                        SaveState(i);
-                    else if (keyData == (Keys.Shift | (Keys)(Keys.D0 + i)) ||
-                       keyData == (Keys.Shift | (Keys)(Keys.NumPad0 + i)))
-                        LoadState(i);
+                    for (int i = 0; i < 9; i++)
+                    {
+                        if (keyData == (Keys.Control | (Keys)(Keys.D0 + i)) ||
+                           keyData == (Keys.Control | (Keys)(Keys.NumPad0 + i)))
+                            SaveState(i);
+                        else if (keyData == (Keys.Shift | (Keys)(Keys.D0 + i)) ||
+                           keyData == (Keys.Shift | (Keys)(Keys.NumPad0 + i)))
+                            LoadState(i);
+                    }
                 }
             }
 

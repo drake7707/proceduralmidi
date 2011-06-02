@@ -22,6 +22,11 @@ namespace ProceduralMidi.DAL
             System.IO.File.WriteAllText(path, str);
         }
 
+        /// <summary>
+        /// Returns the string representation of the board settings
+        /// </summary>
+        /// <param name="boardsettings"></param>
+        /// <returns></returns>
         internal static string GetStringFromBoardSettings(BoardSettings boardsettings)
         {
             OtomataBoard board = boardsettings.Board;
@@ -67,9 +72,15 @@ namespace ProceduralMidi.DAL
         {
             
             string str = System.IO.File.ReadAllText(path);
-            return TryGetBoardSettingsFromString(path, out boardSettings);
+            return TryGetBoardSettingsFromString(str, out boardSettings);
         }
 
+        /// <summary>
+        /// Try loading the board settings from the string
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="boardSettings"></param>
+        /// <returns></returns>
         internal static bool TryGetBoardSettingsFromString(string str, out BoardSettings boardSettings)
         {
             boardSettings = null;

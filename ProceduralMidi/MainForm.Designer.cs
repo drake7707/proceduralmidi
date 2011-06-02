@@ -53,11 +53,13 @@
             this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuFancy = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuShowGrid = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuStates = new System.Windows.Forms.ToolStripMenuItem();
             this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuReloadSamples = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuAbout = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.cellPalette = new ProceduralMidi.Palette();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.btnOpen = new System.Windows.Forms.ToolStripButton();
             this.btnSave = new System.Windows.Forms.ToolStripButton();
@@ -73,8 +75,6 @@
             this.lblStatus = new System.Windows.Forms.ToolStripStatusLabel();
             this.picBoard = new System.Windows.Forms.PictureBox();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-            this.mnuStates = new System.Windows.Forms.ToolStripMenuItem();
-            this.cellPalette = new ProceduralMidi.Palette();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.sldNoteDuration)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudColumns)).BeginInit();
@@ -446,6 +446,12 @@
             this.mnuShowGrid.Text = "Show &grid";
             this.mnuShowGrid.Click += new System.EventHandler(this.mnuShowGrid_Click);
             // 
+            // mnuStates
+            // 
+            this.mnuStates.Name = "mnuStates";
+            this.mnuStates.Size = new System.Drawing.Size(50, 20);
+            this.mnuStates.Text = "&States";
+            // 
             // optionsToolStripMenuItem
             // 
             this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -472,7 +478,7 @@
             // mnuAbout
             // 
             this.mnuAbout.Name = "mnuAbout";
-            this.mnuAbout.Size = new System.Drawing.Size(152, 22);
+            this.mnuAbout.Size = new System.Drawing.Size(116, 22);
             this.mnuAbout.Text = "&About...";
             this.mnuAbout.Click += new System.EventHandler(this.mnuAbout_Click);
             // 
@@ -487,6 +493,19 @@
             this.groupBox2.TabIndex = 17;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Palette";
+            // 
+            // cellPalette
+            // 
+            this.cellPalette.CellStates = null;
+            this.cellPalette.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.cellPalette.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
+            this.cellPalette.FormattingEnabled = true;
+            this.cellPalette.ItemHeight = 34;
+            this.cellPalette.Location = new System.Drawing.Point(3, 16);
+            this.cellPalette.Name = "cellPalette";
+            this.cellPalette.Size = new System.Drawing.Size(57, 473);
+            this.cellPalette.States = null;
+            this.cellPalette.TabIndex = 0;
             // 
             // toolStrip1
             // 
@@ -646,25 +665,6 @@
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 28F));
             this.tableLayoutPanel1.Size = new System.Drawing.Size(741, 498);
             this.tableLayoutPanel1.TabIndex = 22;
-            // 
-            // mnuStates
-            // 
-            this.mnuStates.Name = "mnuStates";
-            this.mnuStates.Size = new System.Drawing.Size(50, 20);
-            this.mnuStates.Text = "&States";
-            // 
-            // cellPalette
-            // 
-            this.cellPalette.CellStates = null;
-            this.cellPalette.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.cellPalette.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
-            this.cellPalette.FormattingEnabled = true;
-            this.cellPalette.ItemHeight = 34;
-            this.cellPalette.Location = new System.Drawing.Point(3, 16);
-            this.cellPalette.Name = "cellPalette";
-            this.cellPalette.Size = new System.Drawing.Size(57, 473);
-            this.cellPalette.States = null;
-            this.cellPalette.TabIndex = 0;
             // 
             // MainForm
             // 
