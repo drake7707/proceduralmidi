@@ -18,6 +18,12 @@ namespace ProceduralMidi.DAL
         /// <param name="boardsettings"></param>
         public static void Save(string path, BoardSettings boardsettings)
         {
+            string str = GetStringFromBoardSettings(boardsettings);
+            System.IO.File.WriteAllText(path, str);
+        }
+
+        internal static string GetStringFromBoardSettings(BoardSettings boardsettings)
+        {
             OtomataBoard board = boardsettings.Board;
 
             StringBuilder str = new StringBuilder();
@@ -27,7 +33,7 @@ namespace ProceduralMidi.DAL
             str.AppendLine("instrument=" + boardsettings.Instrument);
             str.AppendLine("speed=" + boardsettings.Speed);
             str.AppendLine("notes=" + boardsettings.Notes);
-            str.AppendLine("usesamples=" +(boardsettings.UseSamples ? "1" : "0"));
+            str.AppendLine("usesamples=" + (boardsettings.UseSamples ? "1" : "0"));
             str.AppendLine("sample=" + boardsettings.Sample);
 
             str.AppendLine("[cells]");
@@ -48,8 +54,7 @@ namespace ProceduralMidi.DAL
 
                 str.AppendLine(strRow.ToString());
             }
-
-            System.IO.File.WriteAllText(path, str.ToString());
+            return str.ToString();
         }
 
         /// <summary>
@@ -60,8 +65,15 @@ namespace ProceduralMidi.DAL
         /// <returns></returns>
         public static bool TryLoad(string path, out BoardSettings boardSettings)
         {
+            
+            string str = System.IO.File.ReadAllText(path);
+            return TryGetBoardSettingsFromString(path, out boardSettings);
+        }
+
+        internal static bool TryGetBoardSettingsFromString(string str, out BoardSettings boardSettings)
+        {
             boardSettings = null;
-            string[] lines = System.IO.File.ReadAllLines(path);
+            string[] lines = str.Split(Environment.NewLine.ToCharArray()).Where(l => !string.IsNullOrEmpty(l)).ToArray();
 
             if (lines.Length <= 0)
             {

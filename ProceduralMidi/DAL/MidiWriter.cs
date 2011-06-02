@@ -12,12 +12,12 @@ namespace ProceduralMidi.DAL
         /// <summary>
         /// Use midi format 0, there's only 1 track
         /// </summary>
-        private const Int16 MIDI_FORMAT = 0x00;
+        private const Int16 MIDI_FORMAT = 0x01;
 
         /// <summary>
         /// Number of tracks used
         /// </summary>
-        private const Int16 NR_OF_TRACKS_USED = 0x01;
+        private const Int16 NR_OF_TRACKS_USED = 0x02;
 
         /// <summary>
         /// Milliseconds per minute
@@ -33,6 +33,20 @@ namespace ProceduralMidi.DAL
         /// Ticks per beat, use 240
         /// </summary>
         private const int TICKS_PER_BEAT = 240;
+
+        /// <summary>
+        /// Meta event
+        /// </summary>
+        private const byte MSG_META = 0xFF;
+
+        /// <summary>
+        /// Set tempo meta type
+        /// </summary>
+        private const byte MSG_META_SETTEMPO = 0x51;
+
+        private const byte MSG_META_TEXT = 0x01;
+
+        private const byte MSG_META_ENDOFTRACK = 0x2F;
 
         /// <summary>
         /// Note down message
@@ -67,14 +81,17 @@ namespace ProceduralMidi.DAL
         /// <param name="path"></param>
         /// <param name="instrumentIdx"></param>
         /// <param name="notes"></param>
-        public static void Write(string path, int instrumentIdx,  List<Note> notes)
+        public static void Write(string path, int instrumentIdx, List<Note> notes)
         {
             using (Stream stream = File.Create(path))
             {
                 BinaryWriter writer = new BinaryWriter(stream);
                 WriteHeader(writer);
 
+                WriteMetaTrack(writer);
+
                 WriteTrack(writer, instrumentIdx, notes);
+                
             }
         }
 
@@ -99,6 +116,52 @@ namespace ProceduralMidi.DAL
             WriteInt16(writer.BaseStream, (ushort)TICKS_PER_BEAT);
         }
 
+        private static void WriteMetaTrack(BinaryWriter writer)
+        {
+            // write track chunk ID
+            writer.Write(new char[] { 'M', 'T', 'r', 'k' }, 0, 4);
+
+            using (MemoryStream memStream = new MemoryStream())
+            {
+                const int MICROSECONDS_PER_QUARTER_NOTE = (int)((MILLISECONDS_PER_MINUTE * 1000f) / (float)BEATS_PER_MINUTE);
+
+                // write tempo
+                memStream.WriteByte(0); // 0 delta
+                memStream.WriteByte(MSG_META);
+                memStream.WriteByte(MSG_META_SETTEMPO);
+                memStream.WriteByte(3); // length 3
+                byte[] b = BitConverter.GetBytes(MICROSECONDS_PER_QUARTER_NOTE);
+                memStream.WriteByte(b[2]);
+                memStream.WriteByte(b[1]);
+                memStream.WriteByte(b[0]);
+
+                string msg = "Created by Procedural Midi, visit http://proceduralmidi.codeplex.com to try it out yourself!";
+
+                // write text
+                memStream.WriteByte(0); // 0 delta
+                memStream.WriteByte(MSG_META);
+                memStream.WriteByte(MSG_META_TEXT);
+                byte[] msgBytes = msg.ToCharArray().Select(c => (byte)c).ToArray();
+                memStream.WriteByte((byte)msgBytes.Length); // length string length
+                memStream.Write(msgBytes, 0, msgBytes.Length);
+                
+                // write end of track
+                memStream.WriteByte(0); // 0 delta
+                memStream.WriteByte(MSG_META);
+                memStream.WriteByte(MSG_META_ENDOFTRACK);
+                memStream.WriteByte(0); // length 0
+
+                // get bytes from total track
+                byte[] trackBytes = memStream.ToArray();
+
+                // write track chunk size
+                WriteInt32(writer.BaseStream, (uint)(trackBytes.Length));
+
+                // write track
+                writer.Write(trackBytes, 0, trackBytes.Length);
+            }
+        }
+
         /// <summary>
         /// Write the midi track
         /// </summary>
@@ -117,7 +180,7 @@ namespace ProceduralMidi.DAL
             using (MemoryStream memStream = new MemoryStream())
             {
                 // write program change
-                byte eventTypeAndChannel = (byte)((MSG_PROGRAM_CHANGE << 4) +  NoteController.MIDI_CHANNEL);
+                byte eventTypeAndChannel = (byte)((MSG_PROGRAM_CHANGE << 4) + NoteController.MIDI_CHANNEL);
                 memStream.WriteByte(0);
                 memStream.WriteByte(eventTypeAndChannel);
                 memStream.WriteByte((byte)instrumentIdx);
@@ -132,7 +195,7 @@ namespace ProceduralMidi.DAL
                     midiMessagesFromNotes.Add(new MidiMessage()
                     {
                         Time = timeStart,
-                        
+
                         Channel = NoteController.MIDI_CHANNEL,
                         Message = MSG_NOTE_DOWN,
                         Param1 = (byte)n.MidiIndex,
@@ -142,7 +205,7 @@ namespace ProceduralMidi.DAL
                     midiMessagesFromNotes.Add(new MidiMessage()
                     {
                         Time = timeEnd,
-                        
+
                         Channel = NoteController.MIDI_CHANNEL,
                         Message = MSG_NOTE_UP,
                         Param1 = (byte)n.MidiIndex,
@@ -168,12 +231,19 @@ namespace ProceduralMidi.DAL
                     memStream.WriteByte(msg.Param2);
                 }
 
+                // write end of track
+                memStream.WriteByte(0); // 0 delta
+                memStream.WriteByte(MSG_META);
+                memStream.WriteByte(MSG_META_ENDOFTRACK);
+                memStream.WriteByte(0); // length 0
+
+
                 // get bytes from total track
                 byte[] trackBytes = memStream.ToArray();
 
                 // write track chunk size
                 WriteInt32(writer.BaseStream, (uint)(trackBytes.Length));
-                
+
                 // write track
                 writer.Write(trackBytes, 0, trackBytes.Length);
             }
@@ -186,7 +256,7 @@ namespace ProceduralMidi.DAL
         /// <param name="val"></param>
         private static void WriteInt32(Stream s, uint val)
         {
-            byte[] b= BitConverter.GetBytes(val);
+            byte[] b = BitConverter.GetBytes(val);
             s.WriteByte(b[3]);
             s.WriteByte(b[2]);
             s.WriteByte(b[1]);
