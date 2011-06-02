@@ -41,8 +41,13 @@
             this.label5 = new System.Windows.Forms.Label();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuOpen = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuReload = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
+            this.mnuImportAutomataUrl = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuExportOtomataUrl = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator = new System.Windows.Forms.ToolStripSeparator();
+            this.mnuSave = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.mnuExit = new System.Windows.Forms.ToolStripMenuItem();
             this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -54,25 +59,22 @@
             this.mnuAbout = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
-            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
-            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
-            this.status = new System.Windows.Forms.StatusStrip();
-            this.lblStatus = new System.Windows.Forms.ToolStripStatusLabel();
-            this.mnuImportAutomataUrl = new System.Windows.Forms.ToolStripMenuItem();
             this.btnOpen = new System.Windows.Forms.ToolStripButton();
             this.btnSave = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.btnRun = new System.Windows.Forms.ToolStripButton();
             this.btnRecord = new System.Windows.Forms.ToolStripButton();
             this.btnStep = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.btnClean = new System.Windows.Forms.ToolStripButton();
             this.btnRandomize = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
+            this.status = new System.Windows.Forms.StatusStrip();
+            this.lblStatus = new System.Windows.Forms.ToolStripStatusLabel();
             this.picBoard = new System.Windows.Forms.PictureBox();
-            this.mnuOpen = new System.Windows.Forms.ToolStripMenuItem();
-            this.mnuSave = new System.Windows.Forms.ToolStripMenuItem();
+            this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+            this.mnuStates = new System.Windows.Forms.ToolStripMenuItem();
             this.cellPalette = new ProceduralMidi.Palette();
-            this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
-            this.mnuExportOtomataUrl = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.sldNoteDuration)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudColumns)).BeginInit();
@@ -84,6 +86,7 @@
             this.toolStrip1.SuspendLayout();
             this.status.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picBoard)).BeginInit();
+            this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // tmrIterate
@@ -97,7 +100,7 @@
             this.lblDebug.Location = new System.Drawing.Point(9, 333);
             this.lblDebug.Name = "lblDebug";
             this.lblDebug.Size = new System.Drawing.Size(161, 49);
-            this.lblDebug.TabIndex = 5;
+            this.lblDebug.TabIndex = 3;
             // 
             // tmrDrawHighlights
             // 
@@ -107,8 +110,6 @@
             // 
             // groupBox1
             // 
-            this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox1.Controls.Add(this.ddlSamples);
             this.groupBox1.Controls.Add(this.rdbSample);
             this.groupBox1.Controls.Add(this.rdbMidi);
@@ -125,10 +126,12 @@
             this.groupBox1.Controls.Add(this.label2);
             this.groupBox1.Controls.Add(this.sldVolume);
             this.groupBox1.Controls.Add(this.ddlInstruments);
-            this.groupBox1.Location = new System.Drawing.Point(476, 52);
+            this.groupBox1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.groupBox1.Location = new System.Drawing.Point(544, 3);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(180, 390);
-            this.groupBox1.TabIndex = 6;
+            this.tableLayoutPanel1.SetRowSpan(this.groupBox1, 3);
+            this.groupBox1.Size = new System.Drawing.Size(194, 492);
+            this.groupBox1.TabIndex = 21;
             this.groupBox1.TabStop = false;
             // 
             // ddlSamples
@@ -138,7 +141,7 @@
             this.ddlSamples.Location = new System.Drawing.Point(19, 104);
             this.ddlSamples.Name = "ddlSamples";
             this.ddlSamples.Size = new System.Drawing.Size(155, 21);
-            this.ddlSamples.TabIndex = 21;
+            this.ddlSamples.TabIndex = 0;
             this.ddlSamples.SelectedIndexChanged += new System.EventHandler(this.ddlSamples_SelectedIndexChanged);
             // 
             // rdbSample
@@ -147,7 +150,7 @@
             this.rdbSample.Location = new System.Drawing.Point(9, 86);
             this.rdbSample.Name = "rdbSample";
             this.rdbSample.Size = new System.Drawing.Size(60, 17);
-            this.rdbSample.TabIndex = 20;
+            this.rdbSample.TabIndex = 1;
             this.rdbSample.Text = "Sample";
             this.rdbSample.UseVisualStyleBackColor = true;
             this.rdbSample.CheckedChanged += new System.EventHandler(this.rdbSample_CheckedChanged);
@@ -159,7 +162,7 @@
             this.rdbMidi.Location = new System.Drawing.Point(9, 16);
             this.rdbMidi.Name = "rdbMidi";
             this.rdbMidi.Size = new System.Drawing.Size(44, 17);
-            this.rdbMidi.TabIndex = 19;
+            this.rdbMidi.TabIndex = 2;
             this.rdbMidi.TabStop = true;
             this.rdbMidi.Text = "Midi";
             this.rdbMidi.UseVisualStyleBackColor = true;
@@ -171,7 +174,7 @@
             this.lblSpeed.Location = new System.Drawing.Point(6, 179);
             this.lblSpeed.Name = "lblSpeed";
             this.lblSpeed.Size = new System.Drawing.Size(134, 13);
-            this.lblSpeed.TabIndex = 10;
+            this.lblSpeed.TabIndex = 4;
             this.lblSpeed.Text = "Speed (in ms, current=250)";
             // 
             // ddlMidiDevices
@@ -302,37 +305,37 @@
             // 
             // txtNotes
             // 
-            this.txtNotes.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtNotes.Location = new System.Drawing.Point(2, 463);
+            this.txtNotes.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.txtNotes.Location = new System.Drawing.Point(72, 473);
             this.txtNotes.Name = "txtNotes";
-            this.txtNotes.Size = new System.Drawing.Size(654, 20);
-            this.txtNotes.TabIndex = 7;
-            this.txtNotes.Text = "D3, A3, A#3, C4, D4, E4, F4, A5, C5";
+            this.txtNotes.Size = new System.Drawing.Size(466, 20);
+            this.txtNotes.TabIndex = 20;
+            this.txtNotes.Text = "D3, A3, A#3, C4, D4, E4, F4, A5, C5";
             this.txtNotes.TextChanged += new System.EventHandler(this.txtNotes_TextChanged);
             // 
             // label5
             // 
-            this.label5.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(9, 447);
+            this.label5.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label5.Location = new System.Drawing.Point(72, 452);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(466, 13);
+            this.label5.Size = new System.Drawing.Size(466, 18);
             this.label5.TabIndex = 15;
             this.label5.Text = "Notes per cell (seperated by \',\' ). If there are not enough notes the specified n" +
                 "otes will be wrapped";
+            this.label5.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // menuStrip1
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fileToolStripMenuItem,
             this.viewToolStripMenuItem,
+            this.mnuStates,
             this.optionsToolStripMenuItem,
             this.helpToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(661, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(741, 24);
             this.menuStrip1.TabIndex = 16;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -352,6 +355,16 @@
             this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
             this.fileToolStripMenuItem.Text = "&File";
             // 
+            // mnuOpen
+            // 
+            this.mnuOpen.Image = ((System.Drawing.Image)(resources.GetObject("mnuOpen.Image")));
+            this.mnuOpen.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.mnuOpen.Name = "mnuOpen";
+            this.mnuOpen.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
+            this.mnuOpen.Size = new System.Drawing.Size(175, 22);
+            this.mnuOpen.Text = "&Open";
+            this.mnuOpen.Click += new System.EventHandler(this.mnuOpen_Click);
+            // 
             // mnuReload
             // 
             this.mnuReload.Name = "mnuReload";
@@ -360,10 +373,39 @@
             this.mnuReload.Text = "Reload";
             this.mnuReload.Click += new System.EventHandler(this.mnuReload_Click);
             // 
+            // toolStripSeparator5
+            // 
+            this.toolStripSeparator5.Name = "toolStripSeparator5";
+            this.toolStripSeparator5.Size = new System.Drawing.Size(172, 6);
+            // 
+            // mnuImportAutomataUrl
+            // 
+            this.mnuImportAutomataUrl.Name = "mnuImportAutomataUrl";
+            this.mnuImportAutomataUrl.Size = new System.Drawing.Size(175, 22);
+            this.mnuImportAutomataUrl.Text = "&Import otomata url";
+            this.mnuImportAutomataUrl.Click += new System.EventHandler(this.mnuImportAutomataUrl_Click);
+            // 
+            // mnuExportOtomataUrl
+            // 
+            this.mnuExportOtomataUrl.Name = "mnuExportOtomataUrl";
+            this.mnuExportOtomataUrl.Size = new System.Drawing.Size(175, 22);
+            this.mnuExportOtomataUrl.Text = "&Export otomata url";
+            this.mnuExportOtomataUrl.Click += new System.EventHandler(this.mnuExportOtomataUrl_Click);
+            // 
             // toolStripSeparator
             // 
             this.toolStripSeparator.Name = "toolStripSeparator";
             this.toolStripSeparator.Size = new System.Drawing.Size(172, 6);
+            // 
+            // mnuSave
+            // 
+            this.mnuSave.Image = ((System.Drawing.Image)(resources.GetObject("mnuSave.Image")));
+            this.mnuSave.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.mnuSave.Name = "mnuSave";
+            this.mnuSave.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
+            this.mnuSave.Size = new System.Drawing.Size(175, 22);
+            this.mnuSave.Text = "&Save";
+            this.mnuSave.Click += new System.EventHandler(this.mnuSave_Click);
             // 
             // toolStripSeparator2
             // 
@@ -430,18 +472,18 @@
             // mnuAbout
             // 
             this.mnuAbout.Name = "mnuAbout";
-            this.mnuAbout.Size = new System.Drawing.Size(116, 22);
+            this.mnuAbout.Size = new System.Drawing.Size(152, 22);
             this.mnuAbout.Text = "&About...";
             this.mnuAbout.Click += new System.EventHandler(this.mnuAbout_Click);
             // 
             // groupBox2
             // 
-            this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)));
             this.groupBox2.Controls.Add(this.cellPalette);
-            this.groupBox2.Location = new System.Drawing.Point(2, 52);
+            this.groupBox2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.groupBox2.Location = new System.Drawing.Point(3, 3);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(63, 390);
+            this.tableLayoutPanel1.SetRowSpan(this.groupBox2, 3);
+            this.groupBox2.Size = new System.Drawing.Size(63, 492);
             this.groupBox2.TabIndex = 17;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Palette";
@@ -461,45 +503,8 @@
             this.toolStripSeparator4});
             this.toolStrip1.Location = new System.Drawing.Point(0, 24);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(661, 25);
+            this.toolStrip1.Size = new System.Drawing.Size(741, 25);
             this.toolStrip1.TabIndex = 18;
-            // 
-            // toolStripSeparator3
-            // 
-            this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(6, 25);
-            // 
-            // toolStripSeparator1
-            // 
-            this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 25);
-            // 
-            // toolStripSeparator4
-            // 
-            this.toolStripSeparator4.Name = "toolStripSeparator4";
-            this.toolStripSeparator4.Size = new System.Drawing.Size(6, 25);
-            // 
-            // status
-            // 
-            this.status.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.lblStatus});
-            this.status.Location = new System.Drawing.Point(0, 486);
-            this.status.Name = "status";
-            this.status.Size = new System.Drawing.Size(661, 22);
-            this.status.TabIndex = 19;
-            this.status.Text = "statusStrip1";
-            // 
-            // lblStatus
-            // 
-            this.lblStatus.Name = "lblStatus";
-            this.lblStatus.Size = new System.Drawing.Size(0, 17);
-            // 
-            // mnuImportAutomataUrl
-            // 
-            this.mnuImportAutomataUrl.Name = "mnuImportAutomataUrl";
-            this.mnuImportAutomataUrl.Size = new System.Drawing.Size(175, 22);
-            this.mnuImportAutomataUrl.Text = "&Import otomata url";
-            this.mnuImportAutomataUrl.Click += new System.EventHandler(this.mnuImportAutomataUrl_Click);
             // 
             // btnOpen
             // 
@@ -521,6 +526,11 @@
             this.btnSave.Text = "Save";
             this.btnSave.ToolTipText = "Save (CTRL+S)";
             this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
+            // 
+            // toolStripSeparator3
+            // 
+            this.toolStripSeparator3.Name = "toolStripSeparator3";
+            this.toolStripSeparator3.Size = new System.Drawing.Size(6, 25);
             // 
             // btnRun
             // 
@@ -557,6 +567,11 @@
             this.btnStep.ToolTipText = "Next state (F6)";
             this.btnStep.Click += new System.EventHandler(this.btnStep_Click);
             // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 25);
+            // 
             // btnClean
             // 
             this.btnClean.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
@@ -578,40 +593,65 @@
             this.btnRandomize.Text = "Randomize";
             this.btnRandomize.Click += new System.EventHandler(this.btnRandomize_Click);
             // 
+            // toolStripSeparator4
+            // 
+            this.toolStripSeparator4.Name = "toolStripSeparator4";
+            this.toolStripSeparator4.Size = new System.Drawing.Size(6, 25);
+            // 
+            // status
+            // 
+            this.status.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.lblStatus});
+            this.status.Location = new System.Drawing.Point(0, 547);
+            this.status.Name = "status";
+            this.status.Size = new System.Drawing.Size(741, 22);
+            this.status.TabIndex = 19;
+            this.status.Text = "statusStrip1";
+            // 
+            // lblStatus
+            // 
+            this.lblStatus.Name = "lblStatus";
+            this.lblStatus.Size = new System.Drawing.Size(0, 17);
+            // 
             // picBoard
             // 
-            this.picBoard.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
             this.picBoard.BackColor = System.Drawing.Color.Black;
-            this.picBoard.Location = new System.Drawing.Point(71, 52);
+            this.picBoard.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.picBoard.Location = new System.Drawing.Point(72, 3);
             this.picBoard.Name = "picBoard";
-            this.picBoard.Size = new System.Drawing.Size(399, 387);
+            this.picBoard.Size = new System.Drawing.Size(466, 446);
             this.picBoard.TabIndex = 2;
             this.picBoard.TabStop = false;
             this.picBoard.Paint += new System.Windows.Forms.PaintEventHandler(this.picBoard_Paint);
             this.picBoard.MouseDown += new System.Windows.Forms.MouseEventHandler(this.picBoard_MouseDown);
             this.picBoard.MouseMove += new System.Windows.Forms.MouseEventHandler(this.picBoard_MouseMove);
             // 
-            // mnuOpen
+            // tableLayoutPanel1
             // 
-            this.mnuOpen.Image = ((System.Drawing.Image)(resources.GetObject("mnuOpen.Image")));
-            this.mnuOpen.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.mnuOpen.Name = "mnuOpen";
-            this.mnuOpen.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
-            this.mnuOpen.Size = new System.Drawing.Size(175, 22);
-            this.mnuOpen.Text = "&Open";
-            this.mnuOpen.Click += new System.EventHandler(this.mnuOpen_Click);
+            this.tableLayoutPanel1.ColumnCount = 3;
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 69F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 200F));
+            this.tableLayoutPanel1.Controls.Add(this.groupBox2, 0, 0);
+            this.tableLayoutPanel1.Controls.Add(this.groupBox1, 2, 0);
+            this.tableLayoutPanel1.Controls.Add(this.picBoard, 1, 0);
+            this.tableLayoutPanel1.Controls.Add(this.txtNotes, 1, 2);
+            this.tableLayoutPanel1.Controls.Add(this.label5, 1, 1);
+            this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 49);
+            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
+            this.tableLayoutPanel1.RowCount = 3;
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 18F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 28F));
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(741, 498);
+            this.tableLayoutPanel1.TabIndex = 22;
             // 
-            // mnuSave
+            // mnuStates
             // 
-            this.mnuSave.Image = ((System.Drawing.Image)(resources.GetObject("mnuSave.Image")));
-            this.mnuSave.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.mnuSave.Name = "mnuSave";
-            this.mnuSave.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-            this.mnuSave.Size = new System.Drawing.Size(175, 22);
-            this.mnuSave.Text = "&Save";
-            this.mnuSave.Click += new System.EventHandler(this.mnuSave_Click);
+            this.mnuStates.Name = "mnuStates";
+            this.mnuStates.Size = new System.Drawing.Size(50, 20);
+            this.mnuStates.Text = "&States";
             // 
             // cellPalette
             // 
@@ -622,35 +662,20 @@
             this.cellPalette.ItemHeight = 34;
             this.cellPalette.Location = new System.Drawing.Point(3, 16);
             this.cellPalette.Name = "cellPalette";
-            this.cellPalette.Size = new System.Drawing.Size(57, 371);
+            this.cellPalette.Size = new System.Drawing.Size(57, 473);
             this.cellPalette.States = null;
             this.cellPalette.TabIndex = 0;
-            // 
-            // toolStripSeparator5
-            // 
-            this.toolStripSeparator5.Name = "toolStripSeparator5";
-            this.toolStripSeparator5.Size = new System.Drawing.Size(172, 6);
-            // 
-            // mnuExportOtomataUrl
-            // 
-            this.mnuExportOtomataUrl.Name = "mnuExportOtomataUrl";
-            this.mnuExportOtomataUrl.Size = new System.Drawing.Size(175, 22);
-            this.mnuExportOtomataUrl.Text = "&Export otomata url";
-            this.mnuExportOtomataUrl.Click += new System.EventHandler(this.mnuExportOtomataUrl_Click);
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(661, 508);
+            this.ClientSize = new System.Drawing.Size(741, 569);
+            this.Controls.Add(this.tableLayoutPanel1);
             this.Controls.Add(this.status);
             this.Controls.Add(this.toolStrip1);
-            this.Controls.Add(this.groupBox2);
-            this.Controls.Add(this.label5);
-            this.Controls.Add(this.txtNotes);
-            this.Controls.Add(this.groupBox1);
-            this.Controls.Add(this.picBoard);
             this.Controls.Add(this.menuStrip1);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "MainForm";
             this.Text = "Procedural Midi";
@@ -669,6 +694,8 @@
             this.status.ResumeLayout(false);
             this.status.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picBoard)).EndInit();
+            this.tableLayoutPanel1.ResumeLayout(false);
+            this.tableLayoutPanel1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -731,6 +758,8 @@
         private System.Windows.Forms.ToolStripMenuItem mnuImportAutomataUrl;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
         private System.Windows.Forms.ToolStripMenuItem mnuExportOtomataUrl;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
+        private System.Windows.Forms.ToolStripMenuItem mnuStates;
     }
 }
 

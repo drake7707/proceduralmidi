@@ -62,6 +62,10 @@ namespace ProceduralMidi
             FillInstruments();
             FillSamples();
 
+            // create states
+            CreateStates();
+
+            // set default dropdown selection
             if (ddlMidiDevices.Items.Count > 0)
                 ddlMidiDevices.SelectedIndex = 0;
 
@@ -70,6 +74,40 @@ namespace ProceduralMidi
 
             if (ddlSamples.Items.Count > 0)
                 ddlSamples.SelectedIndex = 0;
+        }
+
+        private BoardSettings[] states = new BoardSettings[10];
+        private void CreateStates()
+        {
+            for (int i = 0; i < 10; i++)
+            {
+                states[i] = null;
+
+                var mnuItm = new ToolStripMenuItem("Empty state", null, (sender, e) =>
+                    {
+                        LoadState(mnuStates.DropDownItems.IndexOf((ToolStripItem)sender));
+                    });
+                mnuItm.ToolTipText = "Save state with Ctrl+<nr>, load state with Shift+<nr>";
+                mnuItm.ShortcutKeyDisplayString = "Ctrl/Shift+" + i.ToString();
+                mnuStates.DropDownItems.Add(mnuItm);
+            }
+        }
+
+        private void SaveState(int i)
+        {
+            mnuStates.DropDownItems[i].Text = "State " + DateTime.Now.ToString("HH:mm:ss");
+            mnuStates.DropDownItems[i].Tag = BoardMapper.GetStringFromBoardSettings(GetCurrentBoardSettings());
+        }
+
+        private void LoadState(int i)
+        {
+            var boardsettingsString = (string)mnuStates.DropDownItems[i].Tag;
+            if (boardsettingsString != null)
+            {
+                BoardSettings boardsettings;
+                if (BoardMapper.TryGetBoardSettingsFromString(boardsettingsString, out boardsettings))
+                    UpdateFromBoardSettings(boardsettings);
+            }
         }
 
         /// <summary>
@@ -580,16 +618,7 @@ namespace ProceduralMidi
                     sfd.OverwritePrompt = true;
                     if (sfd.ShowDialog(this) == System.Windows.Forms.DialogResult.OK)
                     {
-                        BoardMapper.Save(sfd.FileName, new BoardSettings()
-                        {
-                            Board = board,
-                            Instrument = ddlInstruments.SelectedIndex,
-                            NoteDuration = NoteDuration,
-                            Notes = txtNotes.Text,
-                            Speed = sldSpeed.Value,
-                            UseSamples = rdbSample.Checked,
-                            Sample = (ddlSamples.SelectedIndex >= 0 ? ddlSamples.Items[ddlSamples.SelectedIndex].ToString() : "")
-                        });
+                        BoardMapper.Save(sfd.FileName, GetCurrentBoardSettings());
                     }
                 }
             }
@@ -597,6 +626,24 @@ namespace ProceduralMidi
             {
                 MessageBox.Show("Could not save file, error: " + ex.GetType().FullName + " - " + ex.Message, "Could not save file");
             }
+        }
+
+        /// <summary>
+        /// Returns the current board and its settings
+        /// </summary>
+        /// <returns></returns>
+        private BoardSettings GetCurrentBoardSettings()
+        {
+            return new BoardSettings()
+            {
+                Board = board,
+                Instrument = ddlInstruments.SelectedIndex,
+                NoteDuration = NoteDuration,
+                Notes = txtNotes.Text,
+                Speed = sldSpeed.Value,
+                UseSamples = rdbSample.Checked,
+                Sample = (ddlSamples.SelectedIndex >= 0 ? ddlSamples.Items[ddlSamples.SelectedIndex].ToString() : "")
+            };
         }
 
 
@@ -627,10 +674,21 @@ namespace ProceduralMidi
                 btnStep_Click(btnStep, EventArgs.Empty);
             else if (keyData == Keys.F7)
                 btnRecord.Checked = !btnRecord.Checked;
+            else
+            {
+                for (int i = 0; i < 9; i++)
+                {
+                    if (keyData == (Keys.Control | (Keys)(Keys.D0 + i)) ||
+                       keyData == (Keys.Control | (Keys)(Keys.NumPad0 + i)))
+                        SaveState(i);
+                    else if (keyData == (Keys.Shift | (Keys)(Keys.D0 + i)) ||
+                       keyData == (Keys.Shift | (Keys)(Keys.NumPad0 + i)))
+                        LoadState(i);
+                }
+            }
 
             return base.ProcessCmdKey(ref msg, keyData);
         }
-
 
         /// <summary>
         /// Clean up any resources being used.
@@ -849,6 +907,11 @@ namespace ProceduralMidi
                 ddlSamples.SelectedIndex = ddlSamples.FindString(currentSample);
         }
 
+        /// <summary>
+        /// Imports an otomata url to the the board
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void mnuImportAutomataUrl_Click(object sender, EventArgs e)
         {
             using (ImportOtomataUrl dlg = new ImportOtomataUrl())
@@ -863,16 +926,21 @@ namespace ProceduralMidi
             }
         }
 
+        /// <summary>
+        /// Exports the current state of the board to an otomata url
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void mnuExportOtomataUrl_Click(object sender, EventArgs e)
         {
             string rowAndState = "qwertyuiopasdfghjklzxcvbnm0123456789";
 
             StringBuilder str = new StringBuilder();
-            str.Append("http://earslap.com/projectslab/otomata/?q=");
+            str.Append("http://earslap.com/projectslab/otomata?q=");
 
             for (int row = 0; row < Math.Min(9, board.Rows); row++)
             {
-                for (int col = 0; col < Math.Min(9,board.Cols); col++)
+                for (int col = 0; col < Math.Min(9, board.Cols); col++)
                 {
                     if (board.Cells[col, row].State == CellStateEnum.Up ||
                        board.Cells[col, row].State == CellStateEnum.Right ||
@@ -886,7 +954,7 @@ namespace ProceduralMidi
                     else if (board.Cells[col, row].State == CellStateEnum.Merged)
                     {
                         string colStr = col.ToString();
-                        foreach (CellStateEnum state in board.Cells[col,row].MergedStates)
+                        foreach (CellStateEnum state in board.Cells[col, row].MergedStates)
                         {
                             string rowStr = rowAndState[(row * 4 + (int)state)].ToString();
                             str.Append(colStr + rowStr);
@@ -902,7 +970,7 @@ namespace ProceduralMidi
 
                 MessageBox.Show("The url is copied onto the clipboard");
             }
-            catch (Exception ex )
+            catch (Exception ex)
             {
                 MessageBox.Show("Could not copy the url to the clipboard, error: " + ex.Message);
             }
