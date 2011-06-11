@@ -1,6 +1,6 @@
 ﻿namespace ProceduralMidi
 {
-    partial class MainForm
+    partial class BoardEditor
     {
         /// <summary>
         /// Required designer variable.
@@ -17,7 +17,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(BoardEditor));
             this.tmrIterate = new System.Windows.Forms.Timer(this.components);
             this.lblDebug = new System.Windows.Forms.Label();
             this.tmrDrawHighlights = new System.Windows.Forms.Timer(this.components);
@@ -39,7 +39,24 @@
             this.ddlInstruments = new System.Windows.Forms.ComboBox();
             this.txtNotes = new System.Windows.Forms.TextBox();
             this.label5 = new System.Windows.Forms.Label();
-            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+            this.menuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
+            this.btnOpen = new System.Windows.Forms.ToolStripButton();
+            this.btnSave = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
+            this.btnRun = new System.Windows.Forms.ToolStripButton();
+            this.btnRecord = new System.Windows.Forms.ToolStripButton();
+            this.btnStep = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.btnClean = new System.Windows.Forms.ToolStripButton();
+            this.btnRandomize = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
+            this.status = new System.Windows.Forms.StatusStrip();
+            this.lblStatus = new System.Windows.Forms.ToolStripStatusLabel();
+            this.picBoard = new System.Windows.Forms.PictureBox();
+            this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+            this.menuStrip2 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuOpen = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuReload = new System.Windows.Forms.ToolStripMenuItem();
@@ -58,35 +75,19 @@
             this.mnuReloadSamples = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuAbout = new System.Windows.Forms.ToolStripMenuItem();
-            this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.cellPalette = new ProceduralMidi.Palette();
-            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
-            this.btnOpen = new System.Windows.Forms.ToolStripButton();
-            this.btnSave = new System.Windows.Forms.ToolStripButton();
-            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
-            this.btnRun = new System.Windows.Forms.ToolStripButton();
-            this.btnRecord = new System.Windows.Forms.ToolStripButton();
-            this.btnStep = new System.Windows.Forms.ToolStripButton();
-            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            this.btnClean = new System.Windows.Forms.ToolStripButton();
-            this.btnRandomize = new System.Windows.Forms.ToolStripButton();
-            this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
-            this.status = new System.Windows.Forms.StatusStrip();
-            this.lblStatus = new System.Windows.Forms.ToolStripStatusLabel();
-            this.picBoard = new System.Windows.Forms.PictureBox();
-            this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.sldNoteDuration)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudColumns)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudRows)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.sldSpeed)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.sldVolume)).BeginInit();
-            this.menuStrip1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.status.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picBoard)).BeginInit();
             this.tableLayoutPanel1.SuspendLayout();
+            this.menuStrip2.SuspendLayout();
             this.SuspendLayout();
             // 
             // tmrIterate
@@ -127,10 +128,10 @@
             this.groupBox1.Controls.Add(this.sldVolume);
             this.groupBox1.Controls.Add(this.ddlInstruments);
             this.groupBox1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.groupBox1.Location = new System.Drawing.Point(544, 3);
+            this.groupBox1.Location = new System.Drawing.Point(478, 3);
             this.groupBox1.Name = "groupBox1";
             this.tableLayoutPanel1.SetRowSpan(this.groupBox1, 3);
-            this.groupBox1.Size = new System.Drawing.Size(194, 492);
+            this.groupBox1.Size = new System.Drawing.Size(194, 446);
             this.groupBox1.TabIndex = 21;
             this.groupBox1.TabStop = false;
             // 
@@ -306,9 +307,9 @@
             // txtNotes
             // 
             this.txtNotes.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.txtNotes.Location = new System.Drawing.Point(72, 473);
+            this.txtNotes.Location = new System.Drawing.Point(72, 427);
             this.txtNotes.Name = "txtNotes";
-            this.txtNotes.Size = new System.Drawing.Size(466, 20);
+            this.txtNotes.Size = new System.Drawing.Size(400, 20);
             this.txtNotes.TabIndex = 20;
             this.txtNotes.Text = "D3, A3, A#3, C4, D4, E4, F4, A5, C5";
             this.txtNotes.TextChanged += new System.EventHandler(this.txtNotes_TextChanged);
@@ -317,27 +318,203 @@
             // 
             this.label5.AutoSize = true;
             this.label5.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label5.Location = new System.Drawing.Point(72, 452);
+            this.label5.Location = new System.Drawing.Point(72, 406);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(466, 18);
+            this.label5.Size = new System.Drawing.Size(400, 18);
             this.label5.TabIndex = 15;
             this.label5.Text = "Notes per cell (seperated by \',\' ). If there are not enough notes the specified n" +
-                "otes will be wrapped";
+    "otes will be wrapped";
             this.label5.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // menuStrip1
             // 
-            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.menuStrip1.Name = "menuStrip1";
+            this.menuStrip1.Size = new System.Drawing.Size(61, 4);
+            this.menuStrip1.Text = "menuStrip1";
+            // 
+            // groupBox2
+            // 
+            this.groupBox2.Controls.Add(this.cellPalette);
+            this.groupBox2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.groupBox2.Location = new System.Drawing.Point(3, 3);
+            this.groupBox2.Name = "groupBox2";
+            this.tableLayoutPanel1.SetRowSpan(this.groupBox2, 3);
+            this.groupBox2.Size = new System.Drawing.Size(63, 446);
+            this.groupBox2.TabIndex = 17;
+            this.groupBox2.TabStop = false;
+            this.groupBox2.Text = "Palette";
+            // 
+            // toolStrip1
+            // 
+            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.btnOpen,
+            this.btnSave,
+            this.toolStripSeparator3,
+            this.btnRun,
+            this.btnRecord,
+            this.btnStep,
+            this.toolStripSeparator1,
+            this.btnClean,
+            this.btnRandomize,
+            this.toolStripSeparator4});
+            this.toolStrip1.Location = new System.Drawing.Point(0, 24);
+            this.toolStrip1.Name = "toolStrip1";
+            this.toolStrip1.Size = new System.Drawing.Size(675, 25);
+            this.toolStrip1.TabIndex = 18;
+            // 
+            // btnOpen
+            // 
+            this.btnOpen.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.btnOpen.Image = global::ProceduralMidi.Properties.Resources.control_open_icon;
+            this.btnOpen.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnOpen.Name = "btnOpen";
+            this.btnOpen.Size = new System.Drawing.Size(23, 22);
+            this.btnOpen.Text = "Open (CTRL+O)";
+            this.btnOpen.Click += new System.EventHandler(this.btnOpen_Click);
+            // 
+            // btnSave
+            // 
+            this.btnSave.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.btnSave.Image = global::ProceduralMidi.Properties.Resources.control_save_icon;
+            this.btnSave.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnSave.Name = "btnSave";
+            this.btnSave.Size = new System.Drawing.Size(23, 22);
+            this.btnSave.Text = "Save";
+            this.btnSave.ToolTipText = "Save (CTRL+S)";
+            this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
+            // 
+            // toolStripSeparator3
+            // 
+            this.toolStripSeparator3.Name = "toolStripSeparator3";
+            this.toolStripSeparator3.Size = new System.Drawing.Size(6, 25);
+            // 
+            // btnRun
+            // 
+            this.btnRun.CheckOnClick = true;
+            this.btnRun.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.btnRun.Image = global::ProceduralMidi.Properties.Resources.control_play_icon;
+            this.btnRun.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnRun.Name = "btnRun";
+            this.btnRun.Size = new System.Drawing.Size(23, 22);
+            this.btnRun.Text = "Play";
+            this.btnRun.ToolTipText = "Play (F5)";
+            this.btnRun.CheckedChanged += new System.EventHandler(this.btnRun_CheckedChanged);
+            // 
+            // btnRecord
+            // 
+            this.btnRecord.CheckOnClick = true;
+            this.btnRecord.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.btnRecord.Image = global::ProceduralMidi.Properties.Resources.control_record_icon;
+            this.btnRecord.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnRecord.Name = "btnRecord";
+            this.btnRecord.Size = new System.Drawing.Size(23, 22);
+            this.btnRecord.Text = "Record midi";
+            this.btnRecord.ToolTipText = "Record to a midi file (F7)";
+            this.btnRecord.CheckedChanged += new System.EventHandler(this.btnRecord_CheckedChanged);
+            // 
+            // btnStep
+            // 
+            this.btnStep.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.btnStep.Image = global::ProceduralMidi.Properties.Resources.control_step_icon;
+            this.btnStep.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnStep.Name = "btnStep";
+            this.btnStep.Size = new System.Drawing.Size(23, 22);
+            this.btnStep.Text = "Next state";
+            this.btnStep.ToolTipText = "Next state (F6)";
+            this.btnStep.Click += new System.EventHandler(this.btnStep_Click);
+            // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 25);
+            // 
+            // btnClean
+            // 
+            this.btnClean.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.btnClean.Image = global::ProceduralMidi.Properties.Resources.control_clean_icon;
+            this.btnClean.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnClean.Name = "btnClean";
+            this.btnClean.Size = new System.Drawing.Size(23, 22);
+            this.btnClean.Text = "Clean";
+            this.btnClean.ToolTipText = "Clean board";
+            this.btnClean.Click += new System.EventHandler(this.btnClean_Click);
+            // 
+            // btnRandomize
+            // 
+            this.btnRandomize.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.btnRandomize.Image = global::ProceduralMidi.Properties.Resources.control_shuffle_icon;
+            this.btnRandomize.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnRandomize.Name = "btnRandomize";
+            this.btnRandomize.Size = new System.Drawing.Size(23, 22);
+            this.btnRandomize.Text = "Randomize";
+            this.btnRandomize.Click += new System.EventHandler(this.btnRandomize_Click);
+            // 
+            // toolStripSeparator4
+            // 
+            this.toolStripSeparator4.Name = "toolStripSeparator4";
+            this.toolStripSeparator4.Size = new System.Drawing.Size(6, 25);
+            // 
+            // status
+            // 
+            this.status.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.lblStatus});
+            this.status.Location = new System.Drawing.Point(0, 501);
+            this.status.Name = "status";
+            this.status.Size = new System.Drawing.Size(675, 22);
+            this.status.TabIndex = 19;
+            this.status.Text = "statusStrip1";
+            // 
+            // lblStatus
+            // 
+            this.lblStatus.Name = "lblStatus";
+            this.lblStatus.Size = new System.Drawing.Size(0, 17);
+            // 
+            // picBoard
+            // 
+            this.picBoard.BackColor = System.Drawing.Color.Black;
+            this.picBoard.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.picBoard.Location = new System.Drawing.Point(72, 3);
+            this.picBoard.Name = "picBoard";
+            this.picBoard.Size = new System.Drawing.Size(400, 400);
+            this.picBoard.TabIndex = 2;
+            this.picBoard.TabStop = false;
+            this.picBoard.Paint += new System.Windows.Forms.PaintEventHandler(this.picBoard_Paint);
+            this.picBoard.MouseDown += new System.Windows.Forms.MouseEventHandler(this.picBoard_MouseDown);
+            this.picBoard.MouseMove += new System.Windows.Forms.MouseEventHandler(this.picBoard_MouseMove);
+            // 
+            // tableLayoutPanel1
+            // 
+            this.tableLayoutPanel1.ColumnCount = 3;
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 69F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 200F));
+            this.tableLayoutPanel1.Controls.Add(this.groupBox2, 0, 0);
+            this.tableLayoutPanel1.Controls.Add(this.groupBox1, 2, 0);
+            this.tableLayoutPanel1.Controls.Add(this.picBoard, 1, 0);
+            this.tableLayoutPanel1.Controls.Add(this.txtNotes, 1, 2);
+            this.tableLayoutPanel1.Controls.Add(this.label5, 1, 1);
+            this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 49);
+            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
+            this.tableLayoutPanel1.RowCount = 3;
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 18F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 28F));
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(675, 452);
+            this.tableLayoutPanel1.TabIndex = 22;
+            // 
+            // menuStrip2
+            // 
+            this.menuStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fileToolStripMenuItem,
             this.viewToolStripMenuItem,
             this.mnuStates,
             this.optionsToolStripMenuItem,
             this.helpToolStripMenuItem});
-            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
-            this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(741, 24);
-            this.menuStrip1.TabIndex = 16;
-            this.menuStrip1.Text = "menuStrip1";
+            this.menuStrip2.Location = new System.Drawing.Point(0, 0);
+            this.menuStrip2.Name = "menuStrip2";
+            this.menuStrip2.Size = new System.Drawing.Size(675, 24);
+            this.menuStrip2.TabIndex = 23;
             // 
             // fileToolStripMenuItem
             // 
@@ -482,18 +659,6 @@
             this.mnuAbout.Text = "&About...";
             this.mnuAbout.Click += new System.EventHandler(this.mnuAbout_Click);
             // 
-            // groupBox2
-            // 
-            this.groupBox2.Controls.Add(this.cellPalette);
-            this.groupBox2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.groupBox2.Location = new System.Drawing.Point(3, 3);
-            this.groupBox2.Name = "groupBox2";
-            this.tableLayoutPanel1.SetRowSpan(this.groupBox2, 3);
-            this.groupBox2.Size = new System.Drawing.Size(63, 492);
-            this.groupBox2.TabIndex = 17;
-            this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "Palette";
-            // 
             // cellPalette
             // 
             this.cellPalette.CellStates = null;
@@ -503,182 +668,21 @@
             this.cellPalette.ItemHeight = 34;
             this.cellPalette.Location = new System.Drawing.Point(3, 16);
             this.cellPalette.Name = "cellPalette";
-            this.cellPalette.Size = new System.Drawing.Size(57, 473);
+            this.cellPalette.Size = new System.Drawing.Size(57, 427);
             this.cellPalette.States = null;
             this.cellPalette.TabIndex = 0;
             // 
-            // toolStrip1
-            // 
-            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.btnOpen,
-            this.btnSave,
-            this.toolStripSeparator3,
-            this.btnRun,
-            this.btnRecord,
-            this.btnStep,
-            this.toolStripSeparator1,
-            this.btnClean,
-            this.btnRandomize,
-            this.toolStripSeparator4});
-            this.toolStrip1.Location = new System.Drawing.Point(0, 24);
-            this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(741, 25);
-            this.toolStrip1.TabIndex = 18;
-            // 
-            // btnOpen
-            // 
-            this.btnOpen.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.btnOpen.Image = global::ProceduralMidi.Properties.Resources.control_open_icon;
-            this.btnOpen.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.btnOpen.Name = "btnOpen";
-            this.btnOpen.Size = new System.Drawing.Size(23, 22);
-            this.btnOpen.Text = "Open (CTRL+O)";
-            this.btnOpen.Click += new System.EventHandler(this.btnOpen_Click);
-            // 
-            // btnSave
-            // 
-            this.btnSave.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.btnSave.Image = global::ProceduralMidi.Properties.Resources.control_save_icon;
-            this.btnSave.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.btnSave.Name = "btnSave";
-            this.btnSave.Size = new System.Drawing.Size(23, 22);
-            this.btnSave.Text = "Save";
-            this.btnSave.ToolTipText = "Save (CTRL+S)";
-            this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
-            // 
-            // toolStripSeparator3
-            // 
-            this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(6, 25);
-            // 
-            // btnRun
-            // 
-            this.btnRun.CheckOnClick = true;
-            this.btnRun.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.btnRun.Image = global::ProceduralMidi.Properties.Resources.control_play_icon;
-            this.btnRun.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.btnRun.Name = "btnRun";
-            this.btnRun.Size = new System.Drawing.Size(23, 22);
-            this.btnRun.Text = "Play";
-            this.btnRun.ToolTipText = "Play (F5)";
-            this.btnRun.CheckedChanged += new System.EventHandler(this.btnRun_CheckedChanged);
-            // 
-            // btnRecord
-            // 
-            this.btnRecord.CheckOnClick = true;
-            this.btnRecord.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.btnRecord.Image = global::ProceduralMidi.Properties.Resources.control_record_icon;
-            this.btnRecord.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.btnRecord.Name = "btnRecord";
-            this.btnRecord.Size = new System.Drawing.Size(23, 22);
-            this.btnRecord.Text = "Record midi";
-            this.btnRecord.ToolTipText = "Record to a midi file (F7)";
-            this.btnRecord.CheckedChanged += new System.EventHandler(this.btnRecord_CheckedChanged);
-            // 
-            // btnStep
-            // 
-            this.btnStep.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.btnStep.Image = global::ProceduralMidi.Properties.Resources.control_step_icon;
-            this.btnStep.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.btnStep.Name = "btnStep";
-            this.btnStep.Size = new System.Drawing.Size(23, 22);
-            this.btnStep.Text = "Next state";
-            this.btnStep.ToolTipText = "Next state (F6)";
-            this.btnStep.Click += new System.EventHandler(this.btnStep_Click);
-            // 
-            // toolStripSeparator1
-            // 
-            this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 25);
-            // 
-            // btnClean
-            // 
-            this.btnClean.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.btnClean.Image = global::ProceduralMidi.Properties.Resources.control_clean_icon;
-            this.btnClean.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.btnClean.Name = "btnClean";
-            this.btnClean.Size = new System.Drawing.Size(23, 22);
-            this.btnClean.Text = "Clean";
-            this.btnClean.ToolTipText = "Clean board";
-            this.btnClean.Click += new System.EventHandler(this.btnClean_Click);
-            // 
-            // btnRandomize
-            // 
-            this.btnRandomize.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.btnRandomize.Image = global::ProceduralMidi.Properties.Resources.control_shuffle_icon;
-            this.btnRandomize.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.btnRandomize.Name = "btnRandomize";
-            this.btnRandomize.Size = new System.Drawing.Size(23, 22);
-            this.btnRandomize.Text = "Randomize";
-            this.btnRandomize.Click += new System.EventHandler(this.btnRandomize_Click);
-            // 
-            // toolStripSeparator4
-            // 
-            this.toolStripSeparator4.Name = "toolStripSeparator4";
-            this.toolStripSeparator4.Size = new System.Drawing.Size(6, 25);
-            // 
-            // status
-            // 
-            this.status.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.lblStatus});
-            this.status.Location = new System.Drawing.Point(0, 547);
-            this.status.Name = "status";
-            this.status.Size = new System.Drawing.Size(741, 22);
-            this.status.TabIndex = 19;
-            this.status.Text = "statusStrip1";
-            // 
-            // lblStatus
-            // 
-            this.lblStatus.Name = "lblStatus";
-            this.lblStatus.Size = new System.Drawing.Size(0, 17);
-            // 
-            // picBoard
-            // 
-            this.picBoard.BackColor = System.Drawing.Color.Black;
-            this.picBoard.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.picBoard.Location = new System.Drawing.Point(72, 3);
-            this.picBoard.Name = "picBoard";
-            this.picBoard.Size = new System.Drawing.Size(466, 446);
-            this.picBoard.TabIndex = 2;
-            this.picBoard.TabStop = false;
-            this.picBoard.Paint += new System.Windows.Forms.PaintEventHandler(this.picBoard_Paint);
-            this.picBoard.MouseDown += new System.Windows.Forms.MouseEventHandler(this.picBoard_MouseDown);
-            this.picBoard.MouseMove += new System.Windows.Forms.MouseEventHandler(this.picBoard_MouseMove);
-            // 
-            // tableLayoutPanel1
-            // 
-            this.tableLayoutPanel1.ColumnCount = 3;
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 69F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 200F));
-            this.tableLayoutPanel1.Controls.Add(this.groupBox2, 0, 0);
-            this.tableLayoutPanel1.Controls.Add(this.groupBox1, 2, 0);
-            this.tableLayoutPanel1.Controls.Add(this.picBoard, 1, 0);
-            this.tableLayoutPanel1.Controls.Add(this.txtNotes, 1, 2);
-            this.tableLayoutPanel1.Controls.Add(this.label5, 1, 1);
-            this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 49);
-            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-            this.tableLayoutPanel1.RowCount = 3;
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 18F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 28F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(741, 498);
-            this.tableLayoutPanel1.TabIndex = 22;
-            // 
-            // MainForm
+            // BoardEditor
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(741, 569);
+            this.ContextMenuStrip = this.menuStrip1;
             this.Controls.Add(this.tableLayoutPanel1);
             this.Controls.Add(this.status);
             this.Controls.Add(this.toolStrip1);
-            this.Controls.Add(this.menuStrip1);
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.MainMenuStrip = this.menuStrip1;
-            this.Name = "MainForm";
-            this.Text = "Procedural Midi";
+            this.Controls.Add(this.menuStrip2);
+            this.Name = "BoardEditor";
+            this.Size = new System.Drawing.Size(675, 523);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.sldNoteDuration)).EndInit();
@@ -686,8 +690,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.nudRows)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.sldSpeed)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.sldVolume)).EndInit();
-            this.menuStrip1.ResumeLayout(false);
-            this.menuStrip1.PerformLayout();
             this.groupBox2.ResumeLayout(false);
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
@@ -696,6 +698,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.picBoard)).EndInit();
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();
+            this.menuStrip2.ResumeLayout(false);
+            this.menuStrip2.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -721,20 +725,10 @@
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label lblNoteDuration;
         private System.Windows.Forms.TrackBar sldNoteDuration;
-        private System.Windows.Forms.MenuStrip menuStrip1;
-        private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem mnuOpen;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator;
-        private System.Windows.Forms.ToolStripMenuItem mnuSave;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
-        private System.Windows.Forms.ToolStripMenuItem mnuExit;
-        private System.Windows.Forms.ToolStripMenuItem mnuReload;
+        private System.Windows.Forms.ContextMenuStrip menuStrip1;
         private System.Windows.Forms.ComboBox ddlMidiDevices;
         private System.Windows.Forms.GroupBox groupBox2;
         private Palette cellPalette;
-        private System.Windows.Forms.ToolStripMenuItem viewToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem mnuFancy;
-        private System.Windows.Forms.ToolStripMenuItem mnuShowGrid;
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripButton btnRun;
         private System.Windows.Forms.ToolStripButton btnRecord;
@@ -747,19 +741,30 @@
         private System.Windows.Forms.ToolStripButton btnSave;
         private System.Windows.Forms.StatusStrip status;
         private System.Windows.Forms.ToolStripStatusLabel lblStatus;
-        private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem mnuAbout;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
         private System.Windows.Forms.ComboBox ddlSamples;
         private System.Windows.Forms.RadioButton rdbSample;
         private System.Windows.Forms.RadioButton rdbMidi;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
+        private System.Windows.Forms.MenuStrip menuStrip2;
+        private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem mnuOpen;
+        private System.Windows.Forms.ToolStripMenuItem mnuReload;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
+        private System.Windows.Forms.ToolStripMenuItem mnuImportAutomataUrl;
+        private System.Windows.Forms.ToolStripMenuItem mnuExportOtomataUrl;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator;
+        private System.Windows.Forms.ToolStripMenuItem mnuSave;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
+        private System.Windows.Forms.ToolStripMenuItem mnuExit;
+        private System.Windows.Forms.ToolStripMenuItem viewToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem mnuFancy;
+        private System.Windows.Forms.ToolStripMenuItem mnuShowGrid;
+        private System.Windows.Forms.ToolStripMenuItem mnuStates;
         private System.Windows.Forms.ToolStripMenuItem optionsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem mnuReloadSamples;
-        private System.Windows.Forms.ToolStripMenuItem mnuImportAutomataUrl;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
-        private System.Windows.Forms.ToolStripMenuItem mnuExportOtomataUrl;
-        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
-        private System.Windows.Forms.ToolStripMenuItem mnuStates;
+        private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem mnuAbout;
     }
 }
 
