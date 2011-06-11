@@ -11,12 +11,30 @@ using ProceduralMidi.DAL;
 
 namespace ProceduralMidi
 {
-    public partial class MainForm : Form
+    public partial class BoardEditor : UserControl
     {
-        /// <summary>
-        /// The current board that will be drawn & manipulated
-        /// </summary>
-        private OtomataBoard board;
+        ///// <summary>
+        ///// The current board that will be drawn & manipulated
+        ///// </summary>
+        //private OtomataBoard board;
+        ///// <summary>
+        ///// The current board that will be drawn & manipulated
+        ///// </summary>
+        //public OtomataBoard Board
+        //{
+        //    get { return board; }
+        //    set
+        //    {
+        //        if (board != value && board != null)
+        //        {
+        //            board = value;
+        //            picBoard.Invalidate();
+        //        }
+        //    }
+        //}
+
+        public BoardSettings BoardSettings { get; set; }
+
 
         /// <summary>
         /// The note controller to play & record notes
@@ -26,7 +44,7 @@ namespace ProceduralMidi
         /// <summary>
         /// Creates a new Otomata board form
         /// </summary>
-        public MainForm()
+        public BoardEditor()
         {
             InitializeComponent();
 
@@ -43,19 +61,19 @@ namespace ProceduralMidi
                 ddlSamples.Enabled = false;
             }
 
-            // default values
-            sldVolume.Value = 64;
-            sldSpeed.Value = 250;
-            sldNoteDuration.Value = 500;
-            sldSpeed_ValueChanged(sldSpeed, EventArgs.Empty);
-            sldNoteDuration_ValueChanged(sldNoteDuration, EventArgs.Empty);
 
 
-            // create a new board with the default columns/rows
-            board = new OtomataBoard(Cols, Rows);
-            cellPalette.States = board.PossibleStatesForPalette;
-            if (cellPalette.Items.Count > 0)
-                cellPalette.SelectedIndex = 0;
+            //// default values
+            //sldVolume.Value = 64;
+            //sldSpeed.Value = 250;
+            //sldNoteDuration.Value = 500;
+            //sldSpeed_ValueChanged(sldSpeed, EventArgs.Empty);
+            //sldNoteDuration_ValueChanged(sldNoteDuration, EventArgs.Empty);
+
+
+            //// create a new board with the default columns/rows
+            //board = new OtomataBoard(Cols, Rows);
+
 
             // fill dropdowns
             FillMidiDevices();
@@ -65,15 +83,22 @@ namespace ProceduralMidi
             // create states
             CreateStates();
 
-            // set default dropdown selection
+            //// set default dropdown selection
             if (ddlMidiDevices.Items.Count > 0)
                 ddlMidiDevices.SelectedIndex = 0;
 
-            if (ddlInstruments.Items.Count > 0)
-                ddlInstruments.SelectedIndex = 0;
+            //if (ddlInstruments.Items.Count > 0)
+            //    ddlInstruments.SelectedIndex = 0;
 
-            if (ddlSamples.Items.Count > 0)
-                ddlSamples.SelectedIndex = 0;
+            //if (ddlSamples.Items.Count > 0)
+            //    ddlSamples.SelectedIndex = 0;
+
+            UpdateFromBoardSettings(BoardSettings.GetDefaultBoard());
+
+            cellPalette.States = BoardSettings.Board.PossibleStatesForPalette;
+            if (cellPalette.Items.Count > 0)
+                cellPalette.SelectedIndex = 0;
+
         }
 
         /// <summary>
@@ -100,7 +125,7 @@ namespace ProceduralMidi
         private void SaveState(int i)
         {
             mnuStates.DropDownItems[i].Text = "State " + DateTime.Now.ToString("HH:mm:ss");
-            mnuStates.DropDownItems[i].Tag = BoardMapper.GetStringFromBoardSettings(GetCurrentBoardSettings());
+            mnuStates.DropDownItems[i].Tag = BoardMapper.GetStringFromBoardSettings(BoardSettings);
         }
 
         /// <summary>
@@ -161,7 +186,10 @@ namespace ProceduralMidi
         private void ddlInstrument_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (ddlInstruments.SelectedIndex >= 0)
+            {
                 MidiManager.ChangeInstrument(ddlInstruments.SelectedIndex, NoteController.MIDI_CHANNEL);
+                BoardSettings.Instrument = ddlInstruments.SelectedIndex;
+            }
         }
 
         /// <summary>
@@ -182,28 +210,32 @@ namespace ProceduralMidi
         /// <param name="e"></param>
         private void picBoard_Paint(object sender, PaintEventArgs e)
         {
+
+            BoardSettings settings = this.BoardSettings;
+
             Graphics g = e.Graphics;
 
             Rectangle bounds = new Rectangle(0, 0, picBoard.Width - 1, picBoard.Height - 1);
 
+            int rows = settings.Board.Rows;
+            int cols = settings.Board.Cols;
+
+
             // determine cell size
-            SizeF cellSize = new SizeF(((float)bounds.Width / (float)Cols), ((float)bounds.Height / (float)Rows));
+            SizeF cellSize = new SizeF(((float)bounds.Width / (float)cols), ((float)bounds.Height / (float)rows));
 
             // draw grid
             if (mnuShowGrid.Checked)
             {
                 using (Pen p = new Pen(Color.Gray))
                 {
-                    for (int i = 0; i <= Cols; i++)
+                    for (int i = 0; i <= settings.Board.Cols; i++)
                         g.DrawLine(p, new PointF(i * cellSize.Width, 0), new PointF(i * cellSize.Width, bounds.Bottom));
 
-                    for (int i = 0; i <= Rows; i++)
+                    for (int i = 0; i <= settings.Board.Rows; i++)
                         g.DrawLine(p, new PointF(0, i * cellSize.Height), new PointF(bounds.Right, i * cellSize.Height));
                 }
             }
-
-            int rows = Rows;
-            int cols = Cols;
 
             bool drawFancy = mnuFancy.Checked;
             if (drawFancy)
@@ -226,20 +258,20 @@ namespace ProceduralMidi
                     // if the cell isn't dead, draw it 
                     RectangleF cellBounds = new RectangleF(col * cellSize.Width + 2, row * cellSize.Height + 2, cellSize.Width - 4, cellSize.Height - 4);
                     if (drawFancy)
-                        g.DrawCellFancy(board.Cells[col, row], cellBounds);
+                        g.DrawCellFancy(settings.Board.Cells[col, row], cellBounds);
                     else
-                        g.DrawCellFast(board.Cells[col, row], cellBounds);
+                        g.DrawCellFast(settings.Board.Cells[col, row], cellBounds);
                 }
             }
 
-            // draw the highlights if there are any alive
-            foreach (Highlight hl in highlights)
+            // draw the highlights if there are any alive, // tolist because vst plugin accesses it from different thread
+            foreach (Highlight hl in highlights.ToList())
             {
                 RectangleF r;
                 if (hl.IsRow)
-                    r = new RectangleF(0, hl.Index * cellSize.Height, cellSize.Width * Cols, cellSize.Height);
+                    r = new RectangleF(0, hl.Index * cellSize.Height, cellSize.Width * cols, cellSize.Height);
                 else
-                    r = new RectangleF(hl.Index * cellSize.Width, 0, cellSize.Width, cellSize.Height * Rows);
+                    r = new RectangleF(hl.Index * cellSize.Width, 0, cellSize.Width, cellSize.Height * rows);
 
                 // draw rectangle for entire column or row
                 using (SolidBrush br = new SolidBrush(Color.FromArgb((int)(hl.Alpha * 255), Color.White)))
@@ -257,34 +289,37 @@ namespace ProceduralMidi
         /// <param name="e"></param>
         private void picBoard_MouseMove(object sender, MouseEventArgs e)
         {
+            int rows = BoardSettings.Board.Rows;
+            int cols = BoardSettings.Board.Cols;
+
             Rectangle bounds = new Rectangle(0, 0, picBoard.Width - 1, picBoard.Height - 1);
 
             // determine cell size
-            SizeF cellSize = new SizeF(((float)bounds.Width / (float)Cols), ((float)bounds.Height / (float)Rows));
+            SizeF cellSize = new SizeF(((float)bounds.Width / (float)cols), ((float)bounds.Height / (float)rows));
 
             // determine current cell index
             int col = (int)(e.X / cellSize.Width);
             int row = (int)(e.Y / cellSize.Height);
 
             // don't go out of bounds
-            if (col < 0 || col >= Cols || row < 0 || row >= Rows)
+            if (col < 0 || col >= cols || row < 0 || row >= rows)
                 return;
 
             // left click
             if (e.Button == System.Windows.Forms.MouseButtons.Left)
             {
-                board.Cells[col, row].State = cellPalette.SelectedState;
+                BoardSettings.Board.Cells[col, row].State = cellPalette.SelectedState;
 
                 // refresh board
-                picBoard.Invalidate();
+                UpdateBoardGUI();
             }
             // right click
             else if (e.Button == System.Windows.Forms.MouseButtons.Right)
             {
                 // show debug info
                 lblDebug.Text = "Pos: " + col + "," + row + Environment.NewLine +
-                                "State: " + board.Cells[col, row].State + Environment.NewLine +
-                                "Merged states: " + string.Join(",", board.Cells[col, row].MergedStates.Select(s => s.ToString()).ToArray());
+                                "State: " + BoardSettings.Board.Cells[col, row].State + Environment.NewLine +
+                                "Merged states: " + string.Join(",", BoardSettings.Board.Cells[col, row].MergedStates.Select(s => s.ToString()).ToArray());
             }
         }
 
@@ -338,13 +373,13 @@ namespace ProceduralMidi
         private void MoveToNextState()
         {
             // advance the board to the next state
-            board.NextState();
+            BoardSettings.Board.NextState();
 
             // check if any acive cells have to be played
             PlayNotesForActiveCells();
 
             // refresh the board
-            picBoard.Invalidate();
+            UpdateBoardGUI();
         }
 
         /// <summary>
@@ -354,25 +389,25 @@ namespace ProceduralMidi
         {
             try
             {
-                OtomataBoard.ActiveState[,] activeCells = board.ActiveCells;
+                OtomataBoard.ActiveState[,] activeCells = BoardSettings.Board.ActiveCells;
 
-                for (int row = 0; row < board.Rows; row++)
+                for (int row = 0; row < BoardSettings.Board.Rows; row++)
                 {
-                    for (int col = 0; col < board.Cols; col++)
+                    for (int col = 0; col < BoardSettings.Board.Cols; col++)
                     {
                         if (activeCells[col, row] == AbstractBoard.ActiveState.ColumnActivated)
                         {
                             // add highlight for the col
                             highlights.Add(new Highlight(false, col));
                             // play corresponding note for the col
-                            noteController.PlayNote(col, NoteDuration, Volume);
+                            noteController.PlayNote(col, BoardSettings.NoteDuration, Volume);
                         }
                         else if (activeCells[col, row] == AbstractBoard.ActiveState.RowActivated)
                         {
                             // add highlight for the row
                             highlights.Add(new Highlight(true, row));
                             // play corresponding note for the row
-                            noteController.PlayNote(row, NoteDuration, Volume);
+                            noteController.PlayNote(row, BoardSettings.NoteDuration, Volume);
                         }
                     }
                 }
@@ -383,6 +418,31 @@ namespace ProceduralMidi
                 btnRun_CheckedChanged(btnRun, EventArgs.Empty);
 
                 MessageBox.Show("Unable to play sound for current state, error: " + ex.GetType().FullName + " - " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        /// <summary>
+        /// Adds highlights all active cells
+        /// </summary>
+        public void AddHighlightsForActiveCells()
+        {
+            OtomataBoard.ActiveState[,] activeCells = BoardSettings.Board.ActiveCells;
+
+            for (int row = 0; row < BoardSettings.Board.Rows; row++)
+            {
+                for (int col = 0; col < BoardSettings.Board.Cols; col++)
+                {
+                    if (activeCells[col, row] == AbstractBoard.ActiveState.ColumnActivated)
+                    {
+                        // add highlight for the col
+                        highlights.Add(new Highlight(false, col));
+                    }
+                    else if (activeCells[col, row] == AbstractBoard.ActiveState.RowActivated)
+                    {
+                        // add highlight for the row
+                        highlights.Add(new Highlight(true, row));
+                    }
+                }
             }
         }
 
@@ -406,8 +466,8 @@ namespace ProceduralMidi
         /// <param name="e"></param>
         private void btnClean_Click(object sender, EventArgs e)
         {
-            board.Clear();
-            picBoard.Invalidate();
+            BoardSettings.Board.Clear();
+            UpdateBoardGUI();
         }
 
         /// <summary>
@@ -435,7 +495,7 @@ namespace ProceduralMidi
 
                 }
 
-                picBoard.Invalidate();
+                UpdateBoardGUI();
             }
         }
 
@@ -448,6 +508,7 @@ namespace ProceduralMidi
         {
             tmrIterate.Interval = sldSpeed.Value;
             lblSpeed.Text = "Speed (in bpm, current=" + ((int)(60000f / (float)sldSpeed.Value)) + ")";
+            BoardSettings.Speed = sldSpeed.Value;
         }
 
         /// <summary>
@@ -459,8 +520,8 @@ namespace ProceduralMidi
         {
             if (!ignoreNudRowColValueChange)
             {
-                board.ChangeSize(Rows, Cols);
-                picBoard.Invalidate();
+                BoardSettings.Board.ChangeSize((int)nudRows.Value, (int)nudColumns.Value);
+                UpdateBoardGUI();
             }
         }
 
@@ -473,25 +534,25 @@ namespace ProceduralMidi
         {
             if (!ignoreNudRowColValueChange)
             {
-                board.ChangeSize(Rows, Cols);
-                picBoard.Invalidate();
+                BoardSettings.Board.ChangeSize((int)nudRows.Value, (int)nudColumns.Value);
+                UpdateBoardGUI();
             }
         }
 
-        /// <summary>
-        /// The current nr of rows used
-        /// </summary>
-        public int Rows { get { return (int)nudRows.Value; } }
+        ///// <summary>
+        ///// The current nr of rows used
+        ///// </summary>
+        //public int Rows { get { return (int)nudRows.Value; } }
 
-        /// <summary>
-        /// The current nr of columns used
-        /// </summary>
-        public int Cols { get { return (int)nudColumns.Value; } }
+        ///// <summary>
+        ///// The current nr of columns used
+        ///// </summary>
+        //public int Cols { get { return (int)nudColumns.Value; } }
 
-        /// <summary>
-        /// The current note duration used
-        /// </summary>
-        public int NoteDuration { get { return sldNoteDuration.Value; } }
+        ///// <summary>
+        ///// The current note duration used
+        ///// </summary>
+        //public int NoteDuration { get { return sldNoteDuration.Value; } }
 
         /// <summary>
         /// The volume used
@@ -506,7 +567,10 @@ namespace ProceduralMidi
         private void txtNotes_TextChanged(object sender, EventArgs e)
         {
             if (!string.IsNullOrEmpty(txtNotes.Text))
+            {
                 noteController.NotesPerCell = txtNotes.Text.ToUpper().Split(',').Select(n => n.Trim()).ToArray();
+                BoardSettings.Notes = txtNotes.Text;
+            }
         }
 
         /// <summary>
@@ -517,6 +581,7 @@ namespace ProceduralMidi
         private void sldNoteDuration_ValueChanged(object sender, EventArgs e)
         {
             lblNoteDuration.Text = "Note duration (in ms, current=" + sldNoteDuration.Value + ")";
+            BoardSettings.NoteDuration = sldNoteDuration.Value;
         }
 
 
@@ -569,9 +634,22 @@ namespace ProceduralMidi
         /// Set controls to the values specified in the board settings
         /// </summary>
         /// <param name="boardSettings"></param>
-        private void UpdateFromBoardSettings(BoardSettings boardSettings)
+        public void UpdateFromBoardSettings(BoardSettings boardSettings)
         {
-            board = boardSettings.Board;
+            if (BoardSettings == null)
+                BoardSettings = boardSettings;
+            else
+            {
+                // don't make a new instance of boarsettings, otherwise the databinding with the plugin will break;
+                BoardSettings.Board = boardSettings.Board;
+                BoardSettings.Instrument = boardSettings.Instrument;
+                BoardSettings.NoteDuration = boardSettings.NoteDuration;
+                BoardSettings.Notes = boardSettings.Notes;
+                BoardSettings.Sample = boardSettings.Sample;
+                BoardSettings.Speed = boardSettings.Speed;
+                BoardSettings.UseSamples = boardSettings.UseSamples;
+            }
+
             sldNoteDuration.Value = boardSettings.NoteDuration;
             sldSpeed.Value = boardSettings.Speed;
             txtNotes.Text = boardSettings.Notes;
@@ -582,7 +660,7 @@ namespace ProceduralMidi
             rdbMidi.Checked = !boardSettings.UseSamples;
             ddlSamples.SelectedIndex = ddlSamples.FindString(boardSettings.Sample);
 
-            picBoard.Invalidate();
+            UpdateBoardGUI();
         }
 
         /// <summary>
@@ -626,7 +704,7 @@ namespace ProceduralMidi
                     sfd.OverwritePrompt = true;
                     if (sfd.ShowDialog(this) == System.Windows.Forms.DialogResult.OK)
                     {
-                        BoardMapper.Save(sfd.FileName, GetCurrentBoardSettings());
+                        BoardMapper.Save(sfd.FileName, BoardSettings);
                     }
                 }
             }
@@ -636,23 +714,35 @@ namespace ProceduralMidi
             }
         }
 
-        /// <summary>
-        /// Returns the current board and its settings
-        /// </summary>
-        /// <returns></returns>
-        private BoardSettings GetCurrentBoardSettings()
-        {
-            return new BoardSettings()
-            {
-                Board = board,
-                Instrument = ddlInstruments.SelectedIndex,
-                NoteDuration = NoteDuration,
-                Notes = txtNotes.Text,
-                Speed = sldSpeed.Value,
-                UseSamples = rdbSample.Checked,
-                Sample = (ddlSamples.SelectedIndex >= 0 ? ddlSamples.Items[ddlSamples.SelectedIndex].ToString() : "")
-            };
-        }
+        ///// <summary>
+        ///// Returns the current board and its settings
+        ///// </summary>
+        ///// <returns></returns>
+        //private BoardSettings GetCurrentBoardSettings()
+        //{
+
+        //    return new BoardSettings()
+        //    {
+        //        Board = board,
+        //        Instrument = ddlInstruments.SelectedIndex,
+        //        NoteDuration = NoteDuration,
+        //        Notes = txtNotes.Text,
+        //        Speed = sldSpeed.Value,
+        //        UseSamples = rdbSample.Checked,
+        //        Sample = (ddlSamples.SelectedIndex >= 0 ? ddlSamples.Items[ddlSamples.SelectedIndex].ToString() : "")
+        //    };
+        //}
+
+        //public void UpdateToBoardSettings(BoardSettings settings)
+        //{
+        //    settings.Board = board;
+        //    settings.Instrument = ddlInstruments.SelectedIndex;
+        //    settings.NoteDuration = NoteDuration;
+        //    settings.Notes = txtNotes.Text;
+        //    settings.Speed = sldSpeed.Value;
+        //    settings.UseSamples = rdbSample.Checked;
+        //    settings.Sample = (ddlSamples.SelectedIndex >= 0 ? ddlSamples.Items[ddlSamples.SelectedIndex].ToString() : "");
+        //}
 
 
         /// <summary>
@@ -662,9 +752,12 @@ namespace ProceduralMidi
         /// <param name="e"></param>
         private void mnuExit_Click(object sender, EventArgs e)
         {
-            this.Close();
+            EventHandler ev = Close;
+            if (ev != null)
+                ev(this, EventArgs.Empty);
         }
 
+        public event EventHandler Close;
 
         /// <summary>
         /// Shorcut keys for run and next step
@@ -724,14 +817,16 @@ namespace ProceduralMidi
         /// <param name="e"></param>
         private void btnRandomize_Click(object sender, EventArgs e)
         {
-            RandomizeBoard(board);
-            picBoard.Invalidate();
+            RandomizeBoard(BoardSettings.Board);
+            UpdateBoardGUI();
         }
 
-        private Random rnd = new Random();
+
 
         private void RandomizeBoard(OtomataBoard board)
         {
+            Random rnd = new Random();
+
             List<CellStateEnum> possibleStates = board.PossibleStatesForPalette.Where(s => s != CellStateEnum.Dead).ToList();
 
             for (int row = 0; row < board.Rows; row++)
@@ -755,7 +850,7 @@ namespace ProceduralMidi
         {
             // toggle fancy setting
             mnuFancy.Checked = !mnuFancy.Checked;
-            picBoard.Invalidate();
+            UpdateBoardGUI();
         }
 
         /// <summary>
@@ -766,7 +861,7 @@ namespace ProceduralMidi
         private void mnuShowGrid_Click(object sender, EventArgs e)
         {
             mnuShowGrid.Checked = !mnuShowGrid.Checked;
-            picBoard.Invalidate();
+            UpdateBoardGUI();
         }
 
         /// <summary>
@@ -853,7 +948,7 @@ namespace ProceduralMidi
         /// <param name="e"></param>
         protected override void OnSizeChanged(EventArgs e)
         {
-            picBoard.Invalidate();
+            UpdateBoardGUI();
             base.OnSizeChanged(e);
         }
 
@@ -876,6 +971,7 @@ namespace ProceduralMidi
         private void rdbSample_CheckedChanged(object sender, EventArgs e)
         {
             noteController.UseSamples = rdbSample.Checked;
+            BoardSettings.UseSamples = rdbSample.Checked;
         }
 
         /// <summary>
@@ -886,6 +982,7 @@ namespace ProceduralMidi
         private void rdbMidi_CheckedChanged(object sender, EventArgs e)
         {
             noteController.UseSamples = rdbSample.Checked;
+            BoardSettings.UseSamples = rdbSample.Checked;
         }
 
         /// <summary>
@@ -896,7 +993,10 @@ namespace ProceduralMidi
         private void ddlSamples_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (ddlSamples.SelectedIndex >= 0 && noteController.SampleManager != null)
+            {
                 noteController.SampleManager.ChangeSample(ddlSamples.Items[ddlSamples.SelectedIndex].ToString());
+                BoardSettings.Sample = ddlSamples.Items[ddlSamples.SelectedIndex].ToString();
+            }
         }
 
         /// <summary>
@@ -949,6 +1049,8 @@ namespace ProceduralMidi
             StringBuilder str = new StringBuilder();
             str.Append("http://earslap.com/projectslab/otomata?q=");
 
+            var board = BoardSettings.Board;
+
             for (int row = 0; row < Math.Min(9, board.Rows); row++)
             {
                 for (int col = 0; col < Math.Min(9, board.Cols); col++)
@@ -984,6 +1086,43 @@ namespace ProceduralMidi
             catch (Exception ex)
             {
                 MessageBox.Show("Could not copy the url to the clipboard, error: " + ex.Message);
+            }
+        }
+
+        public void UpdateBoardGUI()
+        {
+            try
+            {
+                if (picBoard.InvokeRequired)
+                    this.BeginInvoke(new Action(() => picBoard.Invalidate()));
+                else
+                    picBoard.Invalidate();
+            }
+            catch (Exception)
+            {
+            }
+        }
+
+        private bool isForPlugin;
+
+        public bool IsForPlugin
+        {
+            get { return isForPlugin; }
+            set
+            {
+                isForPlugin = value;
+
+
+                btnRun.Enabled = !isForPlugin;
+                btnRecord.Enabled = !isForPlugin;
+                rdbMidi.Enabled = !isForPlugin;
+                rdbSample.Enabled = !isForPlugin;
+                ddlMidiDevices.Enabled = !isForPlugin;
+                ddlInstruments.Enabled = !isForPlugin;
+                ddlSamples.Enabled = !isForPlugin;
+                sldVolume.Enabled = !isForPlugin;
+                mnuReloadSamples.Enabled = !isForPlugin;
+                btnStep.Enabled = !isForPlugin;
             }
         }
 
