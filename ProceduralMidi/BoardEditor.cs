@@ -341,7 +341,6 @@ namespace ProceduralMidi
             if (e.Button == System.Windows.Forms.MouseButtons.Left)
             {
                 BoardSettings.Board.Cells[col, row].State = cellPalette.SelectedState;
-
                 // refresh board
                 UpdateBoardGUI();
             }
@@ -349,7 +348,6 @@ namespace ProceduralMidi
             else if (e.Button == System.Windows.Forms.MouseButtons.Right)
             {
                 BoardSettings.Board.Cells[col, row].State = CellStateEnum.Dead;
-
                 // refresh board
                 UpdateBoardGUI();
             }
