@@ -1,0 +1,252 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1" GroupingSetting="Access" MembersFormat="FullSignature">
+  <Class Name="ProceduralMidi.AbstractBoard">
+    <Position X="1.25" Y="5" Width="3.5" />
+    <Compartments>
+      <Compartment Name="Nested Types" Collapsed="false" />
+    </Compartments>
+    <NestedTypes>
+      <Enum Name="ProceduralMidi.AbstractBoard.ActiveState">
+        <TypeIdentifier>
+          <NewMemberFileName>AbstractBoard.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AQAAAAAAAIAAAEAAAQIAAIAACAAAAAAAAACAAABAAAA=</HashCode>
+      <FileName>AbstractBoard.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Cells" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="ProceduralMidi.BoardEditor">
+    <Position X="16" Y="5.25" Width="3.25" />
+    <Members>
+      <Field Name="btnClean" Hidden="true" />
+      <Field Name="btnOpen" Hidden="true" />
+      <Field Name="btnRandomize" Hidden="true" />
+      <Field Name="btnRecord" Hidden="true" />
+      <Field Name="btnRun" Hidden="true" />
+      <Field Name="btnSave" Hidden="true" />
+      <Field Name="btnStep" Hidden="true" />
+      <Field Name="cellPalette" Hidden="true" />
+      <Field Name="components" Hidden="true" />
+      <Field Name="ddlInstruments" Hidden="true" />
+      <Field Name="ddlMidiDevices" Hidden="true" />
+      <Field Name="ddlSamples" Hidden="true" />
+      <Field Name="fileToolStripMenuItem" Hidden="true" />
+      <Field Name="groupBox1" Hidden="true" />
+      <Field Name="groupBox2" Hidden="true" />
+      <Field Name="helpToolStripMenuItem" Hidden="true" />
+      <Field Name="label2" Hidden="true" />
+      <Field Name="label3" Hidden="true" />
+      <Field Name="label4" Hidden="true" />
+      <Field Name="label5" Hidden="true" />
+      <Field Name="lblDebug" Hidden="true" />
+      <Field Name="lblNoteDuration" Hidden="true" />
+      <Field Name="lblSpeed" Hidden="true" />
+      <Field Name="lblStatus" Hidden="true" />
+      <Field Name="menuStrip1" Hidden="true" />
+      <Field Name="menuStrip2" Hidden="true" />
+      <Field Name="mnuAbout" Hidden="true" />
+      <Field Name="mnuExit" Hidden="true" />
+      <Field Name="mnuExportOtomataUrl" Hidden="true" />
+      <Field Name="mnuFancy" Hidden="true" />
+      <Field Name="mnuImportAutomataUrl" Hidden="true" />
+      <Field Name="mnuOpen" Hidden="true" />
+      <Field Name="mnuReload" Hidden="true" />
+      <Field Name="mnuReloadSamples" Hidden="true" />
+      <Field Name="mnuSave" Hidden="true" />
+      <Field Name="mnuShowGrid" Hidden="true" />
+      <Field Name="mnuStates" Hidden="true" />
+      <Field Name="nudColumns" Hidden="true" />
+      <Field Name="nudRows" Hidden="true" />
+      <Field Name="optionsToolStripMenuItem" Hidden="true" />
+      <Field Name="picBoard" Hidden="true" />
+      <Field Name="rdbMidi" Hidden="true" />
+      <Field Name="rdbSample" Hidden="true" />
+      <Field Name="sldNoteDuration" Hidden="true" />
+      <Field Name="sldSpeed" Hidden="true" />
+      <Field Name="sldVolume" Hidden="true" />
+      <Field Name="status" Hidden="true" />
+      <Field Name="tableLayoutPanel1" Hidden="true" />
+      <Field Name="tmrDrawHighlights" Hidden="true" />
+      <Field Name="tmrIterate" Hidden="true" />
+      <Field Name="toolStrip1" Hidden="true" />
+      <Field Name="toolStripSeparator" Hidden="true" />
+      <Field Name="toolStripSeparator1" Hidden="true" />
+      <Field Name="toolStripSeparator2" Hidden="true" />
+      <Field Name="toolStripSeparator3" Hidden="true" />
+      <Field Name="toolStripSeparator4" Hidden="true" />
+      <Field Name="toolStripSeparator5" Hidden="true" />
+      <Field Name="txtNotes" Hidden="true" />
+      <Field Name="viewToolStripMenuItem" Hidden="true" />
+    </Members>
+    <Compartments>
+      <Compartment Name="Nested Types" Collapsed="false" />
+    </Compartments>
+    <NestedTypes>
+      <Class Name="ProceduralMidi.BoardEditor.Highlight">
+        <TypeIdentifier>
+          <NewMemberFileName>BoardEditor.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Class>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>JzYCAT9wd2YJyRAkNMCYIZcCoJhEkRwYEqeRQgqAs+E=</HashCode>
+      <FileName>BoardEditor.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="noteController" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="ProceduralMidi.Cell">
+    <Position X="5.75" Y="5.25" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAABAAAAAA=</HashCode>
+      <FileName>Cell.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="State" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="ProceduralMidi.CellDrawing">
+    <Position X="13.5" Y="9.75" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAACCEAACAAAgAAAAAgAAAAAAAgAAEQQEAAAAECAAA=</HashCode>
+      <FileName>CellDrawing.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ProceduralMidi.FrmMain">
+    <Position X="16.5" Y="1.75" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAACBAAAAAAACAAAACAAAAAAAAQAAAAAAAAAA=</HashCode>
+      <FileName>FrmMain.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="editor" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="ProceduralMidi.MidiManager">
+    <Position X="24.75" Y="7" Width="2.25" />
+    <NestedTypes>
+      <Delegate Name="ProceduralMidi.MidiManager.MidiCallback" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>MidiManager.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Delegate>
+      <Struct Name="ProceduralMidi.MidiManager.MIDIOUTCAPS" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>MidiManager.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Struct>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>gAAAAAAAAABACBAAAAAgAIAAgAAAAhAAAAAiACAAAAA=</HashCode>
+      <FileName>MidiManager.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ProceduralMidi.Note">
+    <Position X="20.5" Y="0.75" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AAAEAAAAAIAAAAAAAAAAACAAAAAAAAAAAAIAAAAAAAA=</HashCode>
+      <FileName>Note.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ProceduralMidi.NoteController" BaseTypeListCollapsed="true">
+    <Position X="20.5" Y="3.75" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AYAAQAAAgCaEAARAgAEAAAAAAEIYAAAAgAAAACAACgA=</HashCode>
+      <FileName>NoteController.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="sampleManager" />
+      <Field Name="midiManager" />
+      <Property Name="Recorder" />
+    </ShowAsAssociation>
+    <ShowAsCollectionAssociation>
+      <Field Name="notesDown" />
+    </ShowAsCollectionAssociation>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="ProceduralMidi.OtomataBoard">
+    <Position X="1.25" Y="10.5" Width="3.5" />
+    <TypeIdentifier>
+      <HashCode>AIAABAIAAYAAAAAAAQAJIAAAAAAAggAAAACAAAEAAAA=</HashCode>
+      <FileName>OtomataBoard.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ProceduralMidi.Palette">
+    <Position X="13.5" Y="14.25" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAABAAAAAAEIAAABAAAAAA=</HashCode>
+      <FileName>Palette.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ProceduralMidi.Recorder">
+    <Position X="21" Y="9.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAgAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Recorder.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ProceduralMidi.SampleManager" BaseTypeListCollapsed="true">
+    <Position X="24.75" Y="2.75" Width="2.25" />
+    <NestedTypes>
+      <Class Name="ProceduralMidi.SampleManager.Sound" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>SampleManager.cs</NewMemberFileName>
+        </TypeIdentifier>
+        <Lollipop Position="0.2" />
+      </Class>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AAQAAAACACAABAQAAAAgAAAAAAAEAABgAAQAAAAAAAA=</HashCode>
+      <FileName>SampleManager.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="ProceduralMidi.DAL.BoardMapper">
+    <Position X="28.25" Y="8.75" Width="3" />
+    <TypeIdentifier>
+      <HashCode>AAAAAIAAIAAAAAAAAAAAAAAAACAACAAAAAACIAAAAAA=</HashCode>
+      <FileName>DAL\BoardMapper.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ProceduralMidi.DAL.BoardSettings">
+    <Position X="1.25" Y="1.5" Width="3.5" />
+    <TypeIdentifier>
+      <HashCode>AAAgAAAAAAAAAAAAAAAAAABBDAIAAAAAAAIAACAIIgA=</HashCode>
+      <FileName>DAL\BoardSettings.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Board" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="ProceduralMidi.DAL.MidiWriter">
+    <Position X="28" Y="0.75" Width="3.5" />
+    <Compartments>
+      <Compartment Name="Nested Types" Collapsed="false" />
+    </Compartments>
+    <NestedTypes>
+      <Class Name="ProceduralMidi.DAL.MidiWriter.MidiMessage">
+        <TypeIdentifier>
+          <NewMemberFileName>DAL\MidiWriter.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Class>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AAABAAAAAAAAAAAgUIEAAAgBgAAAAQCgBAAiIAkAAEg=</HashCode>
+      <FileName>DAL\MidiWriter.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Enum Name="ProceduralMidi.CellStateEnum">
+    <Position X="8.75" Y="5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AIAAAAIAAQAAAAAAAAAAAAAAAAAAAQQACACACAAAAAI=</HashCode>
+      <FileName>Cell.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

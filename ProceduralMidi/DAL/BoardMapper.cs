@@ -29,9 +29,10 @@ namespace ProceduralMidi.DAL
         /// <returns></returns>
         internal static string GetStringFromBoardSettings(BoardSettings boardsettings)
         {
-            OtomataBoard board = boardsettings.Board;
+            AbstractBoard  board = boardsettings.Board;
 
             StringBuilder str = new StringBuilder();
+            str.AppendLine("boardType=" + board.GetType().FullName);
             str.AppendLine("rows=" + board.Rows);
             str.AppendLine("cols=" + board.Cols);
             str.AppendLine("noteduration=" + boardsettings.NoteDuration);
@@ -234,11 +235,130 @@ namespace ProceduralMidi.DAL
                 Notes = notes,
                 Instrument = instrument,
                 UseSamples = (usesamples != 0 ? true : false),
-                Sample = sample
+                Sample = sample,
+                Volume = 64 // default volume, TODO save in file too ?
             };
             return true;
         }
 
+        /// <summary>
+        /// Generates a board from the given otomata url
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
+        public static BoardSettings GetBoardFromOtomataUrl(string url)
+        {
+            // format of querystring is as follows:
+            // <col><row&state><col><row&state>
+            // with each <col><row&state> for an active cell
+            // if cells are merged, then that pair will be in the querystring multiple times
+            // to determine the row and state seperately
+            // the rowAndState string below has to be split in chunks of 4 characters
+            // the chunk index is the row, the character index in that chunk is the state 
+            string rowAndState = "qwertyuiopasdfghjklzxcvbnm0123456789";
 
+            Uri uri = new Uri(url);
+
+            string querystring = uri.Query.Replace("?q=", "");
+
+            // create settings that are similar to the otomata settings
+            BoardSettings settings = new BoardSettings()
+            {
+                Instrument = 0,
+                Sample = "hang.wav",
+                UseSamples = true,
+                NoteDuration = 3000,
+                Notes = "D3, A3, A#3, C4, D4, E4, F4, A5, C5",
+                Speed = 250
+            };
+
+            // create cell array
+            Cell[,] cells = new Cell[9, 9];
+            // fill default cells with all dead
+            for (int j = 0; j < 9; j++)
+            {
+                for (int i = 0; i < 9; i++)
+                    cells[i, j] = new Cell(CellStateEnum.Dead);
+            }
+
+            // foreach pair
+            for (int i = 0; i < querystring.Length; i += 2)
+            {
+                // <col><row&state>
+                string cell = querystring.Substring(i, 2);
+
+                // parse col
+                int col = int.Parse(cell[0].ToString());
+
+                // parse row & state
+                int row = rowAndState.IndexOf(cell[1].ToString()) / 4;
+                int state = rowAndState.IndexOf(cell[1].ToString()) % 4;
+
+                // add the cell to the board, if there is already a cell present, make the cell merged
+                // and add it to the merged cells list
+                if (cells[col, row] != null && cells[col, row].State != CellStateEnum.Dead)
+                {
+                    if (cells[col, row].State == CellStateEnum.Merged)
+                        cells[col, row].MergedStates.Add((CellStateEnum)state);
+                    else
+                    {
+                        CellStateEnum oldState = cells[col, row].State;
+                        cells[col, row].State = CellStateEnum.Merged;
+                        cells[col, row].MergedStates = new List<CellStateEnum>();
+                        cells[col, row].MergedStates.Add(oldState);
+                        cells[col, row].MergedStates.Add((CellStateEnum)state);
+                    }
+                }
+                else
+                {
+                    cells[col, row] = new Cell((CellStateEnum)state);
+                }
+            }
+
+            settings.Board = new OtomataBoard(9, 9, cells);
+
+            return settings;
+        }
+
+        /// <summary>
+        /// Creates an otomata url based on the board state
+        /// </summary>
+        /// <param name="settings"></param>
+        /// <returns></returns>
+        public static string ExportOtomataUrl(BoardSettings settings)
+        {
+            string rowAndState = "qwertyuiopasdfghjklzxcvbnm0123456789";
+
+            StringBuilder str = new StringBuilder();
+            str.Append("http://earslap.com/projectslab/otomata?q=");
+
+            var board = settings.Board;
+
+            for (int row = 0; row < Math.Min(9, board.Rows); row++)
+            {
+                for (int col = 0; col < Math.Min(9, board.Cols); col++)
+                {
+                    if (board.Cells[col, row].State == CellStateEnum.Up ||
+                       board.Cells[col, row].State == CellStateEnum.Right ||
+                       board.Cells[col, row].State == CellStateEnum.Down ||
+                       board.Cells[col, row].State == CellStateEnum.Left)
+                    {
+                        string colStr = col.ToString();
+                        string rowStr = rowAndState[(row * 4 + (int)board.Cells[col, row].State)].ToString();
+                        str.Append(colStr + rowStr);
+                    }
+                    else if (board.Cells[col, row].State == CellStateEnum.Merged)
+                    {
+                        string colStr = col.ToString();
+                        foreach (CellStateEnum state in board.Cells[col, row].MergedStates)
+                        {
+                            string rowStr = rowAndState[(row * 4 + (int)state)].ToString();
+                            str.Append(colStr + rowStr);
+                        }
+                    }
+                }
+            }
+            return str.ToString();
+        }
     }
 }

@@ -8,6 +8,9 @@ using System.Windows.Forms;
 
 namespace ProceduralMidi
 {
+    /// <summary>
+    /// Auto generated about box from visual studio template
+    /// </summary>
     partial class AboutBox : Form
     {
         public AboutBox()

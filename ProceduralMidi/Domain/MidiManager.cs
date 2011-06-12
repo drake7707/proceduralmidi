@@ -10,9 +10,9 @@ namespace ProceduralMidi
     /// <summary>
     /// Provides a way to communicate with the installed MIDI controllers
     /// </summary>
-    public static class MidiManager
+    public class MidiManager
     {
-        private static int handle = 0;
+        private int handle = 0;
 
         // Handle midi messages sent from system.
         private delegate void MidiCallback(int handle, int msg,
@@ -56,7 +56,7 @@ namespace ProceduralMidi
         /// </summary>
         /// <param name="deviceID"></param>
         /// <returns></returns>
-        private static int OpenMidiOutput(int deviceID)
+        private int OpenMidiOutput(int deviceID)
         {
             midiOutOpen(ref handle, deviceID, null, 0, 0);
             return handle;
@@ -66,7 +66,7 @@ namespace ProceduralMidi
         /// Close midi ouput for device handle
         /// </summary>
         /// <param name="deviceHandle"></param>
-        private static void CloseMidiOutput(int deviceHandle)
+        private void CloseMidiOutput(int deviceHandle)
         {
             midiOutClose(handle);
         }
@@ -100,7 +100,7 @@ namespace ProceduralMidi
         /// <param name="idx"></param>
         /// <param name="channel"></param>
         /// <param name="velocity"></param>
-        public static void NoteDown(short idx, short channel, short velocity)
+        public void NoteDown(short idx, short channel, short velocity)
         {
             if (velocity == 0) // don't play 0 volume notes
                 return;
@@ -116,7 +116,7 @@ namespace ProceduralMidi
         /// <param name="idx"></param>
         /// <param name="channel"></param>
         /// <param name="velocity"></param>
-        public static void NoteUp(short idx, short channel, short velocity)
+        public void NoteUp(short idx, short channel, short velocity)
         {
             if (velocity == 0) // don't play 0 volume notes
                 return;
@@ -272,7 +272,7 @@ namespace ProceduralMidi
         /// Change the current midi device to output notes to
         /// </summary>
         /// <param name="deviceIndex"></param>
-        public static void ChangeMidiDevice(int deviceIndex)
+        public void ChangeMidiDevice(int deviceIndex)
         {
             CloseMidiOutput(0);
             OpenMidiOutput(deviceIndex);
@@ -284,7 +284,7 @@ namespace ProceduralMidi
         /// </summary>
         /// <param name="instrumentIdx"></param>
         /// <param name="channel"></param>
-        public static void ChangeInstrument(int instrumentIdx, int channel)
+        public void ChangeInstrument(int instrumentIdx, int channel)
         {
             midiOutShortMsg(handle, 0xC0 + (instrumentIdx * 0x100) + (instrumentIdx) * 0x10000 + channel);
         }
