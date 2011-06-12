@@ -29,14 +29,20 @@ namespace ProdeduralMidiVST
 
         #region IVstPluginEditor Members
 
+        /// <summary>
+        /// Returns the editors boundaries
+        /// </summary>
         public System.Drawing.Rectangle Bounds
         {
             get { return _uiWrapper.Bounds; }
         }
 
+        /// <summary>
+        /// Closes the editor
+        /// </summary>
         public void Close()
         {
-            lock (guiLock)
+            lock (guiLock) // only 1 thread can access the GUI at the same to prevent deadlocks
             {
                 _uiWrapper.Close();
                 _uiWrapper.SafeInstance.Dispose();
@@ -44,23 +50,48 @@ namespace ProdeduralMidiVST
             }
         }
 
+        /// <summary>
+        /// Keydown is sent to the editor, ignore
+        /// </summary>
+        /// <param name="ascii"></param>
+        /// <param name="virtualKey"></param>
+        /// <param name="modifers"></param>
         public void KeyDown(byte ascii, VstVirtualKey virtualKey, VstModifierKeys modifers)
         {
             // no-op
         }
 
+        /// <summary>
+        /// Keyup is sent to the editor, ignore
+        /// </summary>
+        /// <param name="ascii"></param>
+        /// <param name="virtualKey"></param>
+        /// <param name="modifers"></param>
         public void KeyUp(byte ascii, VstVirtualKey virtualKey, VstModifierKeys modifers)
         {
             // no-op
         }
 
+        /// <summary>
+        /// Knobmode, not used but implementation was required
+        /// </summary>
         public VstKnobMode KnobMode { get; set; }
 
-
+        /// <summary>
+        /// GUI lock,  only 1 thread can access the GUI at the same to prevent deadlocks
+        /// </summary>
         private object guiLock = new object();
 
+        /// <summary>
+        /// Is the editor open
+        /// </summary>
         public bool IsOpen { get; set; }
 
+
+        /// <summary>
+        /// Open an instance of the board editor
+        /// </summary>
+        /// <param name="hWnd"></param>
         public void Open(IntPtr hWnd)
         {
             lock (guiLock)
@@ -94,6 +125,9 @@ namespace ProdeduralMidiVST
             }
         }
 
+        /// <summary>
+        /// Idling, update the GUI
+        /// </summary>
         public void ProcessIdle()
         {
             // update GUI
@@ -104,7 +138,7 @@ namespace ProdeduralMidiVST
                 {
                     try
                     {
-                        Action a = () => _uiWrapper.SafeInstance.UpdateFromBoardSettings(_plugin.BoardSettings);
+                        Action a = () => _uiWrapper.SafeInstance.UpdateGUIFromBoardSettings(_plugin.BoardSettings);
                         if (_uiWrapper.SafeInstance.InvokeRequired)
                             _uiWrapper.SafeInstance.BeginInvoke(a);
                         else
@@ -122,6 +156,9 @@ namespace ProdeduralMidiVST
 
         #endregion
 
+        /// <summary>
+        /// Updates the GUI for the current board state
+        /// </summary>
         internal void UpdateBoard()
         {
             lock (guiLock)

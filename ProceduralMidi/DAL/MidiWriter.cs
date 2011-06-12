@@ -7,6 +7,9 @@ using System.Net;
 
 namespace ProceduralMidi.DAL
 {
+    /// <summary>
+    /// Provides methods to save notes to a midi
+    /// </summary>
     public static class MidiWriter
     {
         /// <summary>
@@ -44,8 +47,14 @@ namespace ProceduralMidi.DAL
         /// </summary>
         private const byte MSG_META_SETTEMPO = 0x51;
 
+        /// <summary>
+        /// Text meta midi event
+        /// </summary>
         private const byte MSG_META_TEXT = 0x01;
 
+        /// <summary>
+        /// End of track meta midi event
+        /// </summary>
         private const byte MSG_META_ENDOFTRACK = 0x2F;
 
         /// <summary>

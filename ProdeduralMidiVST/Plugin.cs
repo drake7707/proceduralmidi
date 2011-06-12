@@ -10,6 +10,9 @@ using ProceduralMidi.DAL;
 
 namespace ProdeduralMidiVST
 {
+    /// <summary>
+    /// VST Plugin manager that manages the midi/audio processor and editor
+    /// </summary>
     public class Plugin : VstPluginWithInterfaceManagerBase, IVstPluginMidiSource
     {
 
@@ -105,19 +108,18 @@ namespace ProdeduralMidiVST
                 IVstMidiProcessor midiProcessor = null;
 
                 if (Host != null)
-                {
                     midiProcessor = Host.GetInstance<IVstMidiProcessor>();
-                }
 
                 if (midiProcessor != null)
-                {
                     return midiProcessor.ChannelCount;
-                }
 
                 return 0;
             }
         }
 
+        /// <summary>
+        /// The current state of the board and its settings
+        /// </summary>
         public BoardSettings BoardSettings { get; set; }
 
         #endregion

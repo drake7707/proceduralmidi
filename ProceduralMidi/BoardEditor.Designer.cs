@@ -38,7 +38,6 @@
             this.sldVolume = new System.Windows.Forms.TrackBar();
             this.ddlInstruments = new System.Windows.Forms.ComboBox();
             this.txtNotes = new System.Windows.Forms.TextBox();
-            this.label5 = new System.Windows.Forms.Label();
             this.menuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
@@ -73,8 +72,16 @@
             this.mnuStates = new System.Windows.Forms.ToolStripMenuItem();
             this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuReloadSamples = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuGenerateMidi = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuAbout = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuLoadStates = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuSaveStates = new System.Windows.Forms.ToolStripMenuItem();
+            this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
+            this.ddlScales = new System.Windows.Forms.ComboBox();
+            this.mnuReloadScales = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
+            this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.cellPalette = new ProceduralMidi.Palette();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.sldNoteDuration)).BeginInit();
@@ -88,6 +95,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.picBoard)).BeginInit();
             this.tableLayoutPanel1.SuspendLayout();
             this.menuStrip2.SuspendLayout();
+            this.tableLayoutPanel2.SuspendLayout();
+            this.groupBox3.SuspendLayout();
             this.SuspendLayout();
             // 
             // tmrIterate
@@ -130,7 +139,7 @@
             this.groupBox1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.groupBox1.Location = new System.Drawing.Point(478, 3);
             this.groupBox1.Name = "groupBox1";
-            this.tableLayoutPanel1.SetRowSpan(this.groupBox1, 3);
+            this.tableLayoutPanel1.SetRowSpan(this.groupBox1, 2);
             this.groupBox1.Size = new System.Drawing.Size(194, 446);
             this.groupBox1.TabIndex = 21;
             this.groupBox1.TabStop = false;
@@ -293,6 +302,7 @@
             this.sldVolume.TabIndex = 8;
             this.sldVolume.TickFrequency = 12;
             this.sldVolume.Value = 64;
+            this.sldVolume.ValueChanged += new System.EventHandler(this.sldVolume_ValueChanged);
             // 
             // ddlInstruments
             // 
@@ -307,24 +317,12 @@
             // txtNotes
             // 
             this.txtNotes.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.txtNotes.Location = new System.Drawing.Point(72, 427);
+            this.txtNotes.Location = new System.Drawing.Point(3, 3);
             this.txtNotes.Name = "txtNotes";
-            this.txtNotes.Size = new System.Drawing.Size(400, 20);
+            this.txtNotes.Size = new System.Drawing.Size(249, 20);
             this.txtNotes.TabIndex = 20;
             this.txtNotes.Text = "D3, A3, A#3, C4, D4, E4, F4, A5, C5";
             this.txtNotes.TextChanged += new System.EventHandler(this.txtNotes_TextChanged);
-            // 
-            // label5
-            // 
-            this.label5.AutoSize = true;
-            this.label5.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label5.Location = new System.Drawing.Point(72, 406);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(400, 18);
-            this.label5.TabIndex = 15;
-            this.label5.Text = "Notes per cell (seperated by \',\' ). If there are not enough notes the specified n" +
-    "otes will be wrapped";
-            this.label5.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // menuStrip1
             // 
@@ -338,7 +336,7 @@
             this.groupBox2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.groupBox2.Location = new System.Drawing.Point(3, 3);
             this.groupBox2.Name = "groupBox2";
-            this.tableLayoutPanel1.SetRowSpan(this.groupBox2, 3);
+            this.tableLayoutPanel1.SetRowSpan(this.groupBox2, 2);
             this.groupBox2.Size = new System.Drawing.Size(63, 446);
             this.groupBox2.TabIndex = 17;
             this.groupBox2.TabStop = false;
@@ -491,15 +489,13 @@
             this.tableLayoutPanel1.Controls.Add(this.groupBox2, 0, 0);
             this.tableLayoutPanel1.Controls.Add(this.groupBox1, 2, 0);
             this.tableLayoutPanel1.Controls.Add(this.picBoard, 1, 0);
-            this.tableLayoutPanel1.Controls.Add(this.txtNotes, 1, 2);
-            this.tableLayoutPanel1.Controls.Add(this.label5, 1, 1);
+            this.tableLayoutPanel1.Controls.Add(this.groupBox3, 1, 1);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 49);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-            this.tableLayoutPanel1.RowCount = 3;
+            this.tableLayoutPanel1.RowCount = 2;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 18F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 28F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 46F));
             this.tableLayoutPanel1.Size = new System.Drawing.Size(675, 452);
             this.tableLayoutPanel1.TabIndex = 22;
             // 
@@ -625,6 +621,9 @@
             // 
             // mnuStates
             // 
+            this.mnuStates.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.mnuLoadStates,
+            this.mnuSaveStates});
             this.mnuStates.Name = "mnuStates";
             this.mnuStates.Size = new System.Drawing.Size(50, 20);
             this.mnuStates.Text = "&States";
@@ -632,17 +631,27 @@
             // optionsToolStripMenuItem
             // 
             this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.mnuReloadSamples});
+            this.mnuReloadSamples,
+            this.mnuReloadScales,
+            this.toolStripMenuItem1,
+            this.mnuGenerateMidi});
             this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
-            this.optionsToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
-            this.optionsToolStripMenuItem.Text = "&Options";
+            this.optionsToolStripMenuItem.Size = new System.Drawing.Size(48, 20);
+            this.optionsToolStripMenuItem.Text = "&Tools";
             // 
             // mnuReloadSamples
             // 
             this.mnuReloadSamples.Name = "mnuReloadSamples";
-            this.mnuReloadSamples.Size = new System.Drawing.Size(156, 22);
+            this.mnuReloadSamples.Size = new System.Drawing.Size(157, 22);
             this.mnuReloadSamples.Text = "Reload &samples";
             this.mnuReloadSamples.Click += new System.EventHandler(this.mnuReloadSamples_Click);
+            // 
+            // mnuGenerateMidi
+            // 
+            this.mnuGenerateMidi.Name = "mnuGenerateMidi";
+            this.mnuGenerateMidi.Size = new System.Drawing.Size(157, 22);
+            this.mnuGenerateMidi.Text = "&Generate midi...";
+            this.mnuGenerateMidi.Click += new System.EventHandler(this.mnuGenerateMidi_Click);
             // 
             // helpToolStripMenuItem
             // 
@@ -659,9 +668,71 @@
             this.mnuAbout.Text = "&About...";
             this.mnuAbout.Click += new System.EventHandler(this.mnuAbout_Click);
             // 
+            // mnuLoadStates
+            // 
+            this.mnuLoadStates.Name = "mnuLoadStates";
+            this.mnuLoadStates.Size = new System.Drawing.Size(133, 22);
+            this.mnuLoadStates.Text = "&Load states";
+            // 
+            // mnuSaveStates
+            // 
+            this.mnuSaveStates.Name = "mnuSaveStates";
+            this.mnuSaveStates.Size = new System.Drawing.Size(133, 22);
+            this.mnuSaveStates.Text = "&Save states";
+            // 
+            // tableLayoutPanel2
+            // 
+            this.tableLayoutPanel2.ColumnCount = 2;
+            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 139F));
+            this.tableLayoutPanel2.Controls.Add(this.ddlScales, 1, 0);
+            this.tableLayoutPanel2.Controls.Add(this.txtNotes, 0, 0);
+            this.tableLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel2.Location = new System.Drawing.Point(3, 13);
+            this.tableLayoutPanel2.Margin = new System.Windows.Forms.Padding(0);
+            this.tableLayoutPanel2.Name = "tableLayoutPanel2";
+            this.tableLayoutPanel2.RowCount = 1;
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(394, 24);
+            this.tableLayoutPanel2.TabIndex = 22;
+            // 
+            // ddlScales
+            // 
+            this.ddlScales.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.ddlScales.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.ddlScales.FormattingEnabled = true;
+            this.ddlScales.Location = new System.Drawing.Point(258, 3);
+            this.ddlScales.Name = "ddlScales";
+            this.ddlScales.Size = new System.Drawing.Size(133, 21);
+            this.ddlScales.TabIndex = 21;
+            this.ddlScales.SelectedIndexChanged += new System.EventHandler(this.ddlScales_SelectedIndexChanged);
+            // 
+            // mnuReloadScales
+            // 
+            this.mnuReloadScales.Name = "mnuReloadScales";
+            this.mnuReloadScales.Size = new System.Drawing.Size(157, 22);
+            this.mnuReloadScales.Text = "Reload &scales";
+            this.mnuReloadScales.Click += new System.EventHandler(this.mnuReloadScales_Click);
+            // 
+            // toolStripMenuItem1
+            // 
+            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(154, 6);
+            // 
+            // groupBox3
+            // 
+            this.groupBox3.Controls.Add(this.tableLayoutPanel2);
+            this.groupBox3.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.groupBox3.Location = new System.Drawing.Point(72, 409);
+            this.groupBox3.Name = "groupBox3";
+            this.groupBox3.Padding = new System.Windows.Forms.Padding(3, 0, 3, 3);
+            this.groupBox3.Size = new System.Drawing.Size(400, 40);
+            this.groupBox3.TabIndex = 22;
+            this.groupBox3.TabStop = false;
+            this.groupBox3.Text = "Scale";
+            // 
             // cellPalette
             // 
-            this.cellPalette.CellStates = null;
             this.cellPalette.Dock = System.Windows.Forms.DockStyle.Fill;
             this.cellPalette.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
             this.cellPalette.FormattingEnabled = true;
@@ -697,9 +768,11 @@
             this.status.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picBoard)).EndInit();
             this.tableLayoutPanel1.ResumeLayout(false);
-            this.tableLayoutPanel1.PerformLayout();
             this.menuStrip2.ResumeLayout(false);
             this.menuStrip2.PerformLayout();
+            this.tableLayoutPanel2.ResumeLayout(false);
+            this.tableLayoutPanel2.PerformLayout();
+            this.groupBox3.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -722,7 +795,6 @@
         private System.Windows.Forms.NumericUpDown nudColumns;
         private System.Windows.Forms.NumericUpDown nudRows;
         private System.Windows.Forms.TextBox txtNotes;
-        private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label lblNoteDuration;
         private System.Windows.Forms.TrackBar sldNoteDuration;
         private System.Windows.Forms.ContextMenuStrip menuStrip1;
@@ -765,6 +837,14 @@
         private System.Windows.Forms.ToolStripMenuItem mnuReloadSamples;
         private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem mnuAbout;
+        private System.Windows.Forms.ToolStripMenuItem mnuGenerateMidi;
+        private System.Windows.Forms.ToolStripMenuItem mnuLoadStates;
+        private System.Windows.Forms.ToolStripMenuItem mnuSaveStates;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
+        private System.Windows.Forms.ComboBox ddlScales;
+        private System.Windows.Forms.ToolStripMenuItem mnuReloadScales;
+        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem1;
+        private System.Windows.Forms.GroupBox groupBox3;
     }
 }
 
