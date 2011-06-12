@@ -23,18 +23,7 @@ namespace ProdeduralMidiVST
             : base("Procedural Midi VST", new VstProductInfo("Procedural Midi", "http://proceduralmidi.codeplex.com", 1000),
                 VstPluginCategory.Generator, VstPluginCapabilities.NoSoundInStop, 0, 0x77073233)
         {
-       
-            BoardSettings = new BoardSettings()
-            {
-                Board = new ProceduralMidi.OtomataBoard(9, 9),
-                Instrument = 0,
-                NoteDuration = 250,
-                Notes = "D3, A3, A#3, C4, D4, E4, F4, A5, C5",
-                Sample = "",
-                Speed = 250,
-                UseSamples = false
-            };
-
+            BoardSettings = BoardSettings.GetDefaultBoard();
         }
 
 
