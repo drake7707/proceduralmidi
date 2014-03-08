@@ -364,12 +364,24 @@ namespace ProceduralMidi
         #endregion
 
 
+        /// <summary>
+        /// Is the cell blocked on the given position (can't go to given position)
+        /// </summary>
+        /// <param name="col"></param>
+        /// <param name="row"></param>
+        /// <returns></returns>
         private bool IsBlocked(int col, int row)
         {
             return Cells[col, row].State == CellStateEnum.Wall || Cells[col, row].State == CellStateEnum.SoundWall ||
                    Cells[col, row].State == CellStateEnum.RotateClockWise || Cells[col, row].State == CellStateEnum.RotateCounterClockWise;
         }
 
+        /// <summary>
+        /// Is the cell at given position a wall
+        /// </summary>
+        /// <param name="col"></param>
+        /// <param name="row"></param>
+        /// <returns></returns>
         private bool IsWall(int col, int row)
         {
             return Cells[col, row].State == CellStateEnum.Wall || Cells[col, row].State == CellStateEnum.SoundWall;

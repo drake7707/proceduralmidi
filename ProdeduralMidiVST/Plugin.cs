@@ -21,7 +21,7 @@ namespace ProdeduralMidiVST
         /// </summary>
         public Plugin()
             : base("Procedural Midi VST", new VstProductInfo("Procedural Midi", "http://proceduralmidi.codeplex.com", 1000),
-                VstPluginCategory.Generator, VstPluginCapabilities.NoSoundInStop, 0, 0x77073233)
+                VstPluginCategory.Generator, VstPluginCapabilities.NoSoundInStop | VstPluginCapabilities.ReceiveTimeInfo, 0, 0x77073233)
         {
             BoardSettings = BoardSettings.GetDefaultBoard();
         }
