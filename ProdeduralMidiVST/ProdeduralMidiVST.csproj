@@ -63,12 +63,6 @@
     <Compile Include="PluginStub.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\ProceduralMidi\ProceduralMidi.csproj">
-      <Project>{B8357E63-C6AB-42A4-AA13-837962BC8D5C}</Project>
-      <Name>ProceduralMidi</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>
