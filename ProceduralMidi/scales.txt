@@ -1,1 +1,0 @@
-﻿Default=D3, A3, A#3, C4, D4, E4, F4, A5, C5
