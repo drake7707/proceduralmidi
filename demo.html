@@ -149,6 +149,9 @@ const NOTES_BY_MIDI_IDX = (() => {
 
 function getFreqByMidiIdx(idx) {
   if (idx < 0) return -1;
+  // Standard MIDI-to-frequency formula: A4 (idx=57) = 440 Hz.
+  // The note table starts at A-1 (idx=0), so idx+3 normalises to A0=0 semitones above A0.
+  // (440/32) = 13.75 Hz is A0; each octave doubles the frequency.
   return (440 / 32) * Math.pow(2, (idx + 3) / 12);
 }
 function noteNameToMidiIdx(name) {
@@ -863,6 +866,8 @@ document.getElementById('wavInput').addEventListener('change', function() {
   const file = this.files[0]; if (!file) return;
   const reader = new FileReader();
   reader.onload = e => {
+    // .slice(0) creates a defensive copy of the ArrayBuffer; some browsers transfer
+    // (detach) the buffer during the FileReader callback, which would cause decodeAudioData to fail.
     getAudioCtx().decodeAudioData(e.target.result.slice(0), buf => {
       sampleBuffer = buf;
       const idx = noteNameToMidiIdx(document.getElementById('txtBaseNote').value.trim());
