@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Procedural Midi – Otomata Demo</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #1e1e1e;
+      color: #ddd;
+      font-family: Segoe UI, Arial, sans-serif;
+      font-size: 13px;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ── top toolbar ── */
+    #toolbar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      background: #2d2d2d;
+      border-bottom: 1px solid #444;
+      flex-shrink: 0;
+      flex-wrap: wrap;
+    }
+
+    #toolbar button, #toolbar label {
+      background: #3a3a3a;
+      color: #ddd;
+      border: 1px solid #555;
+      border-radius: 3px;
+      padding: 4px 10px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    #toolbar button:hover { background: #505050; }
+    #toolbar button.active { background: #1a6fa8; border-color: #2080c0; }
+
+    .sep { width: 1px; height: 22px; background: #555; margin: 0 4px; }
+
+    #toolbar span.lbl { color: #aaa; font-size: 11px; }
+
+    #toolbar input[type=range] { width: 90px; accent-color: #1a6fa8; cursor: pointer; }
+    #toolbar input[type=number] { width: 48px; background: #333; color: #ddd; border: 1px solid #555; border-radius: 3px; padding: 2px 4px; text-align: center; }
+    #toolbar input[type=text]   { width: 200px; background: #333; color: #ddd; border: 1px solid #555; border-radius: 3px; padding: 2px 6px; }
+
+    /* ── main area ── */
+    #main {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* ── palette ── */
+    #palette {
+      width: 96px;
+      background: #252525;
+      border-right: 1px solid #444;
+      display: flex;
+      flex-direction: column;
+      padding: 8px 6px;
+      gap: 4px;
+      overflow-y: auto;
+      flex-shrink: 0;
+    }
+
+    #palette .palette-title {
+      font-size: 11px;
+      color: #888;
+      text-align: center;
+      margin-bottom: 4px;
+    }
+
+    .palette-item {
+      width: 80px;
+      height: 40px;
+      background: #333;
+      border: 2px solid #555;
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      font-size: 18px;
+      transition: border-color 0.15s;
+      user-select: none;
+    }
+    .palette-item .pi-label {
+      font-size: 9px;
+      color: #aaa;
+      margin-top: 1px;
+    }
+    .palette-item:hover  { border-color: #888; }
+    .palette-item.selected { border-color: #1a9af0; background: #1a3a55; }
+
+    /* special cell colours */
+    .palette-item[data-state="0"] .pi-icon,
+    .palette-item[data-state="1"] .pi-icon,
+    .palette-item[data-state="2"] .pi-icon,
+    .palette-item[data-state="3"] .pi-icon { color: #fff; }
+    .palette-item[data-state="5"] .pi-icon { color: #555; }
+    .palette-item[data-state="6"] .pi-icon { color: #e55; }
+    .palette-item[data-state="7"] .pi-icon { color: #8df; }
+    .palette-item[data-state="8"] .pi-icon { color: #fd8; }
+    .palette-item[data-state="9"] .pi-icon { color: #adf; }
+
+    /* ── board canvas area ── */
+    #board-area {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #181818;
+      overflow: hidden;
+    }
+
+    #board {
+      cursor: crosshair;
+      display: block;
+      image-rendering: pixelated;
+    }
+
+    /* ── status bar ── */
+    #statusbar {
+      padding: 3px 10px;
+      background: #2d2d2d;
+      border-top: 1px solid #444;
+      font-size: 11px;
+      color: #888;
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ════════════════ TOOLBAR ════════════════ -->
+<div id="toolbar">
+  <button id="btnPlay" class="active" title="Play / Stop (F5)">▶ Play</button>
+  <button id="btnStep" title="Single step (F6)">⏭ Step</button>
+  <button id="btnClear" title="Clear the board">✕ Clear</button>
+  <button id="btnRandomize" title="Randomize">⚄ Random</button>
+
+  <div class="sep"></div>
+
+  <span class="lbl">Speed</span>
+  <input type="range" id="sldSpeed" min="50" max="2000" value="250" step="10" />
+  <span id="lblSpeed" class="lbl">250 ms (240 bpm)</span>
+
+  <div class="sep"></div>
+
+  <span class="lbl">Duration</span>
+  <input type="range" id="sldDuration" min="50" max="3000" value="500" step="50" />
+  <span id="lblDuration" class="lbl">500 ms</span>
+
+  <div class="sep"></div>
+
+  <span class="lbl">Volume</span>
+  <input type="range" id="sldVolume" min="0" max="100" value="50" />
+
+  <div class="sep"></div>
+
+  <span class="lbl">Rows</span>
+  <input type="number" id="nudRows" min="2" max="32" value="9" />
+  <span class="lbl">Cols</span>
+  <input type="number" id="nudCols" min="2" max="32" value="9" />
+
+  <div class="sep"></div>
+
+  <span class="lbl">Notes</span>
+  <input type="text" id="txtNotes" value="D3, A3, A#3, C4, D4, E4, F4, A5, C5" title="Comma-separated notes per cell index (wraps)" />
+</div>
+
+<!-- ════════════════ MAIN ════════════════ -->
+<div id="main">
+
+  <!-- Palette -->
+  <div id="palette">
+    <div class="palette-title">Palette</div>
+    <!-- items injected by JS -->
+  </div>
+
+  <!-- Board -->
+  <div id="board-area">
+    <canvas id="board"></canvas>
+  </div>
+
+</div>
+
+<!-- Status bar -->
+<div id="statusbar" id="statusbar">Ready – left-click to place, right-click to erase.</div>
+
+<script>
+'use strict';
+
+// ═══════════════════════════════════════════════════════════════
+//  CONSTANTS / ENUMS
+// ═══════════════════════════════════════════════════════════════
+const STATE = {
+  Up:   0, Right: 1, Down:  2, Left:  3,
+  Merged: 4, Dead: 5, Wall: 6, SoundWall: 7,
+  RotateCW: 8, RotateCCW: 9
+};
+
+const STATE_ICON  = ['▲','►','▼','◄','','','█','♫','↻','↺'];
+const STATE_LABEL = ['Up','Right','Down','Left','Merged','Dead','Wall','Sound Wall','Rotate CW','Rotate CCW'];
+const PALETTE_STATES = [STATE.Dead, STATE.Up, STATE.Right, STATE.Down, STATE.Left,
+                        STATE.Wall, STATE.SoundWall, STATE.RotateCW, STATE.RotateCCW];
+
+const ACTIVE = { None: 0, Row: 1, Col: 2 };
+
+// ═══════════════════════════════════════════════════════════════
+//  NOTE TABLES  (ported from NoteController.cs)
+// ═══════════════════════════════════════════════════════════════
+const NOTES_BY_MIDI_IDX = (() => {
+  const octaves = ['-1','0','1','2','3','4','5','6','7','8','9'];
+  const chromatic = ['A','A#','B','C','C#','D','D#','E','F','F#','G','G#'];
+  const list = [];
+  for (const oct of octaves)
+    for (const n of chromatic)
+      list.push(n + oct);
+  return list;
+})();
+
+function getFreqByMidiIdx(idx) {
+  if (idx < 0) return -1;
+  return (440 / 32) * Math.pow(2, (idx + 3) / 12);
+}
+
+function noteNameToMidiIdx(name) {
+  name = name.trim().toUpperCase().replace('BB', 'A#');
+  const idx = NOTES_BY_MIDI_IDX.indexOf(name);
+  return idx; // -1 if not found
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  CELL
+// ═══════════════════════════════════════════════════════════════
+function makeCell(state = STATE.Dead) {
+  return { state, merged: [] };
+}
+
+function cloneCell(c) {
+  return { state: c.state, merged: c.merged.slice() };
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  OTOMATA BOARD
+// ═══════════════════════════════════════════════════════════════
+class OtomataBoard {
+  constructor(rows, cols) {
+    this.rows = rows;
+    this.cols = cols;
+    this.cells = this._clean(rows, cols);
+  }
+
+  _clean(rows, cols) {
+    const g = [];
+    for (let c = 0; c < cols; c++) {
+      g[c] = [];
+      for (let r = 0; r < rows; r++) g[c][r] = makeCell();
+    }
+    return g;
+  }
+
+  clear() { this.cells = this._clean(this.rows, this.cols); }
+
+  changeSize(rows, cols) {
+    const newg = this._clean(rows, cols);
+    const mr = Math.min(this.rows, rows);
+    const mc = Math.min(this.cols, cols);
+    for (let r = 0; r < mr; r++)
+      for (let c = 0; c < mc; c++)
+        newg[c][r] = cloneCell(this.cells[c][r]);
+    this.rows = rows; this.cols = cols; this.cells = newg;
+  }
+
+  // ── helpers ──────────────────────────────────────────────────
+  _isWall(c, r) {
+    const s = this.cells[c][r].state;
+    return s === STATE.Wall || s === STATE.SoundWall;
+  }
+  _isBlocked(c, r) {
+    const s = this.cells[c][r].state;
+    return s === STATE.Wall || s === STATE.SoundWall ||
+           s === STATE.RotateCW || s === STATE.RotateCCW;
+  }
+  _setState(cell, s) {
+    if (cell.state !== STATE.Dead) {
+      cell.merged.push(s);
+      cell.state = STATE.Merged;
+    } else {
+      cell.state = s;
+      cell.merged = [s];
+    }
+  }
+  _rotateCW(s) {
+    if (s === STATE.Up)    return STATE.Right;
+    if (s === STATE.Right) return STATE.Down;
+    if (s === STATE.Down)  return STATE.Left;
+    if (s === STATE.Left)  return STATE.Up;
+    return s;
+  }
+  _rotateCCW(s) {
+    if (s === STATE.Up)    return STATE.Left;
+    if (s === STATE.Left)  return STATE.Down;
+    if (s === STATE.Down)  return STATE.Right;
+    if (s === STATE.Right) return STATE.Up;
+    return s;
+  }
+
+  // ── movement helpers ─────────────────────────────────────────
+  _checkDown(ng, cs, r, c) {
+    if (r + 1 >= this.rows || this._isWall(c, r + 1)) {
+      if (r - 1 >= 0 && !this._isBlocked(c, r - 1)) this._setState(ng[c][r - 1], STATE.Up);
+      else this._setState(ng[c][r], STATE.Up);
+    } else {
+      const nxt = this.cells[c][r + 1].state;
+      if (nxt === STATE.RotateCW) {
+        if (c - 1 >= 0 && !this._isBlocked(c - 1, r)) this._setState(ng[c - 1][r], this._rotateCW(cs));
+        else this._setState(ng[c][r], this._rotateCW(cs));
+      } else if (nxt === STATE.RotateCCW) {
+        if (c + 1 < this.cols && !this._isBlocked(c + 1, r)) this._setState(ng[c + 1][r], this._rotateCCW(cs));
+        else this._setState(ng[c][r], this._rotateCCW(cs));
+      } else {
+        this._setState(ng[c][r + 1], STATE.Down);
+      }
+    }
+  }
+
+  _checkUp(ng, cs, r, c) {
+    if (r - 1 < 0 || this._isWall(c, r - 1)) {
+      if (r + 1 < this.rows && !this._isBlocked(c, r + 1)) this._setState(ng[c][r + 1], STATE.Down);
+      else this._setState(ng[c][r], STATE.Down);
+    } else {
+      const nxt = this.cells[c][r - 1].state;
+      if (nxt === STATE.RotateCW) {
+        if (c + 1 < this.cols && !this._isBlocked(c + 1, r)) this._setState(ng[c + 1][r], this._rotateCW(cs));
+        else this._setState(ng[c][r], this._rotateCW(cs));
+      } else if (nxt === STATE.RotateCCW) {
+        if (c - 1 >= 0 && !this._isBlocked(c - 1, r)) this._setState(ng[c - 1][r], this._rotateCCW(cs));
+        else this._setState(ng[c][r], this._rotateCCW(cs));
+      } else {
+        this._setState(ng[c][r - 1], STATE.Up);
+      }
+    }
+  }
+
+  _checkRight(ng, cs, r, c) {
+    if (c + 1 >= this.cols || this._isWall(c + 1, r)) {
+      if (c - 1 >= 0 && !this._isBlocked(c - 1, r)) this._setState(ng[c - 1][r], STATE.Left);
+      else this._setState(ng[c][r], STATE.Left);
+    } else {
+      const nxt = this.cells[c + 1][r].state;
+      if (nxt === STATE.RotateCW) {
+        if (r + 1 < this.rows && !this._isBlocked(c, r + 1)) this._setState(ng[c][r + 1], this._rotateCW(cs));
+        else this._setState(ng[c][r], this._rotateCW(cs));
+      } else if (nxt === STATE.RotateCCW) {
+        if (r - 1 >= 0 && !this._isBlocked(c, r - 1)) this._setState(ng[c][r - 1], this._rotateCCW(cs));
+        else this._setState(ng[c][r], this._rotateCCW(cs));
+      } else {
+        this._setState(ng[c + 1][r], STATE.Right);
+      }
+    }
+  }
+
+  _checkLeft(ng, cs, r, c) {
+    if (c - 1 < 0 || this._isWall(c - 1, r)) {
+      if (c + 1 < this.cols && !this._isBlocked(c + 1, r)) this._setState(ng[c + 1][r], STATE.Right);
+      else this._setState(ng[c][r], STATE.Right);
+    } else {
+      const nxt = this.cells[c - 1][r].state;
+      if (nxt === STATE.RotateCW) {
+        if (r - 1 >= 0 && !this._isBlocked(c, r - 1)) this._setState(ng[c][r - 1], this._rotateCW(cs));
+        else this._setState(ng[c][r], this._rotateCW(cs));
+      } else if (nxt === STATE.RotateCCW) {
+        if (r + 1 < this.rows && !this._isBlocked(c, r + 1)) this._setState(ng[c][r + 1], this._rotateCCW(cs));
+        else this._setState(ng[c][r], this._rotateCCW(cs));
+      } else {
+        this._setState(ng[c - 1][r], STATE.Left);
+      }
+    }
+  }
+
+  // ── next state ───────────────────────────────────────────────
+  nextState() {
+    const ng = this._clean(this.rows, this.cols);
+
+    for (let r = 0; r < this.rows; r++) {
+      for (let c = 0; c < this.cols; c++) {
+        const cell = this.cells[c][r];
+        const s = cell.state;
+
+        if (s === STATE.Left)  this._checkLeft(ng, s, r, c);
+        else if (s === STATE.Right) this._checkRight(ng, s, r, c);
+        else if (s === STATE.Up)    this._checkUp(ng, s, r, c);
+        else if (s === STATE.Down)  this._checkDown(ng, s, r, c);
+        else if (s === STATE.Wall || s === STATE.SoundWall ||
+                 s === STATE.RotateCW || s === STATE.RotateCCW) {
+          ng[c][r].state = s;
+        } else if (s === STATE.Merged) {
+          for (const ms of cell.merged) {
+            if (ms === STATE.Left)  this._checkLeft(ng, ms, r, c);
+            else if (ms === STATE.Right) this._checkRight(ng, ms, r, c);
+            else if (ms === STATE.Up)    this._checkUp(ng, ms, r, c);
+            else if (ms === STATE.Down)  this._checkDown(ng, ms, r, c);
+          }
+        }
+      }
+    }
+
+    // rotate merged cells (matching C# logic)
+    for (let r = 0; r < this.rows; r++) {
+      for (let c = 0; c < this.cols; c++) {
+        const cell = ng[c][r];
+        if (cell.merged.length > 1) {
+          for (let i = 0; i < cell.merged.length - 1; i++)
+            cell.merged = cell.merged.map(s => this._rotateCW(s));
+        }
+      }
+    }
+
+    this.cells = ng;
+  }
+
+  // ── active cells ─────────────────────────────────────────────
+  // Returns a 2-D array [col][row] of ACTIVE.* values
+  getActiveCells() {
+    const ac = [];
+    for (let c = 0; c < this.cols; c++) {
+      ac[c] = new Array(this.rows).fill(ACTIVE.None);
+    }
+
+    const cw = (s) => this._rotateCW(s);
+    const cellMergedContains = (cell, s) =>
+      cell.state === STATE.Merged && cell.merged.includes(s);
+
+    // left/right borders → RowActivated
+    for (let r = 0; r < this.rows; r++) {
+      const cl = this.cells[0][r], cr = this.cells[this.cols - 1][r];
+      if (cl.state === STATE.Left  || cellMergedContains(cl, cw(STATE.Left)))
+        ac[0][r] = ACTIVE.Row;
+      if (cr.state === STATE.Right || cellMergedContains(cr, cw(STATE.Right)))
+        ac[this.cols - 1][r] = ACTIVE.Row;
+    }
+
+    // top/bottom borders → ColActivated
+    for (let c = 0; c < this.cols; c++) {
+      const ct = this.cells[c][0], cb = this.cells[c][this.rows - 1];
+      if (ct.state === STATE.Up   || cellMergedContains(ct, cw(STATE.Up)))
+        ac[c][0] = ACTIVE.Col;
+      if (cb.state === STATE.Down || cellMergedContains(cb, cw(STATE.Down)))
+        ac[c][this.rows - 1] = ACTIVE.Col;
+    }
+
+    // interior cells next to walls / sound walls
+    for (let r = 0; r < this.rows; r++) {
+      for (let c = 0; c < this.cols; c++) {
+        const cell = this.cells[c][r];
+
+        if (cell.state === STATE.Left || cellMergedContains(cell, cw(STATE.Left))) {
+          if (c - 1 < 0 || this.cells[c - 1][r].state === STATE.SoundWall)
+            ac[c][r] = ACTIVE.Row;
+        }
+        if (cell.state === STATE.Right || cellMergedContains(cell, cw(STATE.Right))) {
+          if (c + 1 >= this.cols || this.cells[c + 1][r].state === STATE.SoundWall)
+            ac[c][r] = ACTIVE.Row;
+        }
+        if (cell.state === STATE.Up || cellMergedContains(cell, cw(STATE.Up))) {
+          if (r - 1 < 0 || this.cells[c][r - 1].state === STATE.SoundWall)
+            ac[c][r] = ACTIVE.Col;
+        }
+        if (cell.state === STATE.Down || cellMergedContains(cell, cw(STATE.Down))) {
+          if (r + 1 >= this.rows || this.cells[c][r + 1].state === STATE.SoundWall)
+            ac[c][r] = ACTIVE.Col;
+        }
+      }
+    }
+
+    return ac;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  AUDIO ENGINE  (Web Audio API)
+// ═══════════════════════════════════════════════════════════════
+let audioCtx = null;
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+
+function playFreq(freq, durationMs, volumeNorm) {
+  if (freq <= 0) return;
+  const ctx = getAudioCtx();
+  const osc  = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.type = 'sine';
+  osc.frequency.value = freq;
+  const now = ctx.currentTime;
+  gain.gain.setValueAtTime(volumeNorm * 0.6, now);
+  gain.gain.exponentialRampToValueAtTime(0.001, now + durationMs / 1000);
+  osc.start(now);
+  osc.stop(now + durationMs / 1000 + 0.05);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  APP STATE
+// ═══════════════════════════════════════════════════════════════
+let board      = new OtomataBoard(9, 9);
+let running    = false;
+let tickTimer  = null;
+let speed      = 250;    // ms between ticks
+let duration   = 500;    // note duration ms
+let volume     = 0.5;    // 0–1
+let notesPerCell = ['D3','A3','A#3','C4','D4','E4','F4','A5','C5'];
+let selectedState = STATE.Up;
+let mouseDown  = false;
+let mouseBtn   = 0;      // 0=left,2=right
+
+// highlights: [{isRow:bool, index:int, alpha:float}]
+let highlights = [];
+let hlRafId    = null;
+
+// ═══════════════════════════════════════════════════════════════
+//  PALETTE
+// ═══════════════════════════════════════════════════════════════
+const paletteEl = document.getElementById('palette');
+
+function buildPalette() {
+  // keep title node
+  const title = paletteEl.querySelector('.palette-title');
+  paletteEl.innerHTML = '';
+  paletteEl.appendChild(title);
+
+  for (const s of PALETTE_STATES) {
+    const item = document.createElement('div');
+    item.className = 'palette-item' + (s === selectedState ? ' selected' : '');
+    item.dataset.state = s;
+    item.title = STATE_LABEL[s];
+
+    const icon = document.createElement('span');
+    icon.className = 'pi-icon';
+    icon.textContent = STATE_ICON[s] || '·';
+
+    const lbl = document.createElement('span');
+    lbl.className = 'pi-label';
+    lbl.textContent = STATE_LABEL[s];
+
+    item.appendChild(icon);
+    item.appendChild(lbl);
+
+    item.addEventListener('click', () => {
+      selectedState = s;
+      document.querySelectorAll('.palette-item').forEach(el => el.classList.remove('selected'));
+      item.classList.add('selected');
+    });
+    paletteEl.appendChild(item);
+  }
+}
+
+buildPalette();
+
+// ═══════════════════════════════════════════════════════════════
+//  CANVAS / RENDERING
+// ═══════════════════════════════════════════════════════════════
+const canvas = document.getElementById('board');
+const ctx2d  = canvas.getContext('2d');
+
+function resizeCanvas() {
+  const area = document.getElementById('board-area');
+  const W = area.clientWidth - 20;
+  const H = area.clientHeight - 20;
+  const cellSize = Math.floor(Math.min(W / board.cols, H / board.rows));
+  canvas.width  = cellSize * board.cols;
+  canvas.height = cellSize * board.rows;
+}
+
+function drawBoard() {
+  const W = canvas.width, H = canvas.height;
+  const cs = W / board.cols;  // cell size (float)
+  const cr = H / board.rows;
+
+  ctx2d.clearRect(0, 0, W, H);
+  ctx2d.fillStyle = '#181818';
+  ctx2d.fillRect(0, 0, W, H);
+
+  // draw highlights (row/col flashes)
+  for (const hl of highlights) {
+    ctx2d.fillStyle = `rgba(255,255,255,${hl.alpha * 0.6})`;
+    if (hl.isRow) ctx2d.fillRect(0, hl.index * cr, W, cr);
+    else          ctx2d.fillRect(hl.index * cs, 0, cs, H);
+  }
+
+  // grid lines
+  ctx2d.strokeStyle = '#333';
+  ctx2d.lineWidth = 1;
+  for (let c = 0; c <= board.cols; c++) {
+    ctx2d.beginPath();
+    ctx2d.moveTo(c * cs, 0);
+    ctx2d.lineTo(c * cs, H);
+    ctx2d.stroke();
+  }
+  for (let r = 0; r <= board.rows; r++) {
+    ctx2d.beginPath();
+    ctx2d.moveTo(0, r * cr);
+    ctx2d.lineTo(W, r * cr);
+    ctx2d.stroke();
+  }
+
+  const pad = 3;
+  const fontSz = Math.max(8, Math.min(cs, cr) * 0.55);
+  ctx2d.font = `bold ${fontSz}px "Segoe UI Symbol", "Arial Unicode MS", sans-serif`;
+  ctx2d.textAlign    = 'center';
+  ctx2d.textBaseline = 'middle';
+
+  for (let r = 0; r < board.rows; r++) {
+    for (let c = 0; c < board.cols; c++) {
+      const cell = board.cells[c][r];
+      if (cell.state === STATE.Dead) continue;
+
+      const x = c * cs + pad, y = r * cr + pad;
+      const w = cs - pad * 2, h = cr - pad * 2;
+      const cx = x + w / 2, cy = y + h / 2;
+      const radius = Math.min(w, h) * 0.15;
+
+      // background
+      if (cell.state === STATE.Merged) {
+        ctx2d.fillStyle = '#ffffff';
+      } else if (cell.state === STATE.Wall) {
+        ctx2d.fillStyle = '#882222';
+      } else if (cell.state === STATE.SoundWall) {
+        ctx2d.fillStyle = '#225588';
+      } else if (cell.state === STATE.RotateCW || cell.state === STATE.RotateCCW) {
+        ctx2d.fillStyle = '#556622';
+      } else {
+        ctx2d.fillStyle = '#555555';
+      }
+      roundRect(ctx2d, x, y, w, h, radius);
+      ctx2d.fill();
+
+      // text
+      if (cell.state === STATE.Merged) {
+        ctx2d.fillStyle = '#222';
+        // show all merged arrows smaller
+        const subSz = Math.max(6, fontSz * 0.65);
+        ctx2d.font = `bold ${subSz}px "Segoe UI Symbol","Arial Unicode MS",sans-serif`;
+        const icons = cell.merged.map(s => STATE_ICON[s]).filter(Boolean);
+        const cols_ = icons.length <= 2 ? icons.length : 2;
+        const rows_ = Math.ceil(icons.length / cols_);
+        icons.forEach((ico, i) => {
+          const dc = (i % cols_) - (cols_ - 1) / 2;
+          const dr = Math.floor(i / cols_) - (rows_ - 1) / 2;
+          ctx2d.fillText(ico, cx + dc * subSz * 1.1, cy + dr * subSz * 1.2);
+        });
+        ctx2d.font = `bold ${fontSz}px "Segoe UI Symbol","Arial Unicode MS",sans-serif`;
+      } else {
+        ctx2d.fillStyle = '#fff';
+        ctx2d.fillText(STATE_ICON[cell.state], cx, cy);
+      }
+    }
+  }
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.arcTo(x + w, y, x + w, y + r, r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
+  ctx.lineTo(x + r, y + h);
+  ctx.arcTo(x, y + h, x, y + h - r, r);
+  ctx.lineTo(x, y + r);
+  ctx.arcTo(x, y, x + r, y, r);
+  ctx.closePath();
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  HIGHLIGHT FADE
+// ═══════════════════════════════════════════════════════════════
+function startHlLoop() {
+  if (hlRafId) return;
+  let last = 0;
+  function loop(ts) {
+    const dt = ts - last;
+    if (dt > 40) { // ~25fps fade
+      last = ts;
+      highlights = highlights.filter(h => {
+        h.alpha -= 0.08;
+        return h.alpha > 0;
+      });
+      drawBoard();
+    }
+    if (highlights.length > 0) hlRafId = requestAnimationFrame(loop);
+    else hlRafId = null;
+  }
+  hlRafId = requestAnimationFrame(loop);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  TICK (advance one step)
+// ═══════════════════════════════════════════════════════════════
+function tick() {
+  board.nextState();
+  const ac = board.getActiveCells();
+
+  const firedRows = new Set(), firedCols = new Set();
+
+  for (let r = 0; r < board.rows; r++) {
+    for (let c = 0; c < board.cols; c++) {
+      if (ac[c][r] === ACTIVE.Col && !firedCols.has(c)) {
+        firedCols.add(c);
+        highlights.push({ isRow: false, index: c, alpha: 0.7 });
+        playNoteForIdx(c);
+      } else if (ac[c][r] === ACTIVE.Row && !firedRows.has(r)) {
+        firedRows.add(r);
+        highlights.push({ isRow: true, index: r, alpha: 0.7 });
+        playNoteForIdx(r);
+      }
+    }
+  }
+
+  drawBoard();
+  if (highlights.length > 0) startHlLoop();
+}
+
+function playNoteForIdx(idx) {
+  if (notesPerCell.length === 0) return;
+  const noteName = notesPerCell[idx % notesPerCell.length];
+  const midiIdx  = noteNameToMidiIdx(noteName);
+  const freq     = getFreqByMidiIdx(midiIdx);
+  if (freq > 0) playFreq(freq, duration, volume);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  SIMULATION CONTROL
+// ═══════════════════════════════════════════════════════════════
+function setRunning(v) {
+  running = v;
+  const btn = document.getElementById('btnPlay');
+  if (running) {
+    btn.textContent = '⏸ Stop';
+    btn.classList.add('active');
+    tickTimer = setInterval(tick, speed);
+  } else {
+    btn.textContent = '▶ Play';
+    btn.classList.remove('active');
+    clearInterval(tickTimer);
+    tickTimer = null;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  MOUSE INTERACTION ON CANVAS
+// ═══════════════════════════════════════════════════════════════
+function cellFromEvent(e) {
+  const rect = canvas.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+  const c = Math.floor((x / canvas.width)  * board.cols);
+  const r = Math.floor((y / canvas.height) * board.rows);
+  if (c < 0 || c >= board.cols || r < 0 || r >= board.rows) return null;
+  return { c, r };
+}
+
+function applyBrush(e) {
+  const pos = cellFromEvent(e);
+  if (!pos) return;
+  if (mouseBtn === 2) {
+    board.cells[pos.c][pos.r] = makeCell(STATE.Dead);
+  } else {
+    board.cells[pos.c][pos.r] = makeCell(selectedState);
+  }
+  drawBoard();
+}
+
+canvas.addEventListener('contextmenu', e => e.preventDefault());
+canvas.addEventListener('mousedown', e => {
+  mouseDown = true; mouseBtn = e.button;
+  applyBrush(e);
+});
+canvas.addEventListener('mousemove', e => { if (mouseDown) applyBrush(e); });
+window.addEventListener('mouseup',   () => { mouseDown = false; });
+
+// ═══════════════════════════════════════════════════════════════
+//  TOOLBAR CONTROLS
+// ═══════════════════════════════════════════════════════════════
+document.getElementById('btnPlay').addEventListener('click', () => setRunning(!running));
+
+document.getElementById('btnStep').addEventListener('click', () => {
+  if (running) setRunning(false);
+  tick();
+});
+
+document.getElementById('btnClear').addEventListener('click', () => {
+  board.clear();
+  highlights = [];
+  drawBoard();
+  setStatus('Board cleared.');
+});
+
+document.getElementById('btnRandomize').addEventListener('click', () => {
+  const nonDead = PALETTE_STATES.filter(s => s !== STATE.Dead);
+  for (let r = 0; r < board.rows; r++)
+    for (let c = 0; c < board.cols; c++) {
+      if (Math.random() >= 0.8)
+        board.cells[c][r] = makeCell(nonDead[Math.floor(Math.random() * nonDead.length)]);
+      else
+        board.cells[c][r] = makeCell(STATE.Dead);
+    }
+  drawBoard();
+  setStatus('Board randomized.');
+});
+
+// Speed
+const sldSpeed = document.getElementById('sldSpeed');
+const lblSpeed = document.getElementById('lblSpeed');
+sldSpeed.addEventListener('input', () => {
+  speed = parseInt(sldSpeed.value);
+  const bpm = Math.round(60000 / speed);
+  lblSpeed.textContent = speed + ' ms (' + bpm + ' bpm)';
+  if (running) { clearInterval(tickTimer); tickTimer = setInterval(tick, speed); }
+});
+// initialise label
+lblSpeed.textContent = speed + ' ms (' + Math.round(60000 / speed) + ' bpm)';
+
+// Duration
+const sldDuration = document.getElementById('sldDuration');
+const lblDuration = document.getElementById('lblDuration');
+sldDuration.addEventListener('input', () => {
+  duration = parseInt(sldDuration.value);
+  lblDuration.textContent = duration + ' ms';
+});
+
+// Volume
+document.getElementById('sldVolume').addEventListener('input', function() {
+  volume = parseInt(this.value) / 100;
+});
+
+// Rows / Cols
+document.getElementById('nudRows').addEventListener('change', function() {
+  const v = Math.max(2, Math.min(32, parseInt(this.value) || 9));
+  this.value = v;
+  board.changeSize(v, board.cols);
+  resizeCanvas();
+  drawBoard();
+});
+document.getElementById('nudCols').addEventListener('change', function() {
+  const v = Math.max(2, Math.min(32, parseInt(this.value) || 9));
+  this.value = v;
+  board.changeSize(board.rows, v);
+  resizeCanvas();
+  drawBoard();
+});
+
+// Notes
+document.getElementById('txtNotes').addEventListener('input', function() {
+  notesPerCell = this.value.split(',').map(n => n.trim().toUpperCase().replace('BB','A#')).filter(Boolean);
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT') return;
+  if (e.key === 'F5') { e.preventDefault(); setRunning(!running); }
+  if (e.key === 'F6') { e.preventDefault(); if (running) setRunning(false); tick(); }
+});
+
+// ═══════════════════════════════════════════════════════════════
+//  STATUS BAR
+// ═══════════════════════════════════════════════════════════════
+function setStatus(msg) {
+  document.getElementById('statusbar').textContent = msg;
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════════════
+window.addEventListener('resize', () => { resizeCanvas(); drawBoard(); });
+resizeCanvas();
+drawBoard();
+
+// start running by default
+setRunning(true);
+</script>
+</body>
+</html>
