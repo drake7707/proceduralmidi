@@ -194,7 +194,7 @@
 </div>
 
 <!-- Status bar -->
-<div id="statusbar" id="statusbar">Ready – left-click to place, right-click to erase.</div>
+<div id="statusbar">Ready – left-click to place, right-click to erase.</div>
 
 <script>
 'use strict';
@@ -420,7 +420,9 @@ class OtomataBoard {
       for (let c = 0; c < this.cols; c++) {
         const cell = ng[c][r];
         if (cell.merged.length > 1) {
-          for (let i = 0; i < cell.merged.length - 1; i++)
+          // Rotate all merged states clockwise (count-1) times, matching original C# logic
+          const rotations = cell.merged.length - 1;
+          for (let n = 0; n < rotations; n++)
             cell.merged = cell.merged.map(s => this._rotateCW(s));
         }
       }
@@ -655,11 +657,11 @@ function drawBoard() {
         const subSz = Math.max(6, fontSz * 0.65);
         ctx2d.font = `bold ${subSz}px "Segoe UI Symbol","Arial Unicode MS",sans-serif`;
         const icons = cell.merged.map(s => STATE_ICON[s]).filter(Boolean);
-        const cols_ = icons.length <= 2 ? icons.length : 2;
-        const rows_ = Math.ceil(icons.length / cols_);
+        const numCols = icons.length <= 2 ? icons.length : 2;
+        const numRows = Math.ceil(icons.length / numCols);
         icons.forEach((ico, i) => {
-          const dc = (i % cols_) - (cols_ - 1) / 2;
-          const dr = Math.floor(i / cols_) - (rows_ - 1) / 2;
+          const dc = (i % numCols) - (numCols - 1) / 2;
+          const dr = Math.floor(i / numCols) - (numRows - 1) / 2;
           ctx2d.fillText(ico, cx + dc * subSz * 1.1, cy + dr * subSz * 1.2);
         });
         ctx2d.font = `bold ${fontSz}px "Segoe UI Symbol","Arial Unicode MS",sans-serif`;
