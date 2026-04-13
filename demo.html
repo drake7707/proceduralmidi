@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Procedural Midi &ndash; Otomata Demo</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #1e1e1e; color: #ddd;
+      font-family: Segoe UI, Arial, sans-serif; font-size: 13px;
+      display: flex; flex-direction: column; height: 100vh; overflow: hidden;
+    }
+    .toolbar {
+      display: flex; align-items: center; gap: 6px;
+      padding: 5px 10px; background: #2d2d2d;
+      border-bottom: 1px solid #444; flex-shrink: 0; flex-wrap: wrap;
+    }
+    .toolbar button {
+      background: #3a3a3a; color: #ddd; border: 1px solid #555;
+      border-radius: 3px; padding: 4px 10px; cursor: pointer; font-size: 12px;
+    }
+    .toolbar button:hover  { background: #505050; }
+    .toolbar button.active { background: #1a6fa8; border-color: #2080c0; }
+    .sep { width: 1px; height: 22px; background: #555; margin: 0 4px; flex-shrink: 0; }
+    .toolbar span.lbl { color: #aaa; font-size: 11px; }
+    .toolbar input[type=range]  { width: 80px; accent-color: #1a6fa8; cursor: pointer; }
+    .toolbar input[type=number] { width: 50px; background: #333; color: #ddd; border: 1px solid #555; border-radius: 3px; padding: 2px 4px; text-align: center; }
+    .toolbar input[type=text]   { background: #333; color: #ddd; border: 1px solid #555; border-radius: 3px; padding: 2px 6px; }
+    #main { display: flex; flex: 1; overflow: hidden; }
+    #palette {
+      width: 100px; background: #252525; border-right: 1px solid #444;
+      display: flex; flex-direction: column; padding: 8px 6px; gap: 4px;
+      overflow-y: auto; flex-shrink: 0;
+    }
+    #palette .palette-title { font-size: 11px; color: #888; text-align: center; margin-bottom: 4px; }
+    .palette-item {
+      width: 86px; height: 42px; background: #333; border: 2px solid #555;
+      border-radius: 4px; cursor: pointer; display: flex; align-items: center;
+      justify-content: center; flex-direction: column; font-size: 18px;
+      transition: border-color 0.15s; user-select: none; overflow: hidden;
+    }
+    .palette-item .pi-label { font-size: 9px; color: #aaa; margin-top: 1px; }
+    .palette-item .pi-img { width: 20px; height: 20px; image-rendering: pixelated; }
+    .palette-item:hover    { border-color: #888; }
+    .palette-item.selected { border-color: #1a9af0; background: #1a3a55; }
+    #board-area {
+      flex: 1; display: flex; align-items: center; justify-content: center;
+      background: #181818; overflow: hidden;
+    }
+    #board { cursor: crosshair; display: block; image-rendering: pixelated; }
+    #statusbar {
+      padding: 3px 10px; background: #2d2d2d; border-top: 1px solid #444;
+      font-size: 11px; color: #888; flex-shrink: 0;
+    }
+    .radio-group { display: flex; align-items: center; gap: 4px; }
+    .radio-group label { cursor: pointer; color: #aaa; font-size: 11px; }
+  </style>
+</head>
+<body>
+
+<!-- ====== TOOLBAR 1: simulation controls ====== -->
+<div class="toolbar" id="toolbar1">
+  <button id="btnPlay" class="active" title="Play / Stop (F5)">&#9654; Play</button>
+  <button id="btnStep" title="Single step (F6)">&#9197; Step</button>
+  <button id="btnClear" title="Clear the board">&#10005; Clear</button>
+  <button id="btnRandomize" title="Randomize (~20% cells)">&#9812; Random</button>
+  <div class="sep"></div>
+  <button id="btnOpen" title="Open board from .txt file">&#128194; Open</button>
+  <button id="btnSave" title="Save board to .txt file">&#128190; Save</button>
+  <div class="sep"></div>
+  <span class="lbl">MIDI steps</span>
+  <input type="number" id="nudMidiSteps" min="1" max="10000" value="200" style="width:54px" title="Number of steps to generate MIDI for" />
+  <button id="btnGenMidi" title="Simulate N steps and export MIDI">&#127925; Gen MIDI</button>
+  <div class="sep"></div>
+  <span class="lbl">Speed</span>
+  <input type="range" id="sldSpeed" min="50" max="2000" value="250" step="10" />
+  <span id="lblSpeed" class="lbl"></span>
+  <div class="sep"></div>
+  <span class="lbl">Duration</span>
+  <input type="range" id="sldDuration" min="50" max="3000" value="500" step="50" />
+  <span id="lblDuration" class="lbl">500 ms</span>
+  <div class="sep"></div>
+  <span class="lbl">Vol</span>
+  <input type="range" id="sldVolume" min="0" max="100" value="50" />
+</div>
+
+<!-- ====== TOOLBAR 2: board size, notes, sample ====== -->
+<div class="toolbar" id="toolbar2">
+  <span class="lbl">Rows</span>
+  <input type="number" id="nudRows" min="2" max="32" value="9" />
+  <span class="lbl">Cols</span>
+  <input type="number" id="nudCols" min="2" max="32" value="9" />
+  <div class="sep"></div>
+  <span class="lbl">Notes</span>
+  <input type="text" id="txtNotes" value="D3, A3, A#3, C4, D4, E4, F4, A5, C5" style="width:200px"
+         title="Comma-separated notes per cell index (wraps)" />
+  <div class="sep"></div>
+  <div class="radio-group">
+    <input type="radio" id="rdbSynth" name="soundMode" value="synth" checked />
+    <label for="rdbSynth">Synthesis</label>
+    <input type="radio" id="rdbWav"   name="soundMode" value="wav" />
+    <label for="rdbWav">WAV Sample</label>
+  </div>
+  <button id="btnLoadWav" title="Load a WAV/audio file to use as sample" style="opacity:0.5">Load WAV&hellip;</button>
+  <span class="lbl">Base note</span>
+  <input type="text" id="txtBaseNote" value="A4" style="width:42px;opacity:0.5"
+         title="Note this sample is tuned to (e.g. A4)" />
+  <span id="lblWavFile" class="lbl" style="color:#6a6">(no file)</span>
+</div>
+
+<!-- ====== MAIN ====== -->
+<div id="main">
+  <div id="palette"><div class="palette-title">Palette</div></div>
+  <div id="board-area"><canvas id="board"></canvas></div>
+</div>
+
+<div id="statusbar">Ready &ndash; left-click to place, right-click to erase.</div>
+
+<input type="file" id="fileOpen" accept=".txt" style="display:none" />
+<input type="file" id="wavInput" accept="audio/*,.wav,.mp3,.ogg,.flac" style="display:none" />
+
+<script>
+'use strict';
+
+// ================================================================
+//  CONSTANTS
+// ================================================================
+const STATE = {
+  Up:0, Right:1, Down:2, Left:3,
+  Merged:4, Dead:5, Wall:6, SoundWall:7, RotateCW:8, RotateCCW:9
+};
+const STATE_LABEL = ['Up','Right','Down','Left','Merged','Dead','Wall','Sound Wall','Rotate CW','Rotate CCW'];
+const STATE_TEXT  = ['\u25b2','\u25ba','\u25bc','\u25c4','','','','','',''];
+const PALETTE_STATES = [STATE.Dead, STATE.Up, STATE.Right, STATE.Down, STATE.Left,
+                        STATE.Wall, STATE.SoundWall, STATE.RotateCW, STATE.RotateCCW];
+const ACTIVE = { None:0, Row:1, Col:2 };
+
+// ================================================================
+//  NOTE TABLES
+// ================================================================
+const NOTES_BY_MIDI_IDX = (() => {
+  const octs = ['-1','0','1','2','3','4','5','6','7','8','9'];
+  const chr  = ['A','A#','B','C','C#','D','D#','E','F','F#','G','G#'];
+  const list = [];
+  for (const o of octs) for (const n of chr) list.push(n + o);
+  return list;
+})();
+
+function getFreqByMidiIdx(idx) {
+  if (idx < 0) return -1;
+  // Standard MIDI-to-frequency formula: A4 (idx=57) = 440 Hz.
+  // The note table starts at A-1 (idx=0), so idx+3 normalises to A0=0 semitones above A0.
+  // (440/32) = 13.75 Hz is A0; each octave doubles the frequency.
+  return (440 / 32) * Math.pow(2, (idx + 3) / 12);
+}
+function noteNameToMidiIdx(name) {
+  return NOTES_BY_MIDI_IDX.indexOf(name.trim().toUpperCase().replace('BB','A#'));
+}
+
+// ================================================================
+//  RESOURCE IMAGES (original PNGs from C# project, base64)
+// ================================================================
+const IMG_DATA = {
+[STATE.Wall]:      'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAB3RJTUUH2wQYCgkHljE0wAAAAAlwSFlzAAAewQAAHsEBw2lUUwAAAARnQU1BAACxjwv8YQUAAABUSURBVHjaY2CgBviPBqSkpIgSA+llARGfP3/GMJRYMUYQATKdHPDs2TOEF4h1NrIYhhfI8Qr1vDAaC4MhFv78+QPHIAOR+djECMbCt2/fiBKjGAAANkMnCTtyoToAAAAASUVORK5CYII=',
+  [STATE.SoundWall]: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAB3RJTUUH2wQYCg479h/egAAAAAlwSFlzAAAewQAAHsEBw2lUUwAAAARnQU1BAACxjwv8YQUAAADYSURBVHjapZLvDYIwEMWp4TsjwAboBm4AG5QNHEE30A1wA2UC2ECdADfQpHyvV/IaL5dKJFzyy+Ue18f1TxQtDWvtHHbEi9Bem2tQ228UUwYJcRR1Ikx6p4UW58QNTV5roXmzHt+1XFxgj1YYeG3PzsJFG9np8Aaaje3q1Deoset3KH5hQhvreBiGRc9gtfQd/WugkZ/IKTdQjJJ4BwxOyGfkErlTxhjZnKNxzQ7sQmTEhkiIO+oqDvztQWyJA9MqMU2G7VxDE0xFzczcNpq5t9DhjJxJ44QPKz5fsMfv5f0AAAAASUVORK5CYII=',
+  [STATE.RotateCW]:  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAK3RFWHRDcmVhdGlvbiBUaW1lAHpvIDI0IGFwciAyMDExIDEyOjAzOjMzICswMTAwVw/2KwAAAAd0SU1FB9sEGAoDNNMOvVwAAAAJcEhZcwAADsIAAA7CARUoSoAAAAAEZ0FNQQAAsY8L/GEFAAAA5klEQVR42mNgoBAw/v//H5t4EBCbAjE7EF8H4k1A/BKrCSADkHD2f9xgKxCzoKlHMWAumoZTQLwTiD8iib0CYkZsBkQiKQJp4kCzKRZJfj02A95DJfehOxEJByEZIotsgBaShBQOzU5AbA7E76DqlgKxOxCLIDv/Ox7bHbAE6lGQHBNShLDiie4DQOyDxD8PxNawaNRFMlUTjytAOB2In2MLRJjfTuLRrIBNHFsIbwNiJjSFi6FyafgSUg9aIJ2AYmSwBp8BIBwBjQ1soASbF3BlJjcgNgFiTiC+BcRLgfgfpTkXKwAAt7ZfeMD9IrsAAAAASUVORK5CYII=',
+  [STATE.RotateCCW]: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAK3RFWHRDcmVhdGlvbiBUaW1lAHpvIDI0IGFwciAyMDExIDEyOjAzOjMzICswMTAwVw/2KwAAAAd0SU1FB9sEGAoEFdAmO8UAAAAJcEhZcwAADsIAAA7CARUoSoAAAAAEZ0FNQQAAsY8L/GEFAAAA5klEQVR42mNgoBAw/v//H5ecOBD7AbEmEP8E4tNAvA5DFcgANMwCxFv/4wbZyOrRNYNc9ApJ8Ucg3gnEp9AMmYvLgPVIimLR5DighsFAJLoBskiSQVi8BsP7oGrewwwQAWJ3IF4KlXgHxOZA7ITDACkki7RggkexBJYDHld8h3mDCRoZ1kB8HilyfID4AJ7oZ8UVjc+BOB2PzSCsieRKXVyKFPAYcBIprLAmpDSogsVo4kxAvA09prAZsAYtME9AMTLowZWQYLjkP3YACv0IZLX4MhMohqKBWA2IvwPxGSDeRWnuxQAA3OxfeLclgu8AAAAASUVORK5CYII='
+};
+
+const IMGS = {};
+for (const [s, src] of Object.entries(IMG_DATA)) {
+  const img = new Image(); img.src = src; IMGS[s] = img;
+}
+
+// ================================================================
+//  CELL
+// ================================================================
+function makeCell(state = STATE.Dead) { return { state, merged: [] }; }
+function cloneCell(c) { return { state: c.state, merged: c.merged.slice() }; }
+
+// ================================================================
+//  OTOMATA BOARD
+// ================================================================
+class OtomataBoard {
+  constructor(rows, cols) {
+    this.rows = rows; this.cols = cols; this.cells = this._clean(rows, cols);
+  }
+  _clean(rows, cols) {
+    const g = [];
+    for (let c = 0; c < cols; c++) { g[c] = []; for (let r = 0; r < rows; r++) g[c][r] = makeCell(); }
+    return g;
+  }
+  clear() { this.cells = this._clean(this.rows, this.cols); }
+  changeSize(rows, cols) {
+    const ng = this._clean(rows, cols);
+    const mr = Math.min(this.rows, rows), mc = Math.min(this.cols, cols);
+    for (let r = 0; r < mr; r++) for (let c = 0; c < mc; c++) ng[c][r] = cloneCell(this.cells[c][r]);
+    this.rows = rows; this.cols = cols; this.cells = ng;
+  }
+  _isWall(c, r) { const s = this.cells[c][r].state; return s === STATE.Wall || s === STATE.SoundWall; }
+  _isBlocked(c, r) {
+    const s = this.cells[c][r].state;
+    return s === STATE.Wall || s === STATE.SoundWall || s === STATE.RotateCW || s === STATE.RotateCCW;
+  }
+  _setState(cell, s) {
+    if (cell.state !== STATE.Dead) { cell.merged.push(s); cell.state = STATE.Merged; }
+    else { cell.state = s; cell.merged = [s]; }
+  }
+  _rotateCW(s) {
+    if (s===STATE.Up) return STATE.Right; if (s===STATE.Right) return STATE.Down;
+    if (s===STATE.Down) return STATE.Left; if (s===STATE.Left) return STATE.Up; return s;
+  }
+  _rotateCCW(s) {
+    if (s===STATE.Up) return STATE.Left; if (s===STATE.Left) return STATE.Down;
+    if (s===STATE.Down) return STATE.Right; if (s===STATE.Right) return STATE.Up; return s;
+  }
+  _checkDown(ng, cs, r, c) {
+    if (r+1 >= this.rows || this._isWall(c,r+1)) {
+      if (r-1>=0 && !this._isBlocked(c,r-1)) this._setState(ng[c][r-1],STATE.Up);
+      else this._setState(ng[c][r],STATE.Up);
+    } else {
+      const nxt = this.cells[c][r+1].state;
+      if (nxt===STATE.RotateCW) {
+        if (c-1>=0 && !this._isBlocked(c-1,r)) this._setState(ng[c-1][r],this._rotateCW(cs));
+        else this._setState(ng[c][r],this._rotateCW(cs));
+      } else if (nxt===STATE.RotateCCW) {
+        if (c+1<this.cols && !this._isBlocked(c+1,r)) this._setState(ng[c+1][r],this._rotateCCW(cs));
+        else this._setState(ng[c][r],this._rotateCCW(cs));
+      } else this._setState(ng[c][r+1],STATE.Down);
+    }
+  }
+  _checkUp(ng, cs, r, c) {
+    if (r-1<0 || this._isWall(c,r-1)) {
+      if (r+1<this.rows && !this._isBlocked(c,r+1)) this._setState(ng[c][r+1],STATE.Down);
+      else this._setState(ng[c][r],STATE.Down);
+    } else {
+      const nxt = this.cells[c][r-1].state;
+      if (nxt===STATE.RotateCW) {
+        if (c+1<this.cols && !this._isBlocked(c+1,r)) this._setState(ng[c+1][r],this._rotateCW(cs));
+        else this._setState(ng[c][r],this._rotateCW(cs));
+      } else if (nxt===STATE.RotateCCW) {
+        if (c-1>=0 && !this._isBlocked(c-1,r)) this._setState(ng[c-1][r],this._rotateCCW(cs));
+        else this._setState(ng[c][r],this._rotateCCW(cs));
+      } else this._setState(ng[c][r-1],STATE.Up);
+    }
+  }
+  _checkRight(ng, cs, r, c) {
+    if (c+1>=this.cols || this._isWall(c+1,r)) {
+      if (c-1>=0 && !this._isBlocked(c-1,r)) this._setState(ng[c-1][r],STATE.Left);
+      else this._setState(ng[c][r],STATE.Left);
+    } else {
+      const nxt = this.cells[c+1][r].state;
+      if (nxt===STATE.RotateCW) {
+        if (r+1<this.rows && !this._isBlocked(c,r+1)) this._setState(ng[c][r+1],this._rotateCW(cs));
+        else this._setState(ng[c][r],this._rotateCW(cs));
+      } else if (nxt===STATE.RotateCCW) {
+        if (r-1>=0 && !this._isBlocked(c,r-1)) this._setState(ng[c][r-1],this._rotateCCW(cs));
+        else this._setState(ng[c][r],this._rotateCCW(cs));
+      } else this._setState(ng[c+1][r],STATE.Right);
+    }
+  }
+  _checkLeft(ng, cs, r, c) {
+    if (c-1<0 || this._isWall(c-1,r)) {
+      if (c+1<this.cols && !this._isBlocked(c+1,r)) this._setState(ng[c+1][r],STATE.Right);
+      else this._setState(ng[c][r],STATE.Right);
+    } else {
+      const nxt = this.cells[c-1][r].state;
+      if (nxt===STATE.RotateCW) {
+        if (r-1>=0 && !this._isBlocked(c,r-1)) this._setState(ng[c][r-1],this._rotateCW(cs));
+        else this._setState(ng[c][r],this._rotateCW(cs));
+      } else if (nxt===STATE.RotateCCW) {
+        if (r+1<this.rows && !this._isBlocked(c,r+1)) this._setState(ng[c][r+1],this._rotateCCW(cs));
+        else this._setState(ng[c][r],this._rotateCCW(cs));
+      } else this._setState(ng[c-1][r],STATE.Left);
+    }
+  }
+  nextState() {
+    const ng = this._clean(this.rows, this.cols);
+    for (let r = 0; r < this.rows; r++) {
+      for (let c = 0; c < this.cols; c++) {
+        const cell = this.cells[c][r]; const s = cell.state;
+        if      (s===STATE.Left)  this._checkLeft(ng,s,r,c);
+        else if (s===STATE.Right) this._checkRight(ng,s,r,c);
+        else if (s===STATE.Up)    this._checkUp(ng,s,r,c);
+        else if (s===STATE.Down)  this._checkDown(ng,s,r,c);
+        else if (s===STATE.Wall||s===STATE.SoundWall||s===STATE.RotateCW||s===STATE.RotateCCW)
+          ng[c][r].state = s;
+        else if (s===STATE.Merged)
+          for (const ms of cell.merged) {
+            if      (ms===STATE.Left)  this._checkLeft(ng,ms,r,c);
+            else if (ms===STATE.Right) this._checkRight(ng,ms,r,c);
+            else if (ms===STATE.Up)    this._checkUp(ng,ms,r,c);
+            else if (ms===STATE.Down)  this._checkDown(ng,ms,r,c);
+          }
+      }
+    }
+    // Rotate merged cells (count-1) times clockwise, matching C# logic
+    for (let r = 0; r < this.rows; r++)
+      for (let c = 0; c < this.cols; c++) {
+        const cell = ng[c][r];
+        if (cell.merged.length > 1) {
+          const rotations = cell.merged.length - 1;
+          for (let n = 0; n < rotations; n++)
+            cell.merged = cell.merged.map(s => this._rotateCW(s));
+        }
+      }
+    this.cells = ng;
+  }
+  getActiveCells() {
+    const ac = [];
+    for (let c = 0; c < this.cols; c++) ac[c] = new Array(this.rows).fill(ACTIVE.None);
+    const cw = s => this._rotateCW(s);
+    const mHas = (cell, s) => cell.state===STATE.Merged && cell.merged.includes(s);
+    for (let r = 0; r < this.rows; r++) {
+      const cl = this.cells[0][r], cr = this.cells[this.cols-1][r];
+      if (cl.state===STATE.Left  || mHas(cl,cw(STATE.Left)))  ac[0][r]           = ACTIVE.Row;
+      if (cr.state===STATE.Right || mHas(cr,cw(STATE.Right))) ac[this.cols-1][r] = ACTIVE.Row;
+    }
+    for (let c = 0; c < this.cols; c++) {
+      const ct = this.cells[c][0], cb = this.cells[c][this.rows-1];
+      if (ct.state===STATE.Up   || mHas(ct,cw(STATE.Up)))   ac[c][0]           = ACTIVE.Col;
+      if (cb.state===STATE.Down || mHas(cb,cw(STATE.Down))) ac[c][this.rows-1] = ACTIVE.Col;
+    }
+    for (let r = 0; r < this.rows; r++) for (let c = 0; c < this.cols; c++) {
+      const cell = this.cells[c][r];
+      if (cell.state===STATE.Left  || mHas(cell,cw(STATE.Left)))
+        { if (c-1<0  || this.cells[c-1][r].state===STATE.SoundWall) ac[c][r]=ACTIVE.Row; }
+      if (cell.state===STATE.Right || mHas(cell,cw(STATE.Right)))
+        { if (c+1>=this.cols || this.cells[c+1][r].state===STATE.SoundWall) ac[c][r]=ACTIVE.Row; }
+      if (cell.state===STATE.Up    || mHas(cell,cw(STATE.Up)))
+        { if (r-1<0  || this.cells[c][r-1].state===STATE.SoundWall) ac[c][r]=ACTIVE.Col; }
+      if (cell.state===STATE.Down  || mHas(cell,cw(STATE.Down)))
+        { if (r+1>=this.rows || this.cells[c][r+1].state===STATE.SoundWall) ac[c][r]=ACTIVE.Col; }
+    }
+    return ac;
+  }
+}
+
+// ================================================================
+//  AUDIO ENGINE
+// ================================================================
+let audioCtx = null;
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+
+function playFreq(freq, durationMs, vol) {
+  if (freq <= 0) return;
+  const ctx = getAudioCtx();
+  const osc = ctx.createOscillator(), gain = ctx.createGain();
+  osc.connect(gain); gain.connect(ctx.destination);
+  osc.type = 'sine'; osc.frequency.value = freq;
+  const now = ctx.currentTime;
+  gain.gain.setValueAtTime(vol * 0.6, now);
+  gain.gain.exponentialRampToValueAtTime(0.001, now + durationMs / 1000);
+  osc.start(now); osc.stop(now + durationMs / 1000 + 0.05);
+}
+
+// WAV sample with pitch-shift via playbackRate
+let sampleBuffer  = null;
+let sampleBaseFreq = 440; // Hz of the sample's root note
+
+function playSample(freq, durationMs, vol) {
+  if (!sampleBuffer) { playFreq(freq, durationMs, vol); return; }
+  if (freq <= 0) return;
+  const ctx = getAudioCtx();
+  const src = ctx.createBufferSource(), gain = ctx.createGain();
+  src.buffer = sampleBuffer;
+  src.playbackRate.value = freq / sampleBaseFreq;
+  src.connect(gain); gain.connect(ctx.destination);
+  const now = ctx.currentTime;
+  gain.gain.setValueAtTime(vol * 0.9, now);
+  gain.gain.exponentialRampToValueAtTime(0.001, now + durationMs / 1000);
+  src.start(now); src.stop(now + durationMs / 1000 + 0.1);
+}
+
+// ================================================================
+//  APP STATE
+// ================================================================
+let board         = new OtomataBoard(9, 9);
+let running       = false;
+let tickTimer     = null;
+let speed         = 250;
+let duration      = 500;
+let volume        = 0.5;
+let notesPerCell  = ['D3','A3','A#3','C4','D4','E4','F4','A5','C5'];
+let selectedState = STATE.Up;
+let mouseDown     = false;
+let mouseBtn      = 0;
+let useSample     = false;
+let highlights    = [];
+let hlRafId       = null;
+
+// ================================================================
+//  BOARD SERIALIZATION  (matches C# BoardMapper format)
+// ================================================================
+function boardToString() {
+  const L = [];
+  L.push('rows=' + board.rows);
+  L.push('cols=' + board.cols);
+  L.push('noteduration=' + duration);
+  L.push('instrument=0');
+  L.push('speed=' + speed);
+  L.push('notes=' + document.getElementById('txtNotes').value);
+  L.push('usesamples=' + (useSample ? '1' : '0'));
+  L.push('sample=');
+  L.push('[cells]');
+  for (let r = 0; r < board.rows; r++) {
+    const row = [];
+    for (let c = 0; c < board.cols; c++) {
+      const cell = board.cells[c][r];
+      if (cell.state === STATE.Merged && cell.merged.length > 0)
+        row.push(cell.state + '_' + cell.merged.join('_'));
+      else
+        row.push(cell.state);
+    }
+    L.push(row.join(','));
+  }
+  return L.join('\r\n') + '\r\n';
+}
+
+function boardFromString(str) {
+  const lines = str.split(/\r?\n/).filter(l => l.trim() !== '');
+  let rows = 0, cols = 0, notedur = 500, spd = 250;
+  let notes = 'D3, A3, A#3, C4, D4, E4, F4, A5, C5';
+  let usesamples = 0;
+  let cells = null;
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i];
+    if (line.includes('=')) {
+      const eq = line.indexOf('=');
+      const key = line.substring(0, eq).toLowerCase().trim();
+      const val = line.substring(eq + 1).trim();
+      if      (key === 'rows')         rows    = parseInt(val) || 9;
+      else if (key === 'cols')         cols    = parseInt(val) || 9;
+      else if (key === 'noteduration') notedur = parseInt(val) || 500;
+      else if (key === 'speed')        spd     = parseInt(val) || 250;
+      else if (key === 'notes')        notes   = val;
+      else if (key === 'usesamples')   usesamples = parseInt(val) || 0;
+      i++;
+    } else if (line.trim() === '[cells]') {
+      cells = [];
+      for (let c = 0; c < cols; c++) cells[c] = [];
+      i++;
+      for (let r = 0; r < rows && i < lines.length; r++, i++) {
+        const parts = lines[i].split(',');
+        for (let c = 0; c < parts.length && c < cols; c++) {
+          const tok = parts[c].trim();
+          if (tok.includes('_')) {
+            const sub = tok.split('_');
+            cells[c][r] = { state: parseInt(sub[0]), merged: sub.slice(1).map(Number) };
+          } else {
+            const st = parseInt(tok);
+            cells[c][r] = { state: st, merged: [st] };
+          }
+        }
+      }
+    } else { i++; }
+  }
+  if (!rows || !cols) return null;
+  if (!cells) { cells = []; for (let c = 0; c < cols; c++) cells[c] = []; }
+  for (let c = 0; c < cols; c++)
+    for (let r = 0; r < rows; r++)
+      if (!cells[c] || !cells[c][r]) { if (!cells[c]) cells[c] = []; cells[c][r] = makeCell(); }
+  return { rows, cols, cells, notedur, spd, notes, usesamples };
+}
+
+// ================================================================
+//  MIDI WRITER  (ported from MidiWriter.cs)
+// ================================================================
+const MIDI_BPM        = 120;
+const MIDI_TICKS_BEAT = 240;
+const MIDI_CHANNEL    = 15;
+const MIDI_TEMPO_US   = Math.round(60000000 / MIDI_BPM);
+const TICKS_PER_MS    = MIDI_TICKS_BEAT * MIDI_BPM / 60000; // 0.48
+
+function msToTicks(ms) { return Math.round(ms * TICKS_PER_MS); }
+
+function _writeInt32BE(buf, v) {
+  buf.push((v>>>24)&0xFF, (v>>>16)&0xFF, (v>>>8)&0xFF, v&0xFF);
+}
+function _writeInt16BE(buf, v) { buf.push((v>>>8)&0xFF, v&0xFF); }
+function _writeVarLen(buf, value) {
+  let v = value >>> 0, b = v & 0x7F;
+  v >>>= 7;
+  while (v > 0) { b = (b << 8) | ((v & 0x7F) | 0x80); v >>>= 7; }
+  while (true) { buf.push(b & 0xFF); if (b & 0x80) b >>>= 8; else break; }
+}
+
+function buildMidi(instrumentIdx, notes) {
+  // notes: [{startMs, midiIdx, durationMs}]
+  const sorted = notes.slice().sort((a, b) => a.startMs - b.startMs);
+  const msgs = [];
+  for (const n of sorted) {
+    msgs.push({ ticks: msToTicks(n.startMs),              type: 0x9, idx: n.midiIdx, vel: 64 });
+    msgs.push({ ticks: msToTicks(n.startMs+n.durationMs), type: 0x8, idx: n.midiIdx, vel: 64 });
+  }
+  msgs.sort((a, b) => a.ticks - b.ticks || a.type - b.type);
+
+  // Header: MThd
+  const hdr = [0x4D,0x54,0x68,0x64];
+  _writeInt32BE(hdr, 6); _writeInt16BE(hdr, 1); _writeInt16BE(hdr, 2); _writeInt16BE(hdr, MIDI_TICKS_BEAT);
+
+  // Meta track: MTrk
+  const meta = [];
+  const txt = Array.from('Created by Procedural Midi HTML Demo').map(c => c.charCodeAt(0));
+  meta.push(0x00, 0xFF, 0x51, 0x03,
+            (MIDI_TEMPO_US>>>16)&0xFF, (MIDI_TEMPO_US>>>8)&0xFF, MIDI_TEMPO_US&0xFF);
+  meta.push(0x00, 0xFF, 0x01); _writeVarLen(meta, txt.length); meta.push(...txt);
+  meta.push(0x00, 0xFF, 0x2F, 0x00);
+  const mTrk = [0x4D,0x54,0x72,0x6B]; _writeInt32BE(mTrk, meta.length); mTrk.push(...meta);
+
+  // Notes track: MTrk
+  const ndata = [];
+  ndata.push(0x00, (0xC0|MIDI_CHANNEL), instrumentIdx & 0x7F); // program change
+  let lastTick = 0;
+  for (const m of msgs) {
+    _writeVarLen(ndata, m.ticks - lastTick);
+    lastTick = m.ticks;
+    ndata.push((m.type<<4)|MIDI_CHANNEL, m.idx & 0x7F, m.vel);
+  }
+  ndata.push(0x00, 0xFF, 0x2F, 0x00);
+  const nTrk = [0x4D,0x54,0x72,0x6B]; _writeInt32BE(nTrk, ndata.length); nTrk.push(...ndata);
+
+  return new Uint8Array([...hdr, ...mTrk, ...nTrk]);
+}
+
+function getMidiIdxForCellIdx(idx) {
+  if (!notesPerCell.length) return -1;
+  return noteNameToMidiIdx(notesPerCell[idx % notesPerCell.length]);
+}
+
+function generateNotesForSteps(steps) {
+  // Deep-copy the board via serialise/deserialise
+  const parsed = boardFromString(boardToString());
+  if (!parsed) return [];
+  const simBoard = new OtomataBoard(parsed.rows, parsed.cols);
+  simBoard.cells = parsed.cells;
+  const notes = [];
+  let curMs = 0;
+  for (let step = 0; step < steps; step++) {
+    simBoard.nextState();
+    const ac = simBoard.getActiveCells();
+    const fR = new Set(), fC = new Set();
+    for (let r = 0; r < simBoard.rows; r++) for (let c = 0; c < simBoard.cols; c++) {
+      if (ac[c][r]===ACTIVE.Col && !fC.has(c)) {
+        fC.add(c);
+        const mi = getMidiIdxForCellIdx(c);
+        if (mi >= 0) notes.push({ startMs: curMs, midiIdx: mi, durationMs: duration });
+      } else if (ac[c][r]===ACTIVE.Row && !fR.has(r)) {
+        fR.add(r);
+        const mi = getMidiIdxForCellIdx(r);
+        if (mi >= 0) notes.push({ startMs: curMs, midiIdx: mi, durationMs: duration });
+      }
+    }
+    curMs += speed;
+  }
+  return notes;
+}
+
+// ================================================================
+//  PALETTE
+// ================================================================
+const paletteEl = document.getElementById('palette');
+function buildPalette() {
+  const title = paletteEl.querySelector('.palette-title');
+  paletteEl.innerHTML = ''; paletteEl.appendChild(title);
+  for (const s of PALETTE_STATES) {
+    const item = document.createElement('div');
+    item.className = 'palette-item' + (s === selectedState ? ' selected' : '');
+    item.dataset.state = s; item.title = STATE_LABEL[s];
+    if (IMG_DATA[s]) {
+      const img = document.createElement('img');
+      img.src = IMG_DATA[s]; img.className = 'pi-img'; img.alt = STATE_LABEL[s];
+      item.appendChild(img);
+    } else {
+      const icon = document.createElement('span');
+      icon.style.cssText = 'font-size:18px;color:#fff;';
+      icon.textContent = STATE_TEXT[s] || '\u00b7';
+      item.appendChild(icon);
+    }
+    const lbl = document.createElement('span');
+    lbl.className = 'pi-label'; lbl.textContent = STATE_LABEL[s];
+    item.appendChild(lbl);
+    item.addEventListener('click', () => {
+      selectedState = s;
+      document.querySelectorAll('.palette-item').forEach(el => el.classList.remove('selected'));
+      item.classList.add('selected');
+    });
+    paletteEl.appendChild(item);
+  }
+}
+buildPalette();
+
+// ================================================================
+//  CANVAS / RENDERING
+// ================================================================
+const canvas = document.getElementById('board');
+const ctx2d  = canvas.getContext('2d');
+
+function resizeCanvas() {
+  const area = document.getElementById('board-area');
+  const W = area.clientWidth - 20, H = area.clientHeight - 20;
+  const cs = Math.floor(Math.min(W / board.cols, H / board.rows));
+  canvas.width = cs * board.cols; canvas.height = cs * board.rows;
+}
+
+function drawBoard() {
+  const W = canvas.width, H = canvas.height;
+  const cs = W / board.cols, cr = H / board.rows;
+  ctx2d.clearRect(0, 0, W, H);
+  ctx2d.fillStyle = '#181818'; ctx2d.fillRect(0, 0, W, H);
+
+  // flash highlights
+  for (const hl of highlights) {
+    ctx2d.fillStyle = `rgba(255,255,255,${hl.alpha * 0.6})`;
+    if (hl.isRow) ctx2d.fillRect(0, hl.index*cr, W, cr);
+    else          ctx2d.fillRect(hl.index*cs, 0, cs, H);
+  }
+
+  // grid
+  ctx2d.strokeStyle = '#333'; ctx2d.lineWidth = 1;
+  for (let c = 0; c <= board.cols; c++) {
+    ctx2d.beginPath(); ctx2d.moveTo(c*cs, 0); ctx2d.lineTo(c*cs, H); ctx2d.stroke();
+  }
+  for (let r = 0; r <= board.rows; r++) {
+    ctx2d.beginPath(); ctx2d.moveTo(0, r*cr); ctx2d.lineTo(W, r*cr); ctx2d.stroke();
+  }
+
+  const pad = 3;
+  const fontSz = Math.max(8, Math.min(cs, cr) * 0.52);
+  ctx2d.textAlign = 'center'; ctx2d.textBaseline = 'middle';
+  ctx2d.font = `bold ${fontSz}px "Segoe UI Symbol","Arial Unicode MS",sans-serif`;
+
+  for (let r = 0; r < board.rows; r++) for (let c = 0; c < board.cols; c++) {
+    const cell = board.cells[c][r];
+    if (cell.state === STATE.Dead) continue;
+    const x = c*cs+pad, y = r*cr+pad, w = cs-pad*2, h = cr-pad*2;
+    const cx = x+w/2, cy = y+h/2, radius = Math.min(w,h)*0.15;
+
+    // background
+    ctx2d.fillStyle = (cell.state === STATE.Merged) ? '#ffffff' : '#555555';
+    roundRect(ctx2d, x, y, w, h, radius); ctx2d.fill();
+
+    // content: image for wall/soundwall/rotate, arrow text for direction, sub-icons for merged
+    const img = IMGS[cell.state];
+    if (img && img.complete && img.naturalWidth > 0) {
+      const imgSz = Math.max(8, Math.min(w, h) * 0.62);
+      ctx2d.drawImage(img, cx-imgSz/2, cy-imgSz/2, imgSz, imgSz);
+    } else if (cell.state === STATE.Merged) {
+      ctx2d.fillStyle = '#222';
+      const subSz = Math.max(6, fontSz * 0.65);
+      ctx2d.font = `bold ${subSz}px "Segoe UI Symbol","Arial Unicode MS",sans-serif`;
+      const icons = cell.merged.map(s => STATE_TEXT[s]).filter(Boolean);
+      const numCols = icons.length <= 2 ? icons.length : 2;
+      const numRows = Math.ceil(icons.length / numCols);
+      icons.forEach((ico, i) => {
+        const dc = (i % numCols) - (numCols-1)/2;
+        const dr = Math.floor(i/numCols) - (numRows-1)/2;
+        ctx2d.fillText(ico, cx+dc*subSz*1.1, cy+dr*subSz*1.2);
+      });
+      ctx2d.font = `bold ${fontSz}px "Segoe UI Symbol","Arial Unicode MS",sans-serif`;
+    } else {
+      ctx2d.fillStyle = '#fff';
+      ctx2d.fillText(STATE_TEXT[cell.state], cx, cy);
+    }
+  }
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y); ctx.arcTo(x+w,y,x+w,y+r,r);
+  ctx.lineTo(x+w,y+h-r); ctx.arcTo(x+w,y+h,x+w-r,y+h,r);
+  ctx.lineTo(x+r,y+h); ctx.arcTo(x,y+h,x,y+h-r,r);
+  ctx.lineTo(x,y+r); ctx.arcTo(x,y,x+r,y,r); ctx.closePath();
+}
+
+// ================================================================
+//  HIGHLIGHT FADE
+// ================================================================
+function startHlLoop() {
+  if (hlRafId) return;
+  let last = 0;
+  function loop(ts) {
+    if (ts - last > 40) {
+      last = ts;
+      highlights = highlights.filter(h => { h.alpha -= 0.08; return h.alpha > 0; });
+      drawBoard();
+    }
+    hlRafId = highlights.length > 0 ? requestAnimationFrame(loop) : null;
+  }
+  hlRafId = requestAnimationFrame(loop);
+}
+
+// ================================================================
+//  TICK
+// ================================================================
+function tick() {
+  board.nextState();
+  const ac = board.getActiveCells();
+  const fR = new Set(), fC = new Set();
+  for (let r = 0; r < board.rows; r++) for (let c = 0; c < board.cols; c++) {
+    if (ac[c][r]===ACTIVE.Col && !fC.has(c)) {
+      fC.add(c); highlights.push({isRow:false, index:c, alpha:0.7}); playNoteForIdx(c);
+    } else if (ac[c][r]===ACTIVE.Row && !fR.has(r)) {
+      fR.add(r); highlights.push({isRow:true, index:r, alpha:0.7}); playNoteForIdx(r);
+    }
+  }
+  drawBoard();
+  if (highlights.length > 0) startHlLoop();
+}
+
+function playNoteForIdx(idx) {
+  const midiIdx = getMidiIdxForCellIdx(idx);
+  const freq = getFreqByMidiIdx(midiIdx);
+  if (freq <= 0) return;
+  if (useSample) playSample(freq, duration, volume);
+  else           playFreq(freq, duration, volume);
+}
+
+// ================================================================
+//  SIMULATION CONTROL
+// ================================================================
+function setRunning(v) {
+  running = v;
+  const btn = document.getElementById('btnPlay');
+  if (running) {
+    btn.textContent = '\u23f8 Stop'; btn.classList.add('active');
+    tickTimer = setInterval(tick, speed);
+  } else {
+    btn.textContent = '\u25b6 Play'; btn.classList.remove('active');
+    clearInterval(tickTimer); tickTimer = null;
+  }
+}
+
+// ================================================================
+//  MOUSE INTERACTION
+// ================================================================
+function cellFromEvent(e) {
+  const rect = canvas.getBoundingClientRect();
+  const c = Math.floor(((e.clientX-rect.left)/canvas.width)  * board.cols);
+  const r = Math.floor(((e.clientY-rect.top) /canvas.height) * board.rows);
+  if (c < 0 || c >= board.cols || r < 0 || r >= board.rows) return null;
+  return { c, r };
+}
+function applyBrush(e) {
+  const pos = cellFromEvent(e); if (!pos) return;
+  board.cells[pos.c][pos.r] = makeCell(mouseBtn===2 ? STATE.Dead : selectedState);
+  drawBoard();
+}
+canvas.addEventListener('contextmenu', e => e.preventDefault());
+canvas.addEventListener('mousedown',   e => { mouseDown=true; mouseBtn=e.button; applyBrush(e); });
+canvas.addEventListener('mousemove',   e => { if (mouseDown) applyBrush(e); });
+window.addEventListener('mouseup',     () => { mouseDown=false; });
+
+// ================================================================
+//  TOOLBAR HANDLERS
+// ================================================================
+document.getElementById('btnPlay').addEventListener('click', () => setRunning(!running));
+document.getElementById('btnStep').addEventListener('click', () => { if(running) setRunning(false); tick(); });
+document.getElementById('btnClear').addEventListener('click', () => {
+  board.clear(); highlights=[]; drawBoard(); setStatus('Board cleared.');
+});
+document.getElementById('btnRandomize').addEventListener('click', () => {
+  const nd = PALETTE_STATES.filter(s => s!==STATE.Dead);
+  for (let r=0;r<board.rows;r++) for (let c=0;c<board.cols;c++)
+    board.cells[c][r] = makeCell(Math.random()>=0.8 ? nd[Math.floor(Math.random()*nd.length)] : STATE.Dead);
+  drawBoard(); setStatus('Board randomized.');
+});
+
+// Open
+document.getElementById('btnOpen').addEventListener('click', () => document.getElementById('fileOpen').click());
+document.getElementById('fileOpen').addEventListener('change', function() {
+  const file = this.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const parsed = boardFromString(e.target.result);
+    if (!parsed) { setStatus('Error: could not parse board file.'); return; }
+    if (running) setRunning(false);
+    board = new OtomataBoard(parsed.rows, parsed.cols);
+    board.cells = parsed.cells;
+    duration = parsed.notedur; speed = parsed.spd;
+    notesPerCell = parsed.notes.split(',').map(n=>n.trim().toUpperCase().replace('BB','A#')).filter(Boolean);
+    document.getElementById('txtNotes').value     = parsed.notes;
+    document.getElementById('sldSpeed').value     = speed;
+    document.getElementById('sldDuration').value  = duration;
+    document.getElementById('nudRows').value      = parsed.rows;
+    document.getElementById('nudCols').value      = parsed.cols;
+    document.getElementById('lblSpeed').textContent    = speed + ' ms (' + Math.round(60000/speed) + ' bpm)';
+    document.getElementById('lblDuration').textContent = duration + ' ms';
+    resizeCanvas(); drawBoard();
+    setStatus('Board loaded from ' + file.name);
+  };
+  reader.readAsText(file); this.value = '';
+});
+
+// Save
+document.getElementById('btnSave').addEventListener('click', () => {
+  const blob = new Blob([boardToString()], {type:'text/plain'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = 'board.txt'; a.click();
+  URL.revokeObjectURL(a.href); setStatus('Board saved as board.txt');
+});
+
+// Generate MIDI
+document.getElementById('btnGenMidi').addEventListener('click', () => {
+  const steps = Math.max(1, parseInt(document.getElementById('nudMidiSteps').value) || 200);
+  setStatus('Generating MIDI for ' + steps + ' steps\u2026');
+  setTimeout(() => {
+    const notes = generateNotesForSteps(steps);
+    if (notes.length === 0) { setStatus('No notes generated \u2013 place some cells first.'); return; }
+    const bytes = buildMidi(0, notes);
+    const blob = new Blob([bytes], {type:'audio/midi'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = 'proceduralmidi.mid'; a.click();
+    URL.revokeObjectURL(a.href);
+    setStatus('MIDI exported: ' + notes.length + ' notes, ' + steps + ' steps.');
+  }, 20);
+});
+
+// Speed
+const sldSpeed = document.getElementById('sldSpeed'), lblSpeed = document.getElementById('lblSpeed');
+sldSpeed.addEventListener('input', () => {
+  speed = parseInt(sldSpeed.value);
+  lblSpeed.textContent = speed + ' ms (' + Math.round(60000/speed) + ' bpm)';
+  if (running) { clearInterval(tickTimer); tickTimer = setInterval(tick, speed); }
+});
+lblSpeed.textContent = speed + ' ms (' + Math.round(60000/speed) + ' bpm)';
+
+// Duration
+const sldDuration = document.getElementById('sldDuration'), lblDuration = document.getElementById('lblDuration');
+sldDuration.addEventListener('input', () => { duration = parseInt(sldDuration.value); lblDuration.textContent = duration + ' ms'; });
+
+// Volume
+document.getElementById('sldVolume').addEventListener('input', function() { volume = parseInt(this.value)/100; });
+
+// Rows / Cols
+document.getElementById('nudRows').addEventListener('change', function() {
+  const v = Math.max(2, Math.min(32, parseInt(this.value)||9)); this.value=v;
+  board.changeSize(v, board.cols); resizeCanvas(); drawBoard();
+});
+document.getElementById('nudCols').addEventListener('change', function() {
+  const v = Math.max(2, Math.min(32, parseInt(this.value)||9)); this.value=v;
+  board.changeSize(board.rows, v); resizeCanvas(); drawBoard();
+});
+
+// Notes
+document.getElementById('txtNotes').addEventListener('input', function() {
+  notesPerCell = this.value.split(',').map(n=>n.trim().toUpperCase().replace('BB','A#')).filter(Boolean);
+});
+
+// Sound mode
+document.querySelectorAll('input[name="soundMode"]').forEach(r => r.addEventListener('change', function() {
+  useSample = (this.value === 'wav');
+  document.getElementById('btnLoadWav').style.opacity  = useSample ? '1' : '0.5';
+  document.getElementById('txtBaseNote').style.opacity = useSample ? '1' : '0.5';
+}));
+
+// Load WAV
+document.getElementById('btnLoadWav').addEventListener('click', () => document.getElementById('wavInput').click());
+document.getElementById('wavInput').addEventListener('change', function() {
+  const file = this.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    // .slice(0) creates a defensive copy of the ArrayBuffer; some browsers transfer
+    // (detach) the buffer during the FileReader callback, which would cause decodeAudioData to fail.
+    getAudioCtx().decodeAudioData(e.target.result.slice(0), buf => {
+      sampleBuffer = buf;
+      const idx = noteNameToMidiIdx(document.getElementById('txtBaseNote').value.trim());
+      sampleBaseFreq = idx >= 0 ? getFreqByMidiIdx(idx) : 440;
+      document.getElementById('rdbWav').checked = true; useSample = true;
+      document.getElementById('btnLoadWav').style.opacity  = '1';
+      document.getElementById('txtBaseNote').style.opacity = '1';
+      document.getElementById('lblWavFile').textContent = '\u2713 ' + file.name;
+      setStatus('Sample loaded: ' + file.name + ' (base: ' + document.getElementById('txtBaseNote').value + ')');
+    }, err => setStatus('Error decoding audio: ' + (err && err.message ? err.message : err)));
+  };
+  reader.readAsArrayBuffer(file); this.value = '';
+});
+
+// Base note change
+document.getElementById('txtBaseNote').addEventListener('change', function() {
+  const idx = noteNameToMidiIdx(this.value.trim());
+  sampleBaseFreq = idx >= 0 ? getFreqByMidiIdx(idx) : 440;
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', e => {
+  if (e.target.tagName==='INPUT') return;
+  if (e.key==='F5') { e.preventDefault(); setRunning(!running); }
+  if (e.key==='F6') { e.preventDefault(); if(running) setRunning(false); tick(); }
+});
+
+// ================================================================
+//  STATUS BAR + INIT
+// ================================================================
+function setStatus(msg) { document.getElementById('statusbar').textContent = msg; }
+
+window.addEventListener('resize', () => { resizeCanvas(); drawBoard(); });
+resizeCanvas(); drawBoard(); setRunning(true);
+</script>
+</body>
+</html>
